@@ -4,7 +4,7 @@
 
 **Version:** 0.1.0 (Pre-Release)  
 **Date:** March 14, 2025  
-**Developed by:** [Your Name/Team] for Guth South Africa  
+**Developed by:** Travis Main for Guth South Africa  
 
 The Guth Pump Assembly Registry is a desktop application designed to digitize and optimize the pump assembly workflow for Guth South Africa. It provides role-based dashboards (Admin, Stores, Assembler, Testing, Pump Originator), secure authentication, serial number generation, automated test certificates, and data exports, all backed by an SQLite database. This project is developed in Python 3.11.6 and targets deployment on Windows 10+, macOS 10.14+, and Ubuntu 20.04+ by May 5, 2025.
 
@@ -28,7 +28,7 @@ The Guth Pump Assembly Registry is a desktop application designed to digitize an
 
 The Guth Pump Assembly Registry automates the pump assembly process, reducing errors and time by 50%. It replaces paper-based workflows with a digital system featuring:
 - **Role-Based Dashboards:** Tailored interfaces for each user role.
-- **Serial Number Generation:** Unique identifiers (e.g., `S/N: 5101 090 – 25`).
+- **Serial Number Generation:** Unique identifiers (e.g., `S/N: 5101 090 â€“ 25`).
 - **Workflow Management:** Tracks pumps from creation (Pump Originator) to completion (Testing).
 - **Documentation:** Stores test certificates in `docs/[serial_number]_[pump_model]/`.
 - **Exports:** Admin can export activity logs, user lists, and pump lists to Excel.
@@ -45,7 +45,7 @@ This project is in active development, with Phase 1 (Planning and Design) underw
 
 - **Planned Features (Phases 2-4):**
   - Role-based GUI dashboards using `ttkbootstrap`.
-  - Serial number generation (`S/N: ABCD EFG – HI`, CD as 01).
+  - Serial number generation (`S/N: ABCD EFG â€“ HI`, CD as 01).
   - Bill of Materials (BOM) management and verification.
   - Automated PDF test certificates with email delivery.
   - Excel exports for activity logs, users, and pumps.
