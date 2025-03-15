@@ -5,6 +5,7 @@ from datetime import datetime
 import sys
 from utils.serial_utils import generate_serial_number
 
+# Absolute path from project root
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "data", "guth_pump_registry.db")
 DB_LOCK = threading.Lock()
@@ -116,7 +117,7 @@ def insert_test_data():
     with connect_db() as conn:
         cursor = conn.cursor()
         for pump_model, config, customer, user in test_pumps:
-            serial = generate_serial_number(pump_model, config, cursor)  # Pass cursor
+            serial = generate_serial_number(pump_model, config, cursor)
             print(f"Inserting pump {serial}...")
             cursor.execute("""
                 INSERT OR IGNORE INTO pumps (serial_number, pump_model, configuration, customer, status, created_at, requested_by)
