@@ -5,19 +5,16 @@ from datetime import datetime
 import sys
 from utils.serial_utils import generate_serial_number
 
-# Absolute path from project root
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "data", "guth_pump_registry.db")
 DB_LOCK = threading.Lock()
 
 def connect_db(timeout=20):
-    """Connect to the database."""
     conn = sqlite3.connect(DB_PATH, timeout=timeout)
     conn.row_factory = sqlite3.Row
     return conn
 
 def initialize_database():
-    """Initialize the database with required tables."""
     print("Initializing database...")
     os.makedirs(os.path.join(BASE_DIR, "data"), exist_ok=True)
     with DB_LOCK, connect_db() as conn:
@@ -82,50 +79,57 @@ def initialize_database():
         conn.commit()
     print("Tables created.")
 
-def create_pump(cursor, serial_number, pump_model, configuration, customer, requested_by):
-    """Create a new pump entry using an existing cursor."""
+def create_pump(cursor, pump_model, configuration, customer, requested_by):
+    serial = generate_serial_number(pump_model, configuration, cursor)
     cursor.execute("""
         INSERT INTO pumps (serial_number, pump_model, configuration, customer, status, created_at, requested_by)
         VALUES (?, ?, ?, ?, 'Stores', ?, ?)
-    """, (serial_number, pump_model, configuration, customer, datetime.now(), requested_by))
-    log_action(cursor, requested_by, f"Created pump S/N: {serial_number}")
+    """, (serial, pump_model, configuration, customer, datetime.now(), requested_by))
+    log_action(cursor, requested_by, f"Created pump S/N: {serial}")
+    return serial
 
 def create_bom_item(cursor, serial_number, part_name, part_code, quantity):
-    """Add a BOM item to a pump using an existing cursor."""
     cursor.execute("""
         INSERT INTO bom_items (serial_number, part_name, part_code, quantity)
         VALUES (?, ?, ?, ?)
     """, (serial_number, part_name, part_code, quantity))
 
+def update_pump_status(cursor, serial_number, new_status, username):
+    cursor.execute("""
+        UPDATE pumps SET status = ? WHERE serial_number = ?
+    """, (new_status, serial_number))
+    log_action(cursor, username, f"Updated S/N: {serial_number} to {new_status}")
+
+def pull_bom_item(cursor, serial_number, part_code, username):
+    cursor.execute("""
+        UPDATE bom_items SET pulled_at = ? WHERE serial_number = ? AND part_code = ?
+    """, (datetime.now(), serial_number, part_code))
+    log_action(cursor, username, f"Pulled part {part_code} for S/N: {serial_number}")
+
+def verify_bom_item(cursor, serial_number, part_code, username):
+    cursor.execute("""
+        UPDATE bom_items SET verified_at = ? WHERE serial_number = ? AND part_code = ?
+    """, (datetime.now(), serial_number, part_code))
+    log_action(cursor, username, f"Verified part {part_code} for S/N: {serial_number}")
+
 def log_action(cursor, username, action):
-    """Log an action in the audit log using an existing cursor."""
     cursor.execute("""
         INSERT INTO audit_log (timestamp, username, action)
         VALUES (?, ?, ?)
     """, (datetime.now(), username, action))
 
 def insert_test_data():
-    """Insert 5 test pumps with BOM items."""
     print("Inserting test data...")
     test_pumps = [
         ("P1 3.0kW", "Standard", "Guth Pinetown", "user1"),
         ("P1 3.0kW", "Standard", "Guth Durban", "user1"),
         ("P1 3.0kW", "Standard", "Guth Cape Town", "user1"),
-        ("P1 3.0kW", "Standard", "Guth Pretoria", "user1"),
-        ("P1 3.0kW", "Standard", "Guth Johannesburg", "user1"),
     ]
     with connect_db() as conn:
         cursor = conn.cursor()
         for pump_model, config, customer, user in test_pumps:
-            serial = generate_serial_number(pump_model, config, cursor)
+            serial = create_pump(cursor, pump_model, config, customer, user)
             print(f"Inserting pump {serial}...")
-            cursor.execute("""
-                INSERT OR IGNORE INTO pumps (serial_number, pump_model, configuration, customer, status, created_at, requested_by)
-                VALUES (?, ?, ?, ?, 'Stores', ?, ?)
-            """, (serial, pump_model, config, customer, datetime.now(), user))
-            print(f"Pump {serial} inserted.")
-            log_action(cursor, user, f"Created pump S/N: {serial}")
-            print(f"Logged action for {serial}.")
             print(f"Inserting BOM for {serial} - Impeller...")
             create_bom_item(cursor, serial, "Impeller", "IMP-001", 1)
             print(f"Inserting BOM for {serial} - Motor...")
@@ -139,7 +143,7 @@ if __name__ == "__main__":
         initialize_database()
         print("Database initialized. Inserting test data...")
         insert_test_data()
-        print("Database layer completed with 5 test pumps.")
+        print("Database layer completed with 3 test pumps.")
         sys.stdout.flush()
     except Exception as e:
         print(f"Error occurred: {e}")

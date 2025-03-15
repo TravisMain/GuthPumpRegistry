@@ -24,7 +24,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="database.py" />
-    <Compile Include="gui.py" />
     <Compile Include="gui\admin_gui.py" />
     <Compile Include="gui\assembler_gui.py" />
     <Compile Include="gui\base_gui.py" />
