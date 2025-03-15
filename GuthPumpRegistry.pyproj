@@ -23,6 +23,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="backup.py" />
     <Compile Include="database.py" />
     <Compile Include="gui\admin_gui.py" />
     <Compile Include="gui\assembler_gui.py" />

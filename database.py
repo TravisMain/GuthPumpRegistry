@@ -4,10 +4,12 @@ import threading
 from datetime import datetime
 import sys
 from utils.serial_utils import generate_serial_number
+from utils.config import get_logger
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "data", "guth_pump_registry.db")
 DB_LOCK = threading.Lock()
+logger = get_logger("database")
 
 def connect_db(timeout=20):
     conn = sqlite3.connect(DB_PATH, timeout=timeout)
@@ -86,37 +88,37 @@ def create_pump(cursor, pump_model, configuration, customer, requested_by):
         VALUES (?, ?, ?, ?, 'Stores', ?, ?)
     """, (serial, pump_model, configuration, customer, datetime.now(), requested_by))
     log_action(cursor, requested_by, f"Created pump S/N: {serial}")
+    logger.info(f"Pump created: {serial} by {requested_by}")
     return serial
 
-def create_bom_item(cursor, serial_number, part_name, part_code, quantity):
-    cursor.execute("""
-        INSERT INTO bom_items (serial_number, part_name, part_code, quantity)
-        VALUES (?, ?, ?, ?)
-    """, (serial_number, part_name, part_code, quantity))
-
 def update_pump_status(cursor, serial_number, new_status, username):
-    cursor.execute("""
-        UPDATE pumps SET status = ? WHERE serial_number = ?
-    """, (new_status, serial_number))
+    cursor.execute("UPDATE pumps SET status = ? WHERE serial_number = ?", (new_status, serial_number))
     log_action(cursor, username, f"Updated S/N: {serial_number} to {new_status}")
+    logger.info(f"Status updated: {serial_number} to {new_status} by {username}")
 
 def pull_bom_item(cursor, serial_number, part_code, username):
-    cursor.execute("""
-        UPDATE bom_items SET pulled_at = ? WHERE serial_number = ? AND part_code = ?
-    """, (datetime.now(), serial_number, part_code))
+    cursor.execute("UPDATE bom_items SET pulled_at = ? WHERE serial_number = ? AND part_code = ?",
+                   (datetime.now(), serial_number, part_code))
     log_action(cursor, username, f"Pulled part {part_code} for S/N: {serial_number}")
+    logger.info(f"Part pulled: {part_code} for {serial_number} by {username}")
 
 def verify_bom_item(cursor, serial_number, part_code, username):
-    cursor.execute("""
-        UPDATE bom_items SET verified_at = ? WHERE serial_number = ? AND part_code = ?
-    """, (datetime.now(), serial_number, part_code))
+    cursor.execute("UPDATE bom_items SET verified_at = ? WHERE serial_number = ? AND part_code = ?",
+                   (datetime.now(), serial_number, part_code))
     log_action(cursor, username, f"Verified part {part_code} for S/N: {serial_number}")
+    logger.info(f"Part verified: {part_code} for {serial_number} by {username}")
 
 def log_action(cursor, username, action):
     cursor.execute("""
         INSERT INTO audit_log (timestamp, username, action)
         VALUES (?, ?, ?)
     """, (datetime.now(), username, action))
+
+def create_bom_item(cursor, serial_number, part_name, part_code, quantity):
+    cursor.execute("""
+        INSERT INTO bom_items (serial_number, part_name, part_code, quantity)
+        VALUES (?, ?, ?, ?)
+    """, (serial_number, part_name, part_code, quantity))
 
 def insert_test_data():
     print("Inserting test data...")

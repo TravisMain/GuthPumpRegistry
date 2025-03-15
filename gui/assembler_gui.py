@@ -1,11 +1,13 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from database import connect_db, verify_bom_item, update_pump_status
+from utils.config import get_logger
+
+logger = get_logger("assembler")
 
 def show_assembler_gui(root, username):
     frame = ttk.Frame(root)
     frame.pack(fill=BOTH, expand=True, padx=20, pady=20)
-
     ttk.Label(frame, text="Assembler - Verify BOM", font=("Helvetica", 16, "bold")).pack(pady=10)
 
     ttk.Label(frame, text="Serial Number:").pack()
@@ -23,5 +25,6 @@ def show_assembler_gui(root, username):
             update_pump_status(cursor, serial, "Testing", username)
             conn.commit()
         ttk.Label(frame, text=f"BOM verified for S/N: {serial}", bootstyle=SUCCESS).pack(pady=10)
+        logger.info(f"GUI: BOM verified for {serial} by {username}")
 
     ttk.Button(frame, text="Verify & Accept", command=verify_and_accept, bootstyle=INFO).pack(pady=20)

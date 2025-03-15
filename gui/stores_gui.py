@@ -1,11 +1,13 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from database import connect_db, pull_bom_item, update_pump_status
+from utils.config import get_logger
+
+logger = get_logger("stores")
 
 def show_stores_gui(root, username):
     frame = ttk.Frame(root)
     frame.pack(fill=BOTH, expand=True, padx=20, pady=20)
-
     ttk.Label(frame, text="Stores - Pull Parts", font=("Helvetica", 16, "bold")).pack(pady=10)
 
     ttk.Label(frame, text="Serial Number:").pack()
@@ -23,5 +25,6 @@ def show_stores_gui(root, username):
             update_pump_status(cursor, serial, "Assembly", username)
             conn.commit()
         ttk.Label(frame, text=f"Parts pulled for S/N: {serial}", bootstyle=SUCCESS).pack(pady=10)
+        logger.info(f"GUI: Parts pulled for {serial} by {username}")
 
     ttk.Button(frame, text="Pull Parts", command=pull_parts, bootstyle=INFO).pack(pady=20)

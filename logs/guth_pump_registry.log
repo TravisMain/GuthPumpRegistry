@@ -1,0 +1,13 @@
+2025-03-15 18:09:43,861 - INFO - Pump created: 5101 001 - 25 by user1
+2025-03-15 18:09:43,862 - INFO - Pump created: 5101 002 - 25 by user1
+2025-03-15 18:09:43,862 - INFO - Pump created: 5101 003 - 25 by user1
+2025-03-15 18:09:57,654 - INFO - Pump created: 5101 004 - 25 by user1
+2025-03-15 18:09:57,660 - INFO - GUI: Pump 5101 004 - 25 created by user1
+2025-03-15 18:10:11,428 - INFO - Part pulled: IMP-001 for 5101 004 - 25 by user1
+2025-03-15 18:10:11,428 - INFO - Part pulled: MTR-3.0kW for 5101 004 - 25 by user1
+2025-03-15 18:10:11,428 - INFO - Status updated: 5101 004 - 25 to Assembly by user1
+2025-03-15 18:10:11,432 - INFO - GUI: Parts pulled for 5101 004 - 25 by user1
+2025-03-15 18:10:22,425 - INFO - Part verified: IMP-001 for 5101 004 - 25 by user1
+2025-03-15 18:10:22,425 - INFO - Part verified: MTR-3.0kW for 5101 004 - 25 by user1
+2025-03-15 18:10:22,425 - INFO - Status updated: 5101 004 - 25 to Testing by user1
+2025-03-15 18:10:22,431 - INFO - GUI: BOM verified for 5101 004 - 25 by user1
