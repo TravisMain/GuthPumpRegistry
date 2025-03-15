@@ -120,6 +120,18 @@ def create_bom_item(cursor, serial_number, part_name, part_code, quantity):
         VALUES (?, ?, ?, ?)
     """, (serial_number, part_name, part_code, quantity))
 
+def update_test_data(cursor, serial_number, invoice_number, job_number_1, job_number_2, test_result, test_comments,
+                     motor_voltage, motor_speed, mechanical_seal, test_date, username):
+    cursor.execute("""
+        UPDATE pumps
+        SET invoice_number = ?, job_number_1 = ?, job_number_2 = ?, test_result = ?, test_comments = ?,
+            motor_voltage = ?, motor_speed = ?, mechanical_seal = ?, test_date = ?, status = 'Completed'
+        WHERE serial_number = ?
+    """, (invoice_number, job_number_1, job_number_2, test_result, test_comments, motor_voltage, motor_speed,
+          mechanical_seal, test_date, serial_number))
+    log_action(cursor, username, f"Tested pump S/N: {serial_number} - Result: {test_result}")
+    logger.info(f"Test data updated for {serial_number} by {username}: Result = {test_result}")
+
 def insert_test_data():
     print("Inserting test data...")
     test_pumps = [
