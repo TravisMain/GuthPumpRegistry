@@ -4,7 +4,7 @@ import sqlite3
 import os
 
 # Database path
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(BASE_DIR, "data", "guth_pump_registry.db")
 
 def connect_db(timeout=20):
@@ -36,17 +36,17 @@ class GuthPumpApp:
         ttk.Label(frame, text="Username:").grid(row=1, column=0, padx=5, pady=5, sticky=E)
         self.username_entry = ttk.Entry(frame)
         self.username_entry.grid(row=1, column=1, padx=5, pady=5)
-        self.username_entry.insert(0, "user1")  # Default for testing
+        self.username_entry.insert(0, "user1")
 
         ttk.Label(frame, text="Password:").grid(row=2, column=0, padx=5, pady=5, sticky=E)
         self.password_entry = ttk.Entry(frame, show="*")
         self.password_entry.grid(row=2, column=1, padx=5, pady=5)
-        self.password_entry.insert(0, "password")  # Stub for testing
+        self.password_entry.insert(0, "password")
 
         ttk.Button(frame, text="Login", command=self.login, bootstyle=SUCCESS).grid(row=3, column=0, columnspan=2, pady=20)
 
     def login(self):
-        """Stub login validation (full auth in Sub-phase 2.2)."""
+        """Stub login validation."""
         username = self.username_entry.get()
         password = self.password_entry.get()
         if username == "user1" and password == "password":
@@ -74,7 +74,7 @@ class GuthPumpApp:
         self.show_pump_list()
 
     def show_pump_list(self):
-        """Show a simple pump count from the database."""
+        """Show a list of pump serial numbers."""
         for widget in self.main_frame.winfo_children():
             widget.destroy()
 
@@ -82,13 +82,14 @@ class GuthPumpApp:
 
         with connect_db() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(*) as pump_count FROM pumps")
-            pump_count = cursor.fetchone()["pump_count"]
+            cursor.execute("SELECT serial_number FROM pumps ORDER BY serial_number")
+            pumps = cursor.fetchall()
 
-        ttk.Label(self.main_frame, text=f"Total Pumps Registered: {pump_count}").pack(pady=10)
-        ttk.Label(self.main_frame, text="Pump list placeholder - Full view in later phase").pack(pady=10)
+        ttk.Label(self.main_frame, text=f"Total Pumps Registered: {len(pumps)}").pack(pady=5)
+        for pump in pumps:
+            ttk.Label(self.main_frame, text=f"S/N: {pump['serial_number']}").pack(pady=2)
 
 if __name__ == "__main__":
-    root = ttk.Window(themename="flatly")  # Modern theme
+    root = ttk.Window(themename="flatly")
     app = GuthPumpApp(root)
     root.mainloop()
