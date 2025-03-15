@@ -1,6 +1,2 @@
-*.db
-__pycache__/
-*.pyc
-data/backups/
-certificates/
+data/guth_pump_registry.db
 .vs/

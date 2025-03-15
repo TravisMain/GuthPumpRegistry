@@ -3,18 +3,22 @@ import os
 import threading
 from datetime import datetime
 import sys
+from utils.serial_utils import generate_serial_number
 
-DB_PATH = os.path.join("data", "guth_pump_registry.db")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "data", "guth_pump_registry.db")
 DB_LOCK = threading.Lock()
 
 def connect_db(timeout=20):
+    """Connect to the database."""
     conn = sqlite3.connect(DB_PATH, timeout=timeout)
     conn.row_factory = sqlite3.Row
     return conn
 
 def initialize_database():
+    """Initialize the database with required tables."""
     print("Initializing database...")
-    os.makedirs("data", exist_ok=True)
+    os.makedirs(os.path.join(BASE_DIR, "data"), exist_ok=True)
     with DB_LOCK, connect_db() as conn:
         cursor = conn.cursor()
         cursor.execute("""
@@ -70,83 +74,61 @@ def initialize_database():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 model_code TEXT NOT NULL,
                 config_code TEXT NOT NULL,
-                sequence INTEGER NOT NULL DEFAULT 1,
+                sequence INTEGER NOT NULL DEFAULT 0,
                 year TEXT NOT NULL
             )
         """)
         conn.commit()
     print("Tables created.")
 
-def create_pump(serial_number, pump_model, configuration, customer, requested_by):
-    with DB_LOCK, connect_db() as conn:
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO pumps (serial_number, pump_model, configuration, customer, status, created_at, requested_by)
-            VALUES (?, ?, ?, ?, 'Stores', ?, ?)
-        """, (serial_number, pump_model, configuration, customer, datetime.now(), requested_by))
-        log_action(cursor, requested_by, f"Created pump S/N: {serial_number}")
-        conn.commit()
+def create_pump(cursor, serial_number, pump_model, configuration, customer, requested_by):
+    """Create a new pump entry using an existing cursor."""
+    cursor.execute("""
+        INSERT INTO pumps (serial_number, pump_model, configuration, customer, status, created_at, requested_by)
+        VALUES (?, ?, ?, ?, 'Stores', ?, ?)
+    """, (serial_number, pump_model, configuration, customer, datetime.now(), requested_by))
+    log_action(cursor, requested_by, f"Created pump S/N: {serial_number}")
 
 def create_bom_item(cursor, serial_number, part_name, part_code, quantity):
+    """Add a BOM item to a pump using an existing cursor."""
     cursor.execute("""
         INSERT INTO bom_items (serial_number, part_name, part_code, quantity)
         VALUES (?, ?, ?, ?)
     """, (serial_number, part_name, part_code, quantity))
 
 def log_action(cursor, username, action):
+    """Log an action in the audit log using an existing cursor."""
     cursor.execute("""
         INSERT INTO audit_log (timestamp, username, action)
         VALUES (?, ?, ?)
     """, (datetime.now(), username, action))
 
-def update_serial_counter(model_code, config_code, year):
-    with DB_LOCK, connect_db() as conn:
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT OR IGNORE INTO serial_counter (model_code, config_code, sequence, year)
-            VALUES (?, ?, 1, ?)
-        """, (model_code, config_code, year))
-        cursor.execute("""
-            UPDATE serial_counter SET sequence = sequence + 1
-            WHERE model_code = ? AND config_code = ? AND year = ?
-        """, (model_code, config_code, year))
-        cursor.execute("""
-            SELECT sequence FROM serial_counter
-            WHERE model_code = ? AND config_code = ? AND year = ?
-        """, (model_code, config_code, year))
-        sequence = cursor.fetchone()["sequence"]
-        conn.commit()
-        return sequence
-
 def insert_test_data():
+    """Insert 5 test pumps with BOM items."""
     print("Inserting test data...")
     test_pumps = [
-        ("5101 001 - 25", "P1 3.0kW", "Standard", "Guth Pinetown", "user1"),
-        ("5101 002 - 25", "P1 3.0kW", "Standard", "Guth Durban", "user1"),
-        ("5101 003 - 25", "P1 3.0kW", "Standard", "Guth Cape Town", "user1"),
-        ("5101 004 - 25", "P1 3.0kW", "Standard", "Guth Pretoria", "user1"),
-        ("5101 005 - 25", "P1 3.0kW", "Standard", "Guth Johannesburg", "user1"),
+        ("P1 3.0kW", "Standard", "Guth Pinetown", "user1"),
+        ("P1 3.0kW", "Standard", "Guth Durban", "user1"),
+        ("P1 3.0kW", "Standard", "Guth Cape Town", "user1"),
+        ("P1 3.0kW", "Standard", "Guth Pretoria", "user1"),
+        ("P1 3.0kW", "Standard", "Guth Johannesburg", "user1"),
     ]
     with connect_db() as conn:
         cursor = conn.cursor()
-        for serial, model, config, customer, user in test_pumps:
+        for pump_model, config, customer, user in test_pumps:
+            serial = generate_serial_number(pump_model, config, cursor)  # Pass cursor
             print(f"Inserting pump {serial}...")
             cursor.execute("""
                 INSERT OR IGNORE INTO pumps (serial_number, pump_model, configuration, customer, status, created_at, requested_by)
                 VALUES (?, ?, ?, ?, 'Stores', ?, ?)
-            """, (serial, model, config, customer, datetime.now(), user))
-            print(f"Pump {serial} inserted into pumps table.")
+            """, (serial, pump_model, config, customer, datetime.now(), user))
+            print(f"Pump {serial} inserted.")
             log_action(cursor, user, f"Created pump S/N: {serial}")
             print(f"Logged action for {serial}.")
             print(f"Inserting BOM for {serial} - Impeller...")
             create_bom_item(cursor, serial, "Impeller", "IMP-001", 1)
             print(f"Inserting BOM for {serial} - Motor...")
             create_bom_item(cursor, serial, "Motor", "MTR-3.0kW", 1)
-        print("Updating serial_counter...")
-        cursor.execute("""
-            INSERT OR REPLACE INTO serial_counter (id, model_code, config_code, sequence, year)
-            VALUES (1, '5', '1', 5, '25')
-        """)
         conn.commit()
     print("Test data inserted.")
 
