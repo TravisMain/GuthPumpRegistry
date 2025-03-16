@@ -28,8 +28,12 @@
     <Compile Include="gui\admin_gui.py" />
     <Compile Include="gui\assembler_gui.py" />
     <Compile Include="gui\base_gui.py" />
+    <Compile Include="gui\dashboard_gui.py" />
+    <Compile Include="gui\login_gui.py" />
     <Compile Include="gui\pump_originator_gui.py" />
+    <Compile Include="gui\register_gui.py" />
     <Compile Include="gui\stores_gui.py" />
+    <Compile Include="gui\styles.py" />
     <Compile Include="gui\testing_gui.py" />
     <Compile Include="main.py" />
     <Compile Include="utils\bom_utils.py" />

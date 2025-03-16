@@ -87,3 +87,71 @@
 2025-03-16 12:35:20,837 - INFO - Pump data exported to C:\Users\travism\source\repos\GuthPumpRegistry\data\exports\pumps_export_20250316_123520.csv
 2025-03-16 12:35:23,831 - INFO - Audit log exported to C:\Users\travism\source\repos\GuthPumpRegistry\data\exports\audit_log_export_20250316_123523.csv
 2025-03-16 12:35:26,091 - INFO - User guide generated at C:\Users\travism\source\repos\GuthPumpRegistry\data\docs\user_guide.pdf
+2025-03-16 12:43:10,317 - INFO - Application started
+2025-03-16 13:02:01,891 - ERROR - Failed to load logo: image "pyimage3" doesn't exist
+2025-03-16 13:03:22,657 - ERROR - Failed to load logo: image "pyimage11" doesn't exist
+2025-03-16 13:04:41,988 - ERROR - Failed to load logo: image "pyimage11" doesn't exist
+2025-03-16 13:08:51,545 - ERROR - Failed to load logo: image "pyimage15" doesn't exist
+2025-03-16 13:08:51,557 - INFO - Application started
+2025-03-16 13:14:12,672 - INFO - Attempting to load logo from: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 13:14:12,679 - ERROR - Logo load failed: image "pyimage15" doesn't exist
+2025-03-16 13:14:12,686 - INFO - Application started
+2025-03-16 13:14:25,256 - WARNING - Failed login attempt for 
+2025-03-16 14:46:15,821 - INFO - Loading logo from: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 14:46:15,828 - ERROR - Logo load failed: image "pyimage3" doesn't exist
+2025-03-16 14:46:15,845 - INFO - Application started
+2025-03-16 14:49:01,383 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 14:49:01,388 - INFO - Logo loaded: 302x100
+2025-03-16 14:49:01,390 - ERROR - Logo load failed: image "pyimage3" doesn't exist
+2025-03-16 14:56:01,605 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 14:56:01,610 - INFO - Logo loaded: 302x100
+2025-03-16 14:56:01,622 - INFO - Application started
+2025-03-16 14:58:05,484 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 14:58:05,489 - INFO - Logo loaded: 302x100
+2025-03-16 14:58:05,496 - INFO - Application started
+2025-03-16 14:58:42,443 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 14:58:42,448 - INFO - Logo loaded: 302x100
+2025-03-16 14:58:42,454 - INFO - Application started
+2025-03-16 15:01:26,870 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 15:01:26,875 - INFO - Logo loaded: 302x100
+2025-03-16 15:01:26,884 - INFO - Application started
+2025-03-16 15:03:12,284 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 15:03:12,291 - INFO - Logo loaded: 302x100
+2025-03-16 15:03:12,301 - INFO - Application started
+2025-03-16 15:06:28,361 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 15:06:28,366 - INFO - Logo loaded: 302x100
+2025-03-16 15:06:28,374 - INFO - Application started
+2025-03-16 15:09:55,923 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 15:09:55,929 - INFO - Logo loaded: 302x100
+2025-03-16 15:09:55,962 - INFO - Logo scaled: 453x150
+2025-03-16 15:09:55,972 - INFO - Application started
+2025-03-16 15:10:10,266 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 15:10:10,271 - INFO - Logo loaded: 302x100
+2025-03-16 15:10:10,288 - INFO - Logo scaled: 453x150
+2025-03-16 15:10:10,296 - INFO - Application started
+2025-03-16 15:10:48,436 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 15:10:48,602 - INFO - Logo loaded: 2468x816
+2025-03-16 15:10:49,263 - INFO - Logo scaled: 3702x1224
+2025-03-16 15:10:49,287 - INFO - Application started
+2025-03-16 15:11:34,899 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 15:11:34,908 - INFO - Logo loaded: 454x150
+2025-03-16 15:11:34,940 - INFO - Logo scaled: 681x225
+2025-03-16 15:11:34,954 - INFO - Application started
+2025-03-16 15:12:27,305 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 15:12:27,324 - INFO - Logo loaded: 757x250
+2025-03-16 15:12:27,394 - INFO - Logo scaled: 1136x375
+2025-03-16 15:12:27,408 - INFO - Application started
+2025-03-16 15:13:23,358 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 15:13:23,366 - INFO - Logo loaded: 378x125
+2025-03-16 15:13:23,393 - INFO - Logo scaled: 567x188
+2025-03-16 15:13:23,403 - INFO - Application started
+2025-03-16 15:15:16,822 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 15:15:16,842 - INFO - Logo loaded: 378x125
+2025-03-16 15:15:16,897 - INFO - Logo scaled: 567x187
+2025-03-16 15:15:16,908 - INFO - Application started
+2025-03-16 15:17:29,760 - INFO - User user1 logged in with role Pump Originator
+2025-03-16 15:17:47,064 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 15:17:47,065 - INFO - Logo loaded: 378x125
+2025-03-16 15:17:47,122 - INFO - Logo scaled: 567x187
+2025-03-16 15:17:47,131 - INFO - User logged out
+2025-03-16 15:17:51,418 - INFO - User admin1 logged in with role Admin
