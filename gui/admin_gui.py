@@ -1,174 +1,385 @@
-import sqlite3  # Add this
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from database import connect_db, insert_user, update_user, delete_user, get_all_users, get_all_pumps, get_audit_log
-from utils.export_utils import export_pumps, export_audit_log, generate_user_guide
+from PIL import Image, ImageTk
+from database import connect_db, DB_PATH
+import sqlite3
+import os
+from datetime import datetime
+import shutil
+import bcrypt
+import re
 from utils.config import get_logger
 
 logger = get_logger("admin_gui")
+LOGO_PATH = r"C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png"
+BUILD_NUMBER = "1.0.0"
 
-def show_admin_gui(root, username):
-    frame = ttk.Frame(root)
-    frame.pack(fill=BOTH, expand=True, padx=20, pady=20)
+def show_admin_gui(root, username, logout_callback):
+    for widget in root.winfo_children():
+        widget.destroy()
 
-    ttk.Label(frame, text="Admin Panel", font=("Helvetica", 16, "bold")).pack(pady=10)
+    main_frame = ttk.Frame(root)
+    main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-    notebook = ttk.Notebook(frame)
-    notebook.pack(fill=BOTH, expand=True)
+    header_frame = ttk.Frame(main_frame, style="white.TFrame")
+    header_frame.pack(fill=X, pady=(0, 20), ipady=20)
 
-    # User Management Tab
-    user_tab = ttk.Frame(notebook)
-    notebook.add(user_tab, text="User Management")
+    if os.path.exists(LOGO_PATH):
+        try:
+            img = Image.open(LOGO_PATH)
+            img_resized = img.resize((int(img.width * 0.75), int(img.height * 0.75)), Image.Resampling.LANCZOS)
+            logo = ImageTk.PhotoImage(img_resized)
+            logo_label = ttk.Label(header_frame, image=logo)
+            logo_label.image = logo
+            logo_label.pack(side=RIGHT, padx=10)
+        except Exception as e:
+            logger.error(f"Admin logo load failed: {str(e)}")
 
-    ttk.Label(user_tab, text="Add/Edit User").pack(pady=5)
-    ttk.Label(user_tab, text="Username:").pack()
-    username_entry = ttk.Entry(user_tab)
-    username_entry.pack(pady=5)
+    ttk.Label(header_frame, text=f"Welcome, {username} (Admin)", font=("Roboto", 18, "bold")).pack(anchor=W, padx=10)
+    ttk.Label(header_frame, text="Manage pumps, users, and backups efficiently.", font=("Roboto", 12)).pack(anchor=W, padx=10)
 
-    ttk.Label(user_tab, text="Password (leave blank to keep unchanged):").pack()
-    password_entry = ttk.Entry(user_tab, show="*")
-    password_entry.pack(pady=5)
+    # Custom tab style
+    style = ttk.Style()
+    style.configure("Custom.TNotebook", tabposition="nw")
+    style.configure("Custom.TNotebook.Tab", 
+                    background="#2c3e50",  # Dark blue as requested
+                    foreground="white", 
+                    font=("Roboto", 12), 
+                    padding=[12, 6])
+    style.map("Custom.TNotebook.Tab", 
+              background=[("selected", "#ECECEC"), ("!selected", "#2c3e50")], 
+              foreground=[("selected", "black"), ("!selected", "white")])
 
-    ttk.Label(user_tab, text="Role:").pack()
-    role_var = ttk.StringVar(value="Pump Originator")
-    role_dropdown = ttk.Combobox(user_tab, textvariable=role_var, 
-                                 values=["Pump Originator", "Stores", "Assembler", "Testing", "Admin"])
-    role_dropdown.pack(pady=5)
+    notebook = ttk.Notebook(main_frame, style="Custom.TNotebook")
+    notebook.pack(fill=BOTH, expand=True, pady=10)
 
-    ttk.Label(user_tab, text="Name:").pack()
-    name_entry = ttk.Entry(user_tab)
-    name_entry.pack(pady=5)
+    pumps_frame = ttk.Frame(notebook)
+    notebook.add(pumps_frame, text="Pumps")
+    show_pumps_tab(pumps_frame)
 
-    ttk.Label(user_tab, text="Surname:").pack()
-    surname_entry = ttk.Entry(user_tab)
-    surname_entry.pack(pady=5)
+    user_frame = ttk.Frame(notebook)
+    notebook.add(user_frame, text="Users")
+    show_user_tab(user_frame)
 
-    ttk.Label(user_tab, text="Email:").pack()
-    email_entry = ttk.Entry(user_tab)
-    email_entry.pack(pady=5)
+    reports_frame = ttk.Frame(notebook)
+    notebook.add(reports_frame, text="Reports")
+    ttk.Label(reports_frame, text="Reports coming soon...", font=("Roboto", 14)).pack(pady=20)
+
+    backup_frame = ttk.Frame(notebook)
+    notebook.add(backup_frame, text="Backup")
+    show_backup_tab(backup_frame)
+
+    ttk.Button(main_frame, text="Logoff", command=logout_callback, bootstyle="warning", style="large.TButton").pack(pady=10)
+    ttk.Label(main_frame, text="\u00A9 Guth South Africa", font=("Roboto", 10)).pack(pady=(5, 0))
+    ttk.Label(main_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack()
+
+def show_pumps_tab(frame):
+    if not hasattr(frame, 'tree'):
+        frame.tree = ttk.Treeview(frame, columns=("Serial Number", "Pump Model", "Configuration", "Status", "Customer"), show="headings", height=15)
+        for col in frame.tree["columns"]:
+            frame.tree.heading(col, text=col, anchor=W)
+            frame.tree.column(col, anchor=W)
+        frame.tree.column("Serial Number", width=150)
+        frame.tree.column("Pump Model", width=150)
+        frame.tree.column("Configuration", width=150)
+        frame.tree.column("Status", width=100)
+        frame.tree.column("Customer", width=150)
+        frame.tree.pack(fill=BOTH, expand=True, padx=10, pady=10)
+        frame.tree.bind("<Double-1>", lambda event: edit_pump_window(frame, frame.tree))
+
+    for item in frame.tree.get_children():
+        frame.tree.delete(item)
+    with connect_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT serial_number, pump_model, configuration, status, customer FROM pumps")
+        pumps = cursor.fetchall()
+        for pump in pumps:
+            frame.tree.insert("", END, values=(pump["serial_number"], pump["pump_model"], pump["configuration"], pump["status"], pump["customer"]))
+
+def edit_pump_window(parent_frame, tree):
+    logger.debug("Entering edit_pump_window")
+    selected = tree.selection()
+    if not selected:
+        logger.debug("No pump selected in Treeview")
+        return
+
+    serial_number = tree.item(selected[0])["values"][0]
+    logger.debug(f"Selected serial_number from Treeview: {serial_number}")
+
+    with connect_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM pumps WHERE serial_number = ?", (serial_number,))
+        pump = cursor.fetchone()
+        if pump:
+            pump_dict = dict(pump)
+            logger.debug(f"Pump data fetched from DB: {pump_dict}")
+        else:
+            logger.warning(f"No pump found in DB for serial_number: {serial_number}")
+            pump_dict = {"serial_number": serial_number}
+
+    edit_window = ttk.Toplevel(parent_frame)
+    edit_window.title(f"Edit Pump {serial_number}")
+    edit_window.geometry("520x600")
+
+    header_frame = ttk.Frame(edit_window, style="white.TFrame")
+    header_frame.pack(fill=X, pady=(0, 10), ipady=10)
+    if os.path.exists(LOGO_PATH):
+        try:
+            img = Image.open(LOGO_PATH)
+            img_resized = img.resize((int(img.width * 0.5), int(img.height * 0.5)), Image.Resampling.LANCZOS)
+            logo = ImageTk.PhotoImage(img_resized)
+            logo_label = ttk.Label(header_frame, image=logo)
+            logo_label.image = logo
+            logo_label.pack(side=RIGHT, padx=10)
+        except Exception as e:
+            logger.error(f"Edit pump logo load failed: {str(e)}")
+    ttk.Label(header_frame, text="Edit pump details or delete.", font=("Roboto", 12)).pack(anchor=W, padx=10)
+
+    frame = ttk.Frame(edit_window, padding=20)
+    frame.pack(fill=BOTH, expand=True)
+
+    fields = ["serial_number", "pump_model", "configuration", "status", "customer"]
+    options = {
+        "pump_model": ["P1 3.0kW", "P2 5.0kW", "P3 7.5kW"],
+        "configuration": ["Standard", "High Flow", "Custom"],
+        "status": ["Stores", "Assembly", "Testing", "Completed"],
+        "customer": ["Guth Pinetown", "Guth Durban", "Guth Cape Town"]
+    }
+    entries = {}
+    for i, field in enumerate(fields):
+        ttk.Label(frame, text=f"{field.replace('_', ' ').title()}:", font=("Roboto", 14)).grid(row=i, column=0, pady=5, sticky=W)
+        if field == "serial_number":
+            entry = ttk.Entry(frame, font=("Roboto", 12))
+            serial_value = pump_dict.get("serial_number", serial_number)
+            entry.insert(0, serial_value)  # Insert first
+            entry.configure(state="readonly")  # Then set readonly
+            logger.debug(f"Inserted serial_number into Entry: {serial_value}")
+        else:
+            entry = ttk.Combobox(frame, values=options[field], font=("Roboto", 12), state="readonly")
+            entry.set(pump_dict.get(field, options[field][0]))
+        entry.grid(row=i, column=1, pady=5, sticky=EW)
+        entries[field] = entry
+
+    frame.grid_columnconfigure(1, weight=1)
+
+    def save_changes():
+        with connect_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE pumps 
+                SET pump_model = ?, configuration = ?, status = ?, customer = ? 
+                WHERE serial_number = ?
+            """, (entries["pump_model"].get(), entries["configuration"].get(), entries["status"].get(), entries["customer"].get(), serial_number))
+            conn.commit()
+            logger.info(f"Updated pump {serial_number}")
+            show_pumps_tab(parent_frame)
+            edit_window.destroy()
+
+    def delete_pump():
+        if ttk.dialogs.dialogs.Messagebox.yesno("Confirm Delete", f"Are you sure you want to delete pump {serial_number}?") == "Yes":
+            with connect_db() as conn:
+                cursor = conn.cursor()
+                cursor.execute("DELETE FROM pumps WHERE serial_number = ?", (serial_number,))
+                conn.commit()
+                logger.info(f"Deleted pump {serial_number}")
+                show_pumps_tab(parent_frame)
+                edit_window.destroy()
+
+    ttk.Button(frame, text="Save", command=save_changes, bootstyle="success", style="large.TButton").grid(row=len(fields), column=0, pady=10)
+    ttk.Button(frame, text="Delete", command=delete_pump, bootstyle="danger", style="large.TButton").grid(row=len(fields), column=1, pady=10)
+
+def show_user_tab(frame):
+    input_frame = ttk.LabelFrame(frame, text="Add/Edit User", padding=20, bootstyle="default")
+    input_frame.pack(fill=X, padx=10, pady=10)
+
+    with connect_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT DISTINCT role FROM users")
+        roles = [row["role"] for row in cursor.fetchall()] or ["Admin", "Stores", "Assembler", "Testing", "Pump Originator"]
+
+    fields = ["Username", "Password", "Role", "Name", "Surname", "Email"]
+    entries = {}
+    for i, field in enumerate(fields):
+        ttk.Label(input_frame, text=f"{field}:", font=("Roboto", 14)).grid(row=i, column=0, pady=5, sticky=W)
+        if field == "Role":
+            entry = ttk.Combobox(input_frame, values=roles, font=("Roboto", 12), state="readonly")
+            entry.set("Pump Originator")
+        else:
+            entry = ttk.Entry(input_frame, font=("Roboto", 12), width=30)
+        entry.grid(row=i, column=1, pady=5, padx=5, sticky=EW)
+        entries[field.lower()] = entry
+
+    input_frame.grid_columnconfigure(1, weight=1)
+
+    error_label = ttk.Label(input_frame, text="", font=("Roboto", 12), bootstyle="danger")
+    error_label.grid(row=len(fields), column=0, columnspan=2, pady=5)
+
+    def validate_email(email):
+        pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+        return re.match(pattern, email) is not None
 
     def add_user():
+        email = entries["email"].get()
+        if not validate_email(email):
+            error_label.config(text="Invalid email address")
+            return
         with connect_db() as conn:
             cursor = conn.cursor()
             try:
-                insert_user(cursor, username_entry.get(), password_entry.get(), role_var.get(),
-                           name_entry.get(), surname_entry.get(), email_entry.get())
+                password_hash = bcrypt.hashpw(entries["password"].get().encode('utf-8'), bcrypt.gensalt())
+                cursor.execute("INSERT INTO users (username, password_hash, role, name, surname, email) VALUES (?, ?, ?, ?, ?, ?)",
+                              (entries["username"].get(), password_hash, entries["role"].get(),
+                               entries["name"].get(), entries["surname"].get(), email))
                 conn.commit()
-                ttk.Label(user_tab, text="User added!", bootstyle=SUCCESS).pack(pady=5)
-                refresh_users()
+                logger.info(f"Added user {entries['username'].get()}")
+                for entry in entries.values():
+                    entry.delete(0, END)
+                error_label.config(text="")
+                refresh_user_list()
             except sqlite3.IntegrityError:
-                ttk.Label(user_tab, text="Username already exists", bootstyle=DANGER).pack(pady=5)
+                error_label.config(text=f"User {entries['username'].get()} already exists")
+                logger.warning(f"User {entries['username'].get()} already exists")
 
     def edit_user():
-        with connect_db() as conn:
-            cursor = conn.cursor()
-            update_user(cursor, username_entry.get(), password_entry.get() or None, role_var.get(),
-                       name_entry.get(), surname_entry.get(), email_entry.get())
-            conn.commit()
-            ttk.Label(user_tab, text="User updated!", bootstyle=SUCCESS).pack(pady=5)
-            refresh_users()
+        selected = user_tree.selection()
+        if not selected:
+            return
+        username = user_tree.item(selected[0])["values"][0]
+        edit_user_window(frame, username)
 
     def delete_user():
-        if ttk.dialogs.Messagebox.yesno("Confirm", f"Delete {username_entry.get()}?"):
+        selected = user_tree.selection()
+        if not selected:
+            return
+        username = user_tree.item(selected[0])["values"][0]
+        if ttk.dialogs.dialogs.Messagebox.yesno("Confirm Delete", f"Are you sure you want to delete user {username}?") == "Yes":
             with connect_db() as conn:
                 cursor = conn.cursor()
-                delete_user(cursor, username_entry.get())
+                cursor.execute("DELETE FROM users WHERE username = ?", (username,))
                 conn.commit()
-                ttk.Label(user_tab, text="User deleted!", bootstyle=SUCCESS).pack(pady=5)
-                refresh_users()
+                logger.info(f"Deleted user {username}")
+                refresh_user_list()
 
-    ttk.Button(user_tab, text="Add User", command=add_user, bootstyle=SUCCESS).pack(side=LEFT, padx=5, pady=10)
-    ttk.Button(user_tab, text="Edit User", command=edit_user, bootstyle=INFO).pack(side=LEFT, padx=5, pady=10)
-    ttk.Button(user_tab, text="Delete User", command=delete_user, bootstyle=DANGER).pack(side=LEFT, padx=5, pady=10)
+    button_frame = ttk.Frame(input_frame)
+    button_frame.grid(row=len(fields) + 1, column=0, columnspan=2, sticky=W, pady=10)
+    ttk.Button(button_frame, text="Add User", command=add_user, bootstyle="success", style="large.TButton").pack(side=LEFT, padx=(0, 5))
+    ttk.Button(button_frame, text="Edit User", command=edit_user, bootstyle="info", style="large.TButton").pack(side=LEFT, padx=5)
+    ttk.Button(button_frame, text="Delete User", command=delete_user, bootstyle="danger", style="large.TButton").pack(side=LEFT, padx=5)
 
-    user_tree = ttk.Treeview(user_tab, columns=("Username", "Role", "Name", "Surname", "Email"), show="headings")
-    user_tree.heading("Username", text="Username")
-    user_tree.heading("Role", text="Role")
-    user_tree.heading("Name", text="Name")
-    user_tree.heading("Surname", text="Surname")
-    user_tree.heading("Email", text="Email")
-    user_tree.pack(fill=BOTH, expand=True, pady=10)
+    user_list_frame = ttk.LabelFrame(frame, text="Registered Users", padding=10)
+    user_list_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-    def refresh_users():
+    user_tree = ttk.Treeview(user_list_frame, columns=("Username", "Role"), show="headings", height=10)
+    user_tree.heading("Username", text="Username", anchor=W)
+    user_tree.heading("Role", text="Role", anchor=W)
+    user_tree.column("Username", width=200, anchor=W)
+    user_tree.column("Role", width=150, anchor=W)
+    user_tree.pack(fill=BOTH, expand=True)
+
+    def refresh_user_list():
         for item in user_tree.get_children():
             user_tree.delete(item)
         with connect_db() as conn:
             cursor = conn.cursor()
-            users = get_all_users(cursor)
-            for user in users:
-                user_tree.insert("", END, values=(user["username"], user["role"], user["name"], user["surname"], user["email"]))
+            cursor.execute("SELECT username, role FROM users")
+            for user in cursor.fetchall():
+                user_tree.insert("", END, values=(user["username"], user["role"]))
 
-    def on_user_select(event):
-        selected = user_tree.selection()
-        if selected:
-            item = user_tree.item(selected[0])
-            username_entry.delete(0, END)
-            username_entry.insert(0, item["values"][0])
-            role_var.set(item["values"][1])
-            name_entry.delete(0, END)
-            name_entry.insert(0, item["values"][2] or "")
-            surname_entry.delete(0, END)
-            surname_entry.insert(0, item["values"][3] or "")
-            email_entry.delete(0, END)
-            email_entry.insert(0, item["values"][4] or "")
+    refresh_user_list()
 
-    user_tree.bind("<<TreeviewSelect>>", on_user_select)
-    refresh_users()
+    def on_right_click(event):
+        item = user_tree.identify_row(event.y)
+        if item:
+            user_tree.selection_set(item)
+            menu = ttk.Menu(frame, tearoff=0)
+            menu.add_command(label="Edit", command=lambda: edit_user_window(frame, user_tree.item(item)["values"][0]))
+            menu.add_command(label="Delete", command=delete_user)
+            menu.post(event.x_root, event.y_root)
 
-    # Pump Status Report Tab
-    pump_tab = ttk.Frame(notebook)
-    notebook.add(pump_tab, text="Pump Status Report")
+    user_tree.bind("<Button-3>", on_right_click)
 
-    pump_tree = ttk.Treeview(pump_tab, columns=("Serial", "Model", "Customer", "Status", "Result", "Test Date"), show="headings")
-    pump_tree.heading("Serial", text="Serial Number")
-    pump_tree.heading("Model", text="Model")
-    pump_tree.heading("Customer", text="Customer")
-    pump_tree.heading("Status", text="Status")
-    pump_tree.heading("Result", text="Test Result")
-    pump_tree.heading("Test Date", text="Test Date")
-    pump_tree.pack(fill=BOTH, expand=True, pady=10)
-
-    def export_pumps_action():
-        path = export_pumps()
-        ttk.Label(pump_tab, text=f"Pumps exported to {path}", bootstyle=SUCCESS).pack(pady=5)
-
-    ttk.Button(pump_tab, text="Export to CSV", command=export_pumps_action, bootstyle=INFO).pack(pady=10)
-
+def edit_user_window(parent_frame, username):
     with connect_db() as conn:
         cursor = conn.cursor()
-        pumps = get_all_pumps(cursor)
-        for pump in pumps:
-            pump_tree.insert("", END, values=(pump["serial_number"], pump["pump_model"], pump["customer"],
-                                             pump["status"], pump["test_result"], pump["test_date"]))
+        cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+        user = cursor.fetchone()
+        logger.debug(f"User data: {dict(user)}")
+        cursor.execute("SELECT DISTINCT role FROM users")
+        roles = [row["role"] for row in cursor.fetchall()] or ["Admin", "Stores", "Assembler", "Testing", "Pump Originator"]
 
-    # Audit Log Report Tab
-    audit_tab = ttk.Frame(notebook)
-    notebook.add(audit_tab, text="Audit Log")
+    edit_window = ttk.Toplevel(parent_frame)
+    edit_window.title(f"Edit User {username}")
+    edit_window.geometry("520x500")
 
-    audit_tree = ttk.Treeview(audit_tab, columns=("Timestamp", "Username", "Action"), show="headings")
-    audit_tree.heading("Timestamp", text="Timestamp")
-    audit_tree.heading("Username", text="Username")
-    audit_tree.heading("Action", text="Action")
-    audit_tree.pack(fill=BOTH, expand=True, pady=10)
+    header_frame = ttk.Frame(edit_window, style="white.TFrame")
+    header_frame.pack(fill=X, pady=(0, 10), ipady=10)
+    if os.path.exists(LOGO_PATH):
+        try:
+            img = Image.open(LOGO_PATH)
+            img_resized = img.resize((int(img.width * 0.5), int(img.height * 0.5)), Image.Resampling.LANCZOS)
+            logo = ImageTk.PhotoImage(img_resized)
+            logo_label = ttk.Label(header_frame, image=logo)
+            logo_label.image = logo
+            logo_label.pack(side=RIGHT, padx=10)
+        except Exception as e:
+            logger.error(f"Edit user logo load failed: {str(e)}")
+    ttk.Label(header_frame, text="Edit user details.", font=("Roboto", 12)).pack(anchor=W, padx=10)
 
-    def export_audit_action():
-        path = export_audit_log()
-        ttk.Label(audit_tab, text=f"Audit log exported to {path}", bootstyle=SUCCESS).pack(pady=5)
+    frame = ttk.Frame(edit_window, padding=20)
+    frame.pack(fill=BOTH, expand=True)
 
-    ttk.Button(audit_tab, text="Export to CSV", command=export_audit_action, bootstyle=INFO).pack(pady=10)
+    fields = ["username", "password", "role", "name", "surname", "email"]
+    entries = {}
+    for i, field in enumerate(fields):
+        ttk.Label(frame, text=f"{field.replace('_', ' ').title()}:", font=("Roboto", 14)).grid(row=i, column=0, pady=5, sticky=W)
+        if field == "role":
+            entry = ttk.Combobox(frame, values=roles, font=("Roboto", 12), state="readonly")
+            entry.set(user["role"])
+        else:
+            entry = ttk.Entry(frame, font=("Roboto", 12))
+            if field != "password":
+                entry.insert(0, user[field])
+        entry.grid(row=i, column=1, pady=5, sticky=EW)
+        entries[field] = entry
 
-    with connect_db() as conn:
-        cursor = conn.cursor()
-        logs = get_audit_log(cursor)
-        for log in logs:
-            audit_tree.insert("", END, values=(log["timestamp"], log["username"], log["action"]))
+    frame.grid_columnconfigure(1, weight=1)
 
-    # User Guide Tab
-    guide_tab = ttk.Frame(notebook)
-    notebook.add(guide_tab, text="User Guide")
+    def save_changes():
+        with connect_db() as conn:
+            cursor = conn.cursor()
+            password = entries["password"].get()
+            password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()) if password else user["password_hash"]
+            cursor.execute("UPDATE users SET password_hash = ?, role = ?, name = ?, surname = ?, email = ? WHERE username = ?",
+                          (password_hash, entries["role"].get(), entries["name"].get(),
+                           entries["surname"].get(), entries["email"].get(), username))
+            conn.commit()
+            logger.info(f"Updated user {username}")
+            show_user_tab(parent_frame)
+            edit_window.destroy()
 
-    def generate_guide_action():
-        path = generate_user_guide()
-        ttk.Label(guide_tab, text=f"User guide saved to {path}", bootstyle=SUCCESS).pack(pady=5)
+    ttk.Button(frame, text="Save", command=save_changes, bootstyle="success", style="large.TButton").grid(row=len(fields), column=0, columnspan=2, pady=10)
 
-    ttk.Button(guide_tab, text="Generate User Guide PDF", command=generate_guide_action, bootstyle=INFO).pack(pady=20)
+def show_backup_tab(frame):
+    backup_frame = ttk.Frame(frame, padding=20)
+    backup_frame.pack(fill=BOTH, expand=True)
+
+    ttk.Label(backup_frame, text="Database Backup & Restore", font=("Roboto", 14)).pack(pady=10)
+    ttk.Button(backup_frame, text="Backup Database", command=lambda: backup_db(), bootstyle="info", style="large.TButton").pack(pady=5)
+    ttk.Button(backup_frame, text="Restore Database", command=lambda: restore_db(), bootstyle="warning", style="large.TButton").pack(pady=5)
+
+def backup_db():
+    try:
+        backup_path = f"{DB_PATH}.{datetime.now().strftime('%Y%m%d_%H%M%S')}.bak"
+        shutil.copy(DB_PATH, backup_path)
+        logger.info(f"Database backed up to {backup_path}")
+    except Exception as e:
+        logger.error(f"Backup failed: {str(e)}")
+
+def restore_db():
+    try:
+        file_path = ttk.dialogs.dialogs.askopenfilename(title="Select Backup File", filetypes=[("Backup Files", "*.bak")])
+        if file_path:
+            shutil.copy(file_path, DB_PATH)
+            logger.info(f"Database restored from {file_path}")
+    except Exception as e:
+        logger.error(f"Restore failed: {str(e)}")

@@ -4,6 +4,7 @@ from gui.styles import configure_styles
 from gui.login_gui import show_login_screen
 from gui.register_gui import show_register_window
 from gui.dashboard_gui import show_dashboard
+from gui.admin_gui import show_admin_gui
 from database import connect_db, check_user, insert_user
 from utils.config import get_logger
 
@@ -13,7 +14,7 @@ class BaseGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Guth Pump Registry")
-        self.root.geometry("800x900")  # Increased from 700 to 900
+        self.root.geometry("800x900")
         self.username = None
         self.role = None
         self.login_frame = None
@@ -35,7 +36,11 @@ class BaseGUI:
             self.role = role
             self.login_frame.destroy()
             self.root.unbind("<Return>")
-            self.main_frame = show_dashboard(self.root, self.username, self.role, self.logout)
+            if role == "Admin":
+                self.root.state("zoomed")
+                show_admin_gui(self.root, self.username, self.logout)
+            else:
+                self.main_frame = show_dashboard(self.root, self.username, self.role, self.logout)
             logger.info(f"User {username} logged in with role {role}")
         else:
             if self.error_label:
@@ -61,9 +66,16 @@ class BaseGUI:
                 logger.warning(f"Failed registration: {username} already exists")
 
     def logout(self):
-        self.main_frame.destroy()
+        if self.role == "Admin":
+            # Admin GUI doesn't use main_frame, just clear the root
+            for widget in self.root.winfo_children():
+                widget.destroy()
+        elif self.main_frame:  # Non-Admin uses main_frame
+            self.main_frame.destroy()
         self.username = None
         self.role = None
+        self.root.state("normal")
+        self.root.geometry("800x900")
         self.show_login()
         logger.info("User logged out")
 
