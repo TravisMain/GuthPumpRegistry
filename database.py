@@ -62,7 +62,10 @@ def initialize_database():
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     username TEXT UNIQUE NOT NULL,
                     password_hash TEXT NOT NULL,
-                    role TEXT NOT NULL CHECK(role IN ('Admin', 'Stores', 'Assembler', 'Testing', 'Pump Originator'))
+                    role TEXT NOT NULL CHECK(role IN ('Admin', 'Stores', 'Assembler', 'Testing', 'Pump Originator')),
+                    name TEXT,
+                    surname TEXT,
+                    email TEXT
                 )
             """)
             print("Users table created.")
@@ -91,12 +94,12 @@ def initialize_database():
             print(f"Database initialization error: {e}")
             raise
 
-def insert_user(cursor, username, password, role):
+def insert_user(cursor, username, password, role, name=None, surname=None, email=None):
     password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
     cursor.execute("""
-        INSERT INTO users (username, password_hash, role)
-        VALUES (?, ?, ?)
-    """, (username, password_hash, role))
+        INSERT INTO users (username, password_hash, role, name, surname, email)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (username, password_hash, role, name, surname, email))
     logger.info(f"User inserted: {username} with role {role}")
 
 def check_user(cursor, username, password):
@@ -165,16 +168,16 @@ def insert_test_data():
         ("P1 3.0kW", "Standard", "Guth Cape Town", "user1"),
     ]
     test_users = [
-        ("user1", "password", "Pump Originator"),
-        ("stores1", "password", "Stores"),
-        ("assembler1", "password", "Assembler"),
-        ("tester1", "password", "Testing"),
-        ("admin1", "password", "Admin"),
+        ("user1", "password", "Pump Originator", "John", "Doe", "john.doe@example.com"),
+        ("stores1", "password", "Stores", "Jane", "Smith", "jane.smith@example.com"),
+        ("assembler1", "password", "Assembler", "Bob", "Jones", "bob.jones@example.com"),
+        ("tester1", "password", "Testing", "Alice", "Brown", "alice.brown@example.com"),
+        ("admin1", "password", "Admin", "Admin", "User", "admin@example.com"),
     ]
     with connect_db() as conn:
         cursor = conn.cursor()
-        for username, password, role in test_users:
-            insert_user(cursor, username, password, role)
+        for username, password, role, name, surname, email in test_users:
+            insert_user(cursor, username, password, role, name, surname, email)
         for pump_model, config, customer, user in test_pumps:
             serial = create_pump(cursor, pump_model, config, customer, user)
             print(f"Inserting pump {serial}...")

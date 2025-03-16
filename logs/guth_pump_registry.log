@@ -45,3 +45,27 @@
 2025-03-16 10:25:37,786 - WARNING - Failed login attempt for user1
 2025-03-16 10:26:23,783 - INFO - User tester1 logged in with role Testing
 2025-03-16 10:26:39,266 - INFO - User logged out
+2025-03-16 10:35:36,495 - INFO - User inserted: user1 with role Pump Originator
+2025-03-16 10:35:36,663 - INFO - User inserted: stores1 with role Stores
+2025-03-16 10:35:36,831 - INFO - User inserted: assembler1 with role Assembler
+2025-03-16 10:35:37,000 - INFO - User inserted: tester1 with role Testing
+2025-03-16 10:35:37,165 - INFO - User inserted: admin1 with role Admin
+2025-03-16 10:35:37,166 - INFO - Pump created: 5101 001 - 25 by user1
+2025-03-16 10:35:37,166 - INFO - Pump created: 5101 002 - 25 by user1
+2025-03-16 10:35:37,166 - INFO - Pump created: 5101 003 - 25 by user1
+2025-03-16 10:35:46,633 - INFO - Application started
+2025-03-16 10:36:00,159 - INFO - User user1 logged in with role Pump Originator
+2025-03-16 10:36:01,510 - INFO - User None logged out
+2025-03-16 10:36:08,090 - INFO - User tester1 logged in with role Testing
+2025-03-16 10:38:51,504 - INFO - Application started
+2025-03-16 10:41:20,766 - INFO - User inserted: user1 with role Pump Originator
+2025-03-16 10:41:20,933 - INFO - User inserted: stores1 with role Stores
+2025-03-16 10:41:21,100 - INFO - User inserted: assembler1 with role Assembler
+2025-03-16 10:41:21,268 - INFO - User inserted: tester1 with role Testing
+2025-03-16 10:41:21,435 - INFO - User inserted: admin1 with role Admin
+2025-03-16 10:41:21,435 - INFO - Pump created: 5101 001 - 25 by user1
+2025-03-16 10:41:21,435 - INFO - Pump created: 5101 002 - 25 by user1
+2025-03-16 10:41:21,436 - INFO - Pump created: 5101 003 - 25 by user1
+2025-03-16 10:41:28,197 - INFO - Application started
+2025-03-16 10:41:45,079 - INFO - User inserted: Test1 with role Pump Originator
+2025-03-16 10:41:45,085 - INFO - Registered new Pump Originator: Test1
