@@ -6,10 +6,18 @@ import sqlite3
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(BASE_DIR, "data", "guth_pump_registry.db")
 
-# Serial number mappings (SOW Appendix A draft)
+# Serial number mappings (SOW Appendix A draft, updated for all models)
 PUMP_MODEL_CODES = {
-    "P1 3.0kW": "5",
-    "PT 0.55kW": "1"
+    "PT 0.55KW": "1",
+    "PS 0.75KW": "2",
+    "PS 1.1KW": "3",
+    "P1 1.1KW": "4",
+    "P1 2.2KW": "5",  # Updated from "P1 3.0kW" style to match pump_options.json
+    "P1 3.0KW": "6",
+    "P1 4.0KW": "7",
+    "P1 5.5KW": "8",
+    "P2 5.5KW": "9",
+    "P2 7.5KW": "A"
 }
 
 CONFIG_CODES = {
@@ -63,5 +71,5 @@ def generate_serial_number(pump_model, configuration, cursor):
 if __name__ == "__main__":
     with connect_db() as conn:
         cursor = conn.cursor()
-        print(generate_serial_number("P1 3.0kW", "Standard", cursor))  # e.g., "5101 001 - 25"
+        print(generate_serial_number("P1 2.2KW", "Standard", cursor))  # e.g., "5101 001 - 25"
         conn.commit()

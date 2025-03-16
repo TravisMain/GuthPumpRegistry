@@ -1,0 +1,18 @@
+{
+  "branch": ["Johannesburg", "Cape Town", "Pinetown", "Port Elizabeth"],
+  "pump_model": ["PT 0.55KW", "PS 0.75KW", "PS 1.1KW", "P1 1.1KW", "P1 2.2KW", "P1 3.0KW", "P1 4.0KW", "P1 5.5KW", "P2 5.5KW", "P2 7.5KW"],
+  "configuration": ["Standard", "Economical"],
+  "impeller_size": {
+    "PT 0.55KW": ["92mm"],
+    "PS 0.75KW": ["110mm", "115mm"],
+    "PS 1.1KW": ["110mm", "115mm"],
+    "P1 1.1KW": ["110mm", "120mm", "130mm", "140mm", "150mm", "160mm", "171mm"],
+    "P1 2.2KW": ["110mm", "120mm", "130mm", "140mm", "150mm", "160mm", "171mm"],
+    "P1 3.0KW": ["110mm", "120mm", "130mm", "140mm", "150mm", "160mm", "171mm"],
+    "P1 4.0KW": ["110mm", "120mm", "130mm", "140mm", "150mm", "160mm", "171mm"],
+    "P1 5.5KW": ["140mm", "150mm", "160mm", "171mm"],
+    "P2 5.5KW": ["170mm", "190mm", "200mm", "210mm", "220mm", "230mm", "240mm", "250mm"],
+    "P2 7.5KW": ["120mm", "130mm", "140mm", "150mm", "160mm", "170mm", "180mm", "190mm"]
+  },
+  "connection_type": ["DIN", "Tri-Clover", "Other"]
+}

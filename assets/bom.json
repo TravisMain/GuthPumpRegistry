@@ -1,0 +1,1982 @@
+{
+    "PT 0.55KW 0.55 kW": {
+        "Standard": [
+            {
+                "computer_code": "10.55.090011",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.100047",
+                "description": "Mechanical shaft seal",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000051",
+                "description": "Impeller assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000052",
+                "description": "Leg assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000053",
+                "description": "Front housing assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00258",
+                "description": "Elect. motor = 0.55kW - 380V S71 (W: STD (stock))",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00056",
+                "description": "Label (Motor direction)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00092",
+                "description": "Guth name plate",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00110",
+                "description": "Pop rivets",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.00135",
+                "description": "Shaft complete with grub screws",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03107",
+                "description": "NW25/1.0\" DIN male w/o",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03109",
+                "description": "NW40/1.5\" DIN male w/o",
+                "quantity_required": 1
+            }
+        ],
+        "Economical": [
+            {
+                "computer_code": "10.55.090011",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.100047",
+                "description": "Mechanical shaft seal",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000051",
+                "description": "Impeller assembly",
+                "quantity_required": 1
+            }
+        ]
+    },
+    "PS 0.75KW 0.75 kW": {
+        "Standard": [
+            {
+                "computer_code": "10.55.09000",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.10004",
+                "description": "Mechanical shaft seal Viton elast.",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00002",
+                "description": "Bikon shrink disc",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00022",
+                "description": "Body assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00024",
+                "description": "Rear leg bracket assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00038",
+                "description": "Front housing",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00048",
+                "description": "Impeller",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00050",
+                "description": "Impeller nut",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00056",
+                "description": "Label (Motor direction)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00260",
+                "description": "Elect. motor = 0.75kW. (1450Rpm) (Without modifications)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00084",
+                "description": "Motor cover",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00092",
+                "description": "Guth name plate",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00095",
+                "description": "Guth pump cover adhesive sticker",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.00110",
+                "description": "Pop rivets",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.00133",
+                "description": "Shaft complete with key",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00154",
+                "description": "Motor cover support assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03107",
+                "description": "NW25/1.0\" DIN male w/o",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03109",
+                "description": "NW40/1.5\" DIN male w/o",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.02.00907",
+                "description": "1.0\" hose connector",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "99.00.00150",
+                "description": "1.0\" T/C union complete",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "99.00.00152",
+                "description": "2.0\" T/C union complete",
+                "quantity_required": 1
+            }
+        ],
+        "Economical": [
+            {
+                "computer_code": "10.55.09000",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.10004",
+                "description": "Mechanical shaft seal",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00002",
+                "description": "Bikon shrink disc",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00022",
+                "description": "Body assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00024",
+                "description": "Rear leg bracket assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00038",
+                "description": "Front housing",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00048",
+                "description": "Impeller",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00050",
+                "description": "Impeller nut",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00056",
+                "description": "Label (Motor direction)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00260",
+                "description": "Elect. motor = 0.75kW. (1450Rpm) D80 (Without modifications)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.03.02231",
+                "description": "NW50/25 Concentric Reducer",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03110",
+                "description": "NW50/2\" DIN male w/o",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03340",
+                "description": "NW50 Male w/o",
+                "quantity_required": 1
+            }
+        ]
+    },
+    "PS 1.1 kW": {
+        "Standard": [
+            {
+                "computer_code": "10.55.09000",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.10004",
+                "description": "Mechanical shaft seal",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00002",
+                "description": "Bikon shrink disc",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00022",
+                "description": "Body assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00024",
+                "description": "Rear leg bracket assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00038",
+                "description": "Front housing",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00048",
+                "description": "Impeller",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00050",
+                "description": "Impeller nut",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00056",
+                "description": "Label (Motor direction)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00264",
+                "description": "Elect. motor = 1.1kW. (2880Rpm) (Without modifications)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00084",
+                "description": "Motor cover c/w ring",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00092",
+                "description": "Guth name plate",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00095",
+                "description": "Guth pump cover adhesive sticker",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.00110",
+                "description": "Pop rivets",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.00133",
+                "description": "Shaft complete with key",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00154",
+                "description": "Motor cover support assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03107",
+                "description": "NW25/1.0\" DIN male w/o",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03109",
+                "description": "NW40/1.5\" DIN male w/o",
+                "quantity_required": 1
+            }
+        ],
+        "Economical": [
+            {
+                "computer_code": "10.55.09000",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.10004",
+                "description": "Mechanical shaft seal",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00002",
+                "description": "Bikon shrink disc",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00022",
+                "description": "Body assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00024",
+                "description": "Rear leg bracket assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00038",
+                "description": "Front housing",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00048",
+                "description": "Impeller",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00050",
+                "description": "Impeller nut",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00056",
+                "description": "Label (Motor direction)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00264",
+                "description": "Elect. motor = 1.1kW. (2880Rpm) (Without modifications)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.03.02231",
+                "description": "NW50/25 Concentric Reducer",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03110",
+                "description": "NW50/2\" DIN male w/o",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03340",
+                "description": "NW50 Male w/o",
+                "quantity_required": 1
+            }
+        ]
+    },
+    "P1 1.1 kW": {
+        "Standard": [
+            {
+                "computer_code": "10.55.09013",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.10004",
+                "description": "Mechanical shaft seal Viton",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00003",
+                "description": "Bikon shrink disc",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00012",
+                "description": "Mild steel plated distance piece",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00020",
+                "description": "Leg assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00030",
+                "description": "Front cover assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00035",
+                "description": "Front cover wing nuts",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00040",
+                "description": "Housing assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00230",
+                "description": "Elect. motor = 1.1kW. (1450Rpm) (Without modifications)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00046",
+                "description": "Impeller",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00050",
+                "description": "Impeller cap nut",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00056",
+                "description": "Label (Motor direction)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00086",
+                "description": "Motor cover c/w ring",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00092",
+                "description": "Guth name plate",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00094",
+                "description": "Guth pump cover adhesive sticker",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.00096",
+                "description": "M10 mild steel plated nuts",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00099",
+                "description": "M12 mild steel plated nuts",
+                "quantity_required": 3
+            },
+            {
+                "computer_code": "10.77.00110",
+                "description": "Pop rivets",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.00130",
+                "description": "Shaft complete with key",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00136",
+                "description": "M10 x 32 stainless steel studs",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00140",
+                "description": "M10 x 30 mild steel plated studs",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00146",
+                "description": "M12 x 85 mild steel plated studs",
+                "quantity_required": 3
+            },
+            {
+                "computer_code": "10.77.00155",
+                "description": "Motor cover support assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03109",
+                "description": "NW40/1.5\" DIN male w/o",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03110",
+                "description": "NW50/2.0\" DIN male w/o",
+                "quantity_required": 1
+            }
+        ],
+        "Economical": [
+            {
+                "computer_code": "10.55.09005",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.10004",
+                "description": "Mechanical shaft seal Viton Elastomers",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00003",
+                "description": "Bikon shrink disc",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00012",
+                "description": "Mild steel plated distance piece",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00020",
+                "description": "Leg assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00030",
+                "description": "Front cover assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00035",
+                "description": "Front cover wing nuts",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00040",
+                "description": "Housing assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00230",
+                "description": "Elect. motor = 1.1kW. (1450Rpm)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00046",
+                "description": "Full Impeller 171mm",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00050",
+                "description": "Impeller cap nut",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00056",
+                "description": "Label (Motor direction)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00092",
+                "description": "Guth name plate",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00096",
+                "description": "M10 mild steel plated nuts",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00099",
+                "description": "M12 mild steel plated nuts",
+                "quantity_required": 3
+            },
+            {
+                "computer_code": "10.77.00110",
+                "description": "Pop rivets",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.00130",
+                "description": "Shaft complete with key",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00136",
+                "description": "M10 x 32 stainless steel studs",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00140",
+                "description": "M10 x 30 mild steel plated studs",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00146",
+                "description": "M12 m/s plated flat washers",
+                "quantity_required": 3
+            },
+            {
+                "computer_code": "10.77.00200",
+                "description": "Stainless steel spacer ring",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00210",
+                "description": "Pump support assembly - 1.1kW",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03109",
+                "description": "NW40/1.5\" DIN male w/o",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03110",
+                "description": "NW50/2.0\" DIN male w/o",
+                "quantity_required": 1
+            }
+        ]
+    },
+    "P1 2.2 kW": {
+        "Standard": [
+            {
+                "computer_code": "10.55.09005",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.10004",
+                "description": "Mechanical shaft seal VITON",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00005",
+                "description": "Bikon shrink disc",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00014",
+                "description": "Mild steel plated distance piece",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00020",
+                "description": "Leg assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00030",
+                "description": "Front cover assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00035",
+                "description": "Front cover wing nuts",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00040",
+                "description": "Housing assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00245",
+                "description": "Elect. motor = 2.2kW. (2880Rpm) (Without modifications)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00046",
+                "description": "Impeller",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00050",
+                "description": "Impeller cap nut",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00056",
+                "description": "Label (Motor direction)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00087",
+                "description": "Motor cover c/w ring",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00092",
+                "description": "Guth name plate",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00094",
+                "description": "Guth pump motor cover adhesive sticker",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.00099",
+                "description": "M12 mild steel plated nuts",
+                "quantity_required": 3
+            },
+            {
+                "computer_code": "10.77.00110",
+                "description": "Pop rivets",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.00120",
+                "description": "Shaft complete with key",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00136",
+                "description": "M10 x 34 stainless steel studs",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00140",
+                "description": "M10 x 30 mild steel plated studs",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00150",
+                "description": "M12 m/s plated flat washer",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00158",
+                "description": "Motor cover support assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03109",
+                "description": "NW40/1.5\" DIN male w/o",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03110",
+                "description": "NW50/2.0\" DIN male w/o",
+                "quantity_required": 1
+            }
+        ],
+        "Economical": [
+            {
+                "computer_code": "10.55.090005",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.100004",
+                "description": "Mechanical shaft seal",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000003",
+                "description": "Bikon shrink disc",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000012",
+                "description": "Mild steel plated distance piece",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000030",
+                "description": "Front cover assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000035",
+                "description": "Front cover wing nuts",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.000040",
+                "description": "Housing assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000046",
+                "description": "Impeller",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000050",
+                "description": "Impeller cap nut",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000056",
+                "description": "Label (Motor direction)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000092",
+                "description": "Guth name plate",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000096",
+                "description": "M10 mild steel plated nuts",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.000099",
+                "description": "M12 mild steel plated nuts",
+                "quantity_required": 3
+            },
+            {
+                "computer_code": "10.77.001110",
+                "description": "Pop rivets",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.001130",
+                "description": "Shaft complete with key",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.001136",
+                "description": "M10 x 32 stainless steel studs",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.001140",
+                "description": "M10 x 30 mild steel plated studs",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.001146",
+                "description": "M12 x 85 mild steel plated studs",
+                "quantity_required": 3
+            },
+            {
+                "computer_code": "10.77.002000",
+                "description": "Stainless steel spacer ring",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.002015",
+                "description": "Pump support assembly - 2.2kW",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "90.00.000000",
+                "description": "Elect. motor = 2.2kW. (2880 Rpm)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.13.04629",
+                "description": "1.5\" T/C FERRULE",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.13.04630",
+                "description": "2.0\" T/C FERRULE",
+                "quantity_required": 1
+            }
+        ]
+    },
+    "P1 3.0 kW": {
+        "Standard": [
+            {
+                "computer_code": "10.55.09005",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.10004",
+                "description": "Mechanical shaft seal VITON",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00005",
+                "description": "Bikon shrink disc",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00014",
+                "description": "Mild steel plated distance piece",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00020",
+                "description": "Leg assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00030",
+                "description": "Front cover assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00035",
+                "description": "Front cover wing nuts",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00040",
+                "description": "Housing assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00240",
+                "description": "Elect. motor = 3.0kW. (2880Rpm) (Without modifications)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00046",
+                "description": "Impeller",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00050",
+                "description": "Impeller cap nut",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00056",
+                "description": "Label (Motor direction)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00087",
+                "description": "Motor cover c/w ring",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00092",
+                "description": "Guth name plate",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00094",
+                "description": "Guth pump motor cover adhesive sticker",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.00099",
+                "description": "M12 mild steel plated nuts",
+                "quantity_required": 3
+            },
+            {
+                "computer_code": "10.77.00110",
+                "description": "Pop rivets",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.00120",
+                "description": "Shaft complete with key",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00136",
+                "description": "M10 x 34 stainless steel studs",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00140",
+                "description": "M10 x 30 mild steel plated studs",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00150",
+                "description": "M12 m/s plated flat washer",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00158",
+                "description": "Motor cover support assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03109",
+                "description": "NW40/1.5\" DIN male w/o",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03110",
+                "description": "NW50/2.0\" DIN male w/o",
+                "quantity_required": 1
+            }
+        ],
+        "Economical": [
+            {
+                "computer_code": "10.55.090005",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.100004",
+                "description": "Mechanical shaft seal",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000005",
+                "description": "Bikon shrink disc",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000014",
+                "description": "Mild steel plated distance piece",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000030",
+                "description": "Front cover assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000035",
+                "description": "Front cover wing nuts",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.000040",
+                "description": "Housing assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000046",
+                "description": "Impeller",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000050",
+                "description": "Impeller cap nut",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000056",
+                "description": "Label (Motor direction)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000092",
+                "description": "Guth name plate",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000099",
+                "description": "M12 mild steel plated nuts",
+                "quantity_required": 3
+            },
+            {
+                "computer_code": "10.77.001110",
+                "description": "Pop rivets",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.001120",
+                "description": "M12 x 30 Mild steel plated set",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.001132",
+                "description": "Shaft complete with key",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.001136",
+                "description": "M10 x 32 stainless steel studs",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.001144",
+                "description": "M12 x 78 mild steel plated studs",
+                "quantity_required": 3
+            },
+            {
+                "computer_code": "10.77.001150",
+                "description": "M12 m/s plated flat washer",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.002000",
+                "description": "Stainless steel spacer ring",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.002220",
+                "description": "Pump support assembly - 3.0kW",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.002240",
+                "description": "Elect. motor = 3.0kW. (2880Rpm) (Without modifications)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.031109",
+                "description": "NW40/1.5\" Male w/o gr 316",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.031110",
+                "description": "NW50/2.0\" Male w/o gr 316",
+                "quantity_required": 1
+            }
+        ]
+    },
+    "P1 4.0 kW": {
+        "Standard": [
+            {
+                "computer_code": "10.55.09005",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.10004",
+                "description": "Mechanical shaft seal VITON",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00005",
+                "description": "Bikon shrink disc",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00014",
+                "description": "Mild steel plated distance piece",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00020",
+                "description": "Leg assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00030",
+                "description": "Front cover assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00035",
+                "description": "Front cover wing nuts",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00040",
+                "description": "Housing assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00240",
+                "description": "Elect. motor = 4.0kW. (2880Rpm) (Without modifications)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00046",
+                "description": "Impeller",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00050",
+                "description": "Impeller cap nut",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00056",
+                "description": "Label (Motor direction)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00087",
+                "description": "Motor cover c/w ring",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00092",
+                "description": "Guth name plate",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00094",
+                "description": "Guth pump motor cover adhesive sticker",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.00099",
+                "description": "M12 mild steel plated nuts",
+                "quantity_required": 3
+            },
+            {
+                "computer_code": "10.77.00110",
+                "description": "Pop rivets",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.00120",
+                "description": "Shaft complete with key",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00136",
+                "description": "M10 x 34 stainless steel studs",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00140",
+                "description": "M10 x 30 mild steel plated studs",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00150",
+                "description": "M12 m/s plated flat washer",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.00158",
+                "description": "Motor cover support assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03109",
+                "description": "NW40/1.5\" DIN male w/o",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.03110",
+                "description": "NW50/2.0\" DIN male w/o",
+                "quantity_required": 1
+            }
+        ],
+        "Economical": [
+            {
+                "computer_code": "10.55.090005",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.100004",
+                "description": "Mechanical shaft seal Viton elast",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000005",
+                "description": "Bikon shrink disc",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000014",
+                "description": "Mild steel plated distance piece",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000030",
+                "description": "Front cover assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000035",
+                "description": "Front cover wing nuts",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.000040",
+                "description": "Housing assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000046",
+                "description": "Impeller",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000050",
+                "description": "Impeller cap nut",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000056",
+                "description": "Label (Motor direction)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000092",
+                "description": "Guth name plate",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000099",
+                "description": "M12 mild steel plated nuts",
+                "quantity_required": 3
+            },
+            {
+                "computer_code": "10.77.001110",
+                "description": "Pop rivets",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.001120",
+                "description": "M12 x 30 Mild steel plated set",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.001132",
+                "description": "Shaft complete with key",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.001136",
+                "description": "M10 x 32 stainless steel studs",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.001144",
+                "description": "M12 x 78 mild steel plated studs",
+                "quantity_required": 3
+            },
+            {
+                "computer_code": "10.77.001150",
+                "description": "M12 m/s plated flat washer",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.002000",
+                "description": "Stainless steel spacer ring",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.002225",
+                "description": "Pump support assembly - 4.0kW",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.002245",
+                "description": "Elect. motor = 4.0kW. (2880Rpm) (Without modifications)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.02939",
+                "description": "NW40 Male w/o",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.02940",
+                "description": "NW50 Male w/o",
+                "quantity_required": 1
+            }
+        ]
+    },
+    "P1 5.5 kW": {
+        "Standard": [
+            {
+                "computer_code": "10.55.090005",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.100001",
+                "description": "Mechanical shaft seal TC/TC",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000006",
+                "description": "P2 Bikon shrink disc",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000016",
+                "description": "Mild steel plated distance piece",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000026",
+                "description": "Motor support assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000030",
+                "description": "Front cover assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000035",
+                "description": "Front cover wing nuts",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.000040",
+                "description": "Housing assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "90.00.000000",
+                "description": "Mot5.5kW2P400/690VB3 132 IP66CIR8759",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000046",
+                "description": "P1 impeller",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000050",
+                "description": "Impeller cap nut",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000056",
+                "description": "Label (Motor direction)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000092",
+                "description": "Guth name plate",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000099",
+                "description": "M12 mild steel plated nuts",
+                "quantity_required": 7
+            },
+            {
+                "computer_code": "10.77.001110",
+                "description": "Pop rivets",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.001121",
+                "description": "M12 x 45 Mild steel plated set",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.001134",
+                "description": "P2 shaft complete with key",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.001136",
+                "description": "M10 x 34 stainless steel studs",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.001142",
+                "description": "M12 x 50 mild steel plated studs",
+                "quantity_required": 3
+            },
+            {
+                "computer_code": "10.77.001150",
+                "description": "M12 m/s plated flat washer",
+                "quantity_required": 7
+            },
+            {
+                "computer_code": "11.18.031109",
+                "description": "NW40/1.5\" Male w/o",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.031110",
+                "description": "NW50/2.0\" Male w/o",
+                "quantity_required": 1
+            }
+        ],
+        "Economical": [
+            {
+                "computer_code": "10.55.090005",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.100001",
+                "description": "Mechanical shaft seal TC/TC",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000006",
+                "description": "P2 Bikon shrink disc",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000016",
+                "description": "Mild steel plated distance piece",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000026",
+                "description": "Motor support assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000030",
+                "description": "Front cover assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000035",
+                "description": "Front cover wing nuts",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.000040",
+                "description": "Housing assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "90.00.000000",
+                "description": "Mot5.5kW2P400/690VB3 132 IP66CIR8759",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000046",
+                "description": "P1 impeller",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000050",
+                "description": "Impeller cap nut",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000056",
+                "description": "Label (Motor direction)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000092",
+                "description": "Guth name plate",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000099",
+                "description": "M12 mild steel plated nuts",
+                "quantity_required": 7
+            },
+            {
+                "computer_code": "10.77.001110",
+                "description": "Pop rivets",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.001121",
+                "description": "M12 x 45 Mild steel plated set",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.001134",
+                "description": "P2 shaft complete with key",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.001136",
+                "description": "M10 x 34 stainless steel studs",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.001142",
+                "description": "M12 x 50 mild steel plated studs",
+                "quantity_required": 3
+            },
+            {
+                "computer_code": "10.77.001150",
+                "description": "M12 m/s plated flat washer",
+                "quantity_required": 7
+            },
+            {
+                "computer_code": "11.18.031109",
+                "description": "NW40/1.5\" Male w/o",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.031110",
+                "description": "NW50/2.0\" Male w/o",
+                "quantity_required": 1
+            }
+        ]
+    },
+    "P2 5.5 kW": {
+        "Standard": [
+            {
+                "computer_code": "10.55.090010",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.100001",
+                "description": "Mechanical shaft seal TC/TC",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.57.00360",
+                "description": "M12 x 50 Set screw c/w nut, 2 flat & 2 spring washers",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.000026",
+                "description": "Fristam + P2 + P1 (5.5kW)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000006",
+                "description": "Bikon shrink disc",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000019",
+                "description": "Body assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000029",
+                "description": "Front cover assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "90.00.000000",
+                "description": "Elect. motor = 5.5kW. (1450Rpm)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000049",
+                "description": "Impeller",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000050",
+                "description": "Impeller cap nut",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000056",
+                "description": "Label (Motor direction)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000091",
+                "description": "Motor cover c/w ring (Split) (For WEG motor)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000092",
+                "description": "Guth name plate",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000094",
+                "description": "Guth pump cover adhesive sticker",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.001110",
+                "description": "Pop rivets",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.001134",
+                "description": "Shaft complete with key",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.001161",
+                "description": "Motor cover support assembly P1 (5.5kW) + P2 + Fristam (For WEG)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.031111",
+                "description": "NW65/2.5\" DIN male w/o gr 316",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.031112",
+                "description": "NW80/3.0\" DIN male w/o gr 316",
+                "quantity_required": 1
+            }
+        ],
+        "Economical": [
+            {
+                "computer_code": "10.55.090010",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.100002",
+                "description": "Mechanical shaft seal",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.57.00360",
+                "description": "M12 x 50 Set screw c/w nut, 2 flat & 2 spring washers",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.000006",
+                "description": "Bikon shrink disc",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000019",
+                "description": "Body assembly complete",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000026",
+                "description": "Motor support assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000029",
+                "description": "Front cover assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000049",
+                "description": "Impeller",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000050",
+                "description": "Impeller cap nut",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000056",
+                "description": "Label (Motor direction)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000092",
+                "description": "Guth name plate",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.001110",
+                "description": "Pop rivets",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.001134",
+                "description": "Shaft complete with key",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.002266",
+                "description": "Elect. motor = 5.5kW. (1450Rpm) (Without modifications)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.030111",
+                "description": "NW65/2.5\" DIN Exp male",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.030112",
+                "description": "NW80/3.0\" Male w/o",
+                "quantity_required": 1
+            }
+        ]
+    },
+    "P2 7.5 kW": {
+        "Standard": [
+            {
+                "computer_code": "10.55.090010",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.100004",
+                "description": "Mechanical shaft seal Viton elast.",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.57.00360",
+                "description": "M12 x 50 Set screw c/w nut, 2 flat & 2 spring washers (For WEG motors)",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.57.00391",
+                "description": "Fristam + P2 + P1 (5.5kW)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000006",
+                "description": "Bikon shrink disc",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000019",
+                "description": "Body assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000029",
+                "description": "Front cover assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00305",
+                "description": "Elect. motor 7.5kW. (2900Rpm) (Without modifications)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000049",
+                "description": "Impeller cut to size 150mm dia",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000050",
+                "description": "Impeller cap nut",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000056",
+                "description": "Label (Motor direction)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000091",
+                "description": "Motor cover c/w ring (Split) (For WEG motor)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000092",
+                "description": "Guth name plate",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000094",
+                "description": "Guth pump cover adhesive sticker",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.001110",
+                "description": "Pop rivets",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.001134",
+                "description": "Shaft complete with key",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.001161",
+                "description": "Motor cover support assembly P1 (5.5kW) + P2 + Fristam (For WEG)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.031111",
+                "description": "NW65 Male w/o",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.031112",
+                "description": "NW80/3\" Male w/o 304",
+                "quantity_required": 1
+            }
+        ],
+        "Economical": [
+            {
+                "computer_code": "10.55.090010",
+                "description": "Front cover 'O' ring (Black nitrile)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.55.100004",
+                "description": "Mechanical shaft seal Viton Elast.",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.57.00360",
+                "description": "M12 x 50 Set screw c/w nut, 2 flat & 2 spring washers",
+                "quantity_required": 4
+            },
+            {
+                "computer_code": "10.77.000006",
+                "description": "Bikon shrink disc",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000019",
+                "description": "Body assembly complete",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000026",
+                "description": "Motor support assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000029",
+                "description": "Front cover assembly",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000049",
+                "description": "Impeller",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000050",
+                "description": "Impeller cap nut",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000056",
+                "description": "Label (Motor direction)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.000092",
+                "description": "Guth name plate",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.001110",
+                "description": "Pop rivets",
+                "quantity_required": 2
+            },
+            {
+                "computer_code": "10.77.001134",
+                "description": "Shaft complete with key",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "10.77.00305",
+                "description": "Elect. motor 7.5kW. (2900Rpm) (Without modifications)",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.031111",
+                "description": "NW65/2.5\" DIN male w/o",
+                "quantity_required": 1
+            },
+            {
+                "computer_code": "11.18.031112",
+                "description": "NW80/3.0\" Male w/o",
+                "quantity_required": 1
+            }
+        ]
+    }
+}
