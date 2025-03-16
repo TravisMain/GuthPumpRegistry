@@ -1,6 +1,8 @@
+import sqlite3  # Add this
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from database import connect_db, insert_user, update_user, delete_user, get_all_users, get_all_pumps, get_audit_log
+from utils.export_utils import export_pumps, export_audit_log, generate_user_guide
 from utils.config import get_logger
 
 logger = get_logger("admin_gui")
@@ -126,6 +128,12 @@ def show_admin_gui(root, username):
     pump_tree.heading("Test Date", text="Test Date")
     pump_tree.pack(fill=BOTH, expand=True, pady=10)
 
+    def export_pumps_action():
+        path = export_pumps()
+        ttk.Label(pump_tab, text=f"Pumps exported to {path}", bootstyle=SUCCESS).pack(pady=5)
+
+    ttk.Button(pump_tab, text="Export to CSV", command=export_pumps_action, bootstyle=INFO).pack(pady=10)
+
     with connect_db() as conn:
         cursor = conn.cursor()
         pumps = get_all_pumps(cursor)
@@ -143,8 +151,24 @@ def show_admin_gui(root, username):
     audit_tree.heading("Action", text="Action")
     audit_tree.pack(fill=BOTH, expand=True, pady=10)
 
+    def export_audit_action():
+        path = export_audit_log()
+        ttk.Label(audit_tab, text=f"Audit log exported to {path}", bootstyle=SUCCESS).pack(pady=5)
+
+    ttk.Button(audit_tab, text="Export to CSV", command=export_audit_action, bootstyle=INFO).pack(pady=10)
+
     with connect_db() as conn:
         cursor = conn.cursor()
         logs = get_audit_log(cursor)
         for log in logs:
             audit_tree.insert("", END, values=(log["timestamp"], log["username"], log["action"]))
+
+    # User Guide Tab
+    guide_tab = ttk.Frame(notebook)
+    notebook.add(guide_tab, text="User Guide")
+
+    def generate_guide_action():
+        path = generate_user_guide()
+        ttk.Label(guide_tab, text=f"User guide saved to {path}", bootstyle=SUCCESS).pack(pady=5)
+
+    ttk.Button(guide_tab, text="Generate User Guide PDF", command=generate_guide_action, bootstyle=INFO).pack(pady=20)

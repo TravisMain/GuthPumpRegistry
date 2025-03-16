@@ -81,3 +81,9 @@
 2025-03-16 11:05:26,780 - INFO - Pump created: 5101 003 - 25 by user1
 2025-03-16 12:25:41,142 - INFO - Application started
 2025-03-16 12:25:49,395 - INFO - User admin1 logged in with role Admin
+2025-03-16 12:33:57,618 - INFO - Application started
+2025-03-16 12:34:03,212 - INFO - User admin1 logged in with role Admin
+2025-03-16 12:34:37,229 - INFO - User inserted: newuser with role Stores
+2025-03-16 12:35:20,837 - INFO - Pump data exported to C:\Users\travism\source\repos\GuthPumpRegistry\data\exports\pumps_export_20250316_123520.csv
+2025-03-16 12:35:23,831 - INFO - Audit log exported to C:\Users\travism\source\repos\GuthPumpRegistry\data\exports\audit_log_export_20250316_123523.csv
+2025-03-16 12:35:26,091 - INFO - User guide generated at C:\Users\travism\source\repos\GuthPumpRegistry\data\docs\user_guide.pdf
