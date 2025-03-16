@@ -1,0 +1,13 @@
+BOM for Pump 1101 002 - 25:
+Part: Front cover 'O' ring (Black nitrile) (10.55.090011), Qty: 1, Pulled: Yes, Reason: 
+Part: Mechanical shaft seal (10.55.100047), Qty: 1, Pulled: Yes, Reason: 
+Part: Impeller assembly (10.77.000051), Qty: 1, Pulled: Yes, Reason: 
+Part: Leg assembly (10.77.000052), Qty: 1, Pulled: Yes, Reason: 
+Part: Front housing assembly (10.77.000053), Qty: 1, Pulled: Yes, Reason: 
+Part: Elect. motor = 0.55kW - 380V S71 (W: STD (stock)) (10.77.00258), Qty: 1, Pulled: Yes, Reason: 
+Part: Label (Motor direction) (10.77.00056), Qty: 1, Pulled: Yes, Reason: 
+Part: Guth name plate (10.77.00092), Qty: 1, Pulled: Yes, Reason: 
+Part: Pop rivets (10.77.00110), Qty: 2, Pulled: Yes, Reason: 
+Part: Shaft complete with grub screws (10.77.00135), Qty: 1, Pulled: Yes, Reason: 
+Part: NW25/1.0" DIN male w/o (11.18.03107), Qty: 1, Pulled: Yes, Reason: 
+Part: NW40/1.5" DIN male w/o (11.18.03109), Qty: 1, Pulled: Yes, Reason: 

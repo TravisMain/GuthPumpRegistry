@@ -10,7 +10,7 @@ from utils.config import get_logger
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "data", "guth_pump_registry.db")
-BOM_PATH = os.path.join(BASE_DIR, "assets", "bom.json")  # Added BOM file path
+BOM_PATH = os.path.join(BASE_DIR, "assets", "bom.json")
 DB_LOCK = threading.Lock()
 logger = get_logger("database")
 
@@ -25,7 +25,7 @@ def initialize_database():
     with DB_LOCK, connect_db() as conn:
         cursor = conn.cursor()
         try:
-            # Drop and recreate pumps table with new fields
+            # Drop and recreate pumps table with updated status constraint
             cursor.execute("DROP TABLE IF EXISTS pumps")
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS pumps (
@@ -33,7 +33,7 @@ def initialize_database():
                     pump_model TEXT NOT NULL,
                     configuration TEXT NOT NULL,
                     customer TEXT NOT NULL,
-                    status TEXT NOT NULL CHECK(status IN ('Stores', 'Assembly', 'Testing', 'Completed')),
+                    status TEXT NOT NULL CHECK(status IN ('Stores', 'Assembler', 'Testing', 'Completed')),
                     created_at DATETIME NOT NULL,
                     requested_by TEXT NOT NULL,
                     invoice_number TEXT,
@@ -161,7 +161,6 @@ def get_user_email(cursor, username):
     return user["email"] if user else None
 
 def load_bom_from_json(pump_model, configuration):
-    """Load BOM data from bom.json for a given pump model and configuration."""
     try:
         with open(BOM_PATH, "r") as f:
             bom_data = json.load(f)
@@ -179,7 +178,6 @@ def load_bom_from_json(pump_model, configuration):
 def create_pump(cursor, pump_model, configuration, customer, requested_by, branch, impeller_size, 
                 connection_type, pressure_required, flow_rate_required, custom_motor, flush_seal_housing, 
                 insert_bom=True):
-    """Create a pump entry and optionally insert BOM items from bom.json."""
     serial = generate_serial_number(pump_model, configuration, cursor)
     cursor.execute("""
         INSERT INTO pumps (serial_number, pump_model, configuration, customer, status, created_at, requested_by,
@@ -189,7 +187,6 @@ def create_pump(cursor, pump_model, configuration, customer, requested_by, branc
     """, (serial, pump_model, configuration, customer, datetime.now(), requested_by, branch, impeller_size, 
           connection_type, pressure_required, flow_rate_required, custom_motor, flush_seal_housing))
     
-    # Insert BOM items if requested
     if insert_bom:
         bom_items = load_bom_from_json(pump_model, configuration)
         for item in bom_items:
@@ -262,10 +259,6 @@ def insert_test_data():
         for pump_model, config, customer, user, branch, impeller, conn_type, press, flow, motor, flush in test_pumps:
             serial = create_pump(cursor, pump_model, config, customer, user, branch, impeller, conn_type, press, flow, motor, flush)
             print(f"Inserting pump {serial}...")
-            print(f"Inserting BOM for {serial} - Impeller...")
-            create_bom_item(cursor, serial, "Impeller", "IMP-001", 1)
-            print(f"Inserting BOM for {serial} - Motor...")
-            create_bom_item(cursor, serial, "Motor", "MTR-3.0kW", 1)
         conn.commit()
     print("Test data inserted.")
 

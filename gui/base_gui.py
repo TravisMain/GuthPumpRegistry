@@ -5,6 +5,7 @@ from gui.login_gui import show_login_screen
 from gui.register_gui import show_register_window
 from gui.dashboard_gui import show_dashboard
 from gui.admin_gui import show_admin_gui
+from gui.stores_gui import show_stores_dashboard
 from database import connect_db, check_user, insert_user
 from utils.config import get_logger
 
@@ -39,7 +40,11 @@ class BaseGUI:
             if role == "Admin":
                 self.root.state("zoomed")
                 show_admin_gui(self.root, self.username, self.logout)
-            else:
+            elif role == "Stores":
+                self.root.state("zoomed")
+                self.main_frame = show_stores_dashboard(self.root, self.username, self.role, self.logout)
+            else:  # Pump Originator, Assembler, Testing, etc.
+                self.root.state("zoomed")
                 self.main_frame = show_dashboard(self.root, self.username, self.role, self.logout)
             logger.info(f"User {username} logged in with role {role}")
         else:
@@ -48,7 +53,7 @@ class BaseGUI:
             logger.warning(f"Failed login attempt for {username}")
 
     def show_register(self):
-        show_register_window(self.root, self.register)
+        show_register_window(self.root, self.username)
 
     def register(self, username, password, name, surname, email, error_label):
         if not all([username, password, name, surname, email]):
@@ -70,8 +75,8 @@ class BaseGUI:
             # Admin GUI doesn't use main_frame, just clear the root
             for widget in self.root.winfo_children():
                 widget.destroy()
-        elif self.main_frame:  # Non-Admin uses main_frame
-            self.main_frame.destroy()
+        elif self.main_frame:  # Non-Admin (including Stores) uses main_frame
+            self.main_frame.destroy()  # Fixed the typo here
         self.username = None
         self.role = None
         self.root.state("normal")
