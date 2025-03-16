@@ -108,7 +108,10 @@ def check_user(cursor, username, password):
     if user and bcrypt.checkpw(password.encode('utf-8'), user["password_hash"]):
         return user["role"]
     return None
-
+def get_user_email(cursor, username):
+    cursor.execute("SELECT email FROM users WHERE username = ?", (username,))
+    user = cursor.fetchone()
+    return user["email"] if user else None
 def create_pump(cursor, pump_model, configuration, customer, requested_by):
     serial = generate_serial_number(pump_model, configuration, cursor)
     cursor.execute("""
