@@ -23,6 +23,8 @@ def initialize_database():
     with DB_LOCK, connect_db() as conn:
         cursor = conn.cursor()
         try:
+            # Drop and recreate pumps table with new fields
+            cursor.execute("DROP TABLE IF EXISTS pumps")
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS pumps (
                     serial_number TEXT PRIMARY KEY,
@@ -40,10 +42,17 @@ def initialize_database():
                     motor_voltage TEXT,
                     motor_speed TEXT,
                     mechanical_seal TEXT,
-                    test_date DATE
+                    test_date DATE,
+                    branch TEXT NOT NULL,
+                    impeller_size TEXT NOT NULL,
+                    connection_type TEXT NOT NULL,
+                    pressure_required TEXT,
+                    flow_rate_required TEXT,
+                    custom_motor TEXT,
+                    flush_seal_housing TEXT
                 )
             """)
-            print("Pumps table created.")
+            print("Pumps table created with updated schema.")
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS bom_items (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -125,7 +134,12 @@ def get_all_users(cursor):
     return cursor.fetchall()
 
 def get_all_pumps(cursor):
-    cursor.execute("SELECT serial_number, pump_model, customer, status, test_result, test_date FROM pumps")
+    cursor.execute("""
+        SELECT serial_number, pump_model, customer, status, test_result, test_date, 
+               branch, impeller_size, connection_type, pressure_required, flow_rate_required, 
+               custom_motor, flush_seal_housing 
+        FROM pumps
+    """)
     return cursor.fetchall()
 
 def get_audit_log(cursor):
@@ -144,12 +158,16 @@ def get_user_email(cursor, username):
     user = cursor.fetchone()
     return user["email"] if user else None
 
-def create_pump(cursor, pump_model, configuration, customer, requested_by):
+def create_pump(cursor, pump_model, configuration, customer, requested_by, branch, impeller_size, 
+                connection_type, pressure_required, flow_rate_required, custom_motor, flush_seal_housing):
     serial = generate_serial_number(pump_model, configuration, cursor)
     cursor.execute("""
-        INSERT INTO pumps (serial_number, pump_model, configuration, customer, status, created_at, requested_by)
-        VALUES (?, ?, ?, ?, 'Stores', ?, ?)
-    """, (serial, pump_model, configuration, customer, datetime.now(), requested_by))
+        INSERT INTO pumps (serial_number, pump_model, configuration, customer, status, created_at, requested_by,
+                          branch, impeller_size, connection_type, pressure_required, flow_rate_required, 
+                          custom_motor, flush_seal_housing)
+        VALUES (?, ?, ?, ?, 'Stores', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (serial, pump_model, configuration, customer, datetime.now(), requested_by, branch, impeller_size, 
+          connection_type, pressure_required, flow_rate_required, custom_motor, flush_seal_housing))
     log_action(cursor, requested_by, f"Created pump S/N: {serial}")
     logger.info(f"Pump created: {serial} by {requested_by}")
     return serial
@@ -198,9 +216,9 @@ def update_test_data(cursor, serial_number, invoice_number, job_number_1, job_nu
 def insert_test_data():
     print("Inserting test data...")
     test_pumps = [
-        ("P1 3.0kW", "Standard", "Guth Pinetown", "user1"),
-        ("P1 3.0kW", "Standard", "Guth Durban", "user1"),
-        ("P1 3.0kW", "Standard", "Guth Cape Town", "user1"),
+        ("P1 3.0kW", "Standard", "Guth Pinetown", "user1", "Guth Pinetown", "Medium", "Flange", "", "", "", "No"),
+        ("P1 3.0kW", "Standard", "Guth Durban", "user1", "Guth Durban", "Small", "Threaded", "", "", "", "Yes"),
+        ("P1 3.0kW", "Standard", "Guth Cape Town", "user1", "Guth Cape Town", "Large", "Welded", "", "", "", "No"),
     ]
     test_users = [
         ("user1", "password", "Pump Originator", "John", "Doe", "john.doe@example.com"),
@@ -213,8 +231,8 @@ def insert_test_data():
         cursor = conn.cursor()
         for username, password, role, name, surname, email in test_users:
             insert_user(cursor, username, password, role, name, surname, email)
-        for pump_model, config, customer, user in test_pumps:
-            serial = create_pump(cursor, pump_model, config, customer, user)
+        for pump_model, config, customer, user, branch, impeller, conn_type, press, flow, motor, flush in test_pumps:
+            serial = create_pump(cursor, pump_model, config, customer, user, branch, impeller, conn_type, press, flow, motor, flush)
             print(f"Inserting pump {serial}...")
             print(f"Inserting BOM for {serial} - Impeller...")
             create_bom_item(cursor, serial, "Impeller", "IMP-001", 1)
