@@ -1,75 +1,60 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-import sqlite3
-import os
+from database import connect_db, check_user
 from gui.pump_originator_gui import show_pump_originator_gui
 from gui.stores_gui import show_stores_gui
 from gui.assembler_gui import show_assembler_gui
 from gui.testing_gui import show_testing_gui
 from gui.admin_gui import show_admin_gui
+from utils.config import get_logger
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DB_PATH = os.path.join(BASE_DIR, "data", "guth_pump_registry.db")
+logger = get_logger("base_gui")
 
-def connect_db(timeout=20):
-    conn = sqlite3.connect(DB_PATH, timeout=timeout)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-class GuthPumpApp:
+class BaseGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Guth Pump Assembly Registry")
+        self.root.title("Guth Pump Registry")
         self.root.geometry("800x600")
         self.username = None
         self.role = None
-        self.show_login()
+        self.show_login_screen()
 
-    def clear_window(self):
-        for widget in self.root.winfo_children():
-            widget.destroy()
+    def show_login_screen(self):
+        self.login_frame = ttk.Frame(self.root)
+        self.login_frame.pack(fill=BOTH, expand=True, padx=20, pady=20)
 
-    def show_login(self):
-        self.clear_window()
-        frame = ttk.Frame(self.root, padding=20)
-        frame.pack(expand=True)
+        ttk.Label(self.login_frame, text="Login", font=("Helvetica", 16, "bold")).pack(pady=10)
+        ttk.Label(self.login_frame, text="Username:").pack()
+        self.username_entry = ttk.Entry(self.login_frame)
+        self.username_entry.pack(pady=5)
+        ttk.Label(self.login_frame, text="Password:").pack()
+        self.password_entry = ttk.Entry(self.login_frame, show="*")
+        self.password_entry.pack(pady=5)
 
-        ttk.Label(frame, text="Login", font=("Helvetica", 16, "bold")).grid(row=0, column=0, columnspan=2, pady=10)
-
-        ttk.Label(frame, text="Username:").grid(row=1, column=0, padx=5, pady=5, sticky=E)
-        self.username_entry = ttk.Entry(frame)
-        self.username_entry.grid(row=1, column=1, padx=5, pady=5)
-        self.username_entry.insert(0, "user1")
-
-        ttk.Label(frame, text="Password:").grid(row=2, column=0, padx=5, pady=5, sticky=E)
-        self.password_entry = ttk.Entry(frame, show="*")
-        self.password_entry.grid(row=2, column=1, padx=5, pady=5)
-        self.password_entry.insert(0, "password")
-
-        ttk.Label(frame, text="Role:").grid(row=3, column=0, padx=5, pady=5, sticky=E)
-        self.role_combo = ttk.Combobox(frame, values=["Pump Originator", "Stores", "Assembler", "Testing", "Admin"])
-        self.role_combo.grid(row=3, column=1, padx=5, pady=5)
-        self.role_combo.set("Pump Originator")
-
-        ttk.Button(frame, text="Login", command=self.login, bootstyle=SUCCESS).grid(row=4, column=0, columnspan=2, pady=20)
+        ttk.Button(self.login_frame, text="Login", command=self.login, bootstyle=SUCCESS).pack(pady=20)
 
     def login(self):
         username = self.username_entry.get()
         password = self.password_entry.get()
-        role = self.role_combo.get()
-        if username == "user1" and password == "password":  # Stub check
+        with connect_db() as conn:
+            cursor = conn.cursor()
+            role = check_user(cursor, username, password)
+        if role:
             self.username = username
             self.role = role
+            self.login_frame.destroy()
             self.show_dashboard()
+            logger.info(f"User {username} logged in with role {role}")
         else:
-            ttk.Label(self.root, text="Invalid credentials", bootstyle=DANGER).pack(pady=10)
+            ttk.Label(self.login_frame, text="Invalid credentials", bootstyle=DANGER).pack(pady=10)
+            logger.warning(f"Failed login attempt for {username}")
 
     def show_dashboard(self):
-        self.clear_window()
-        sidebar = ttk.Frame(self.root, width=200, relief=RAISED, borderwidth=1)
-        sidebar.pack(side=LEFT, fill=Y)
+        self.main_frame = ttk.Frame(self.root)
+        self.main_frame.pack(fill=BOTH, expand=True)
 
-        ttk.Label(sidebar, text=f"Guth Pump Registry\nRole: {self.role}", font=("Helvetica", 14, "bold")).pack(pady=10)
+        sidebar = ttk.Frame(self.main_frame)
+        sidebar.pack(side=LEFT, fill=Y, padx=10, pady=10)
 
         role_actions = {
             "Pump Originator": [("Create Pump", lambda: show_pump_originator_gui(self.main_frame, self.username))],
@@ -79,31 +64,32 @@ class GuthPumpApp:
             "Admin": [("Admin Panel", lambda: show_admin_gui(self.main_frame, self.username))]
         }
 
-        # Show all actions for testing (remove role restriction temporarily)
-        for role, actions in role_actions.items():
-            for text, cmd in actions:
-                btn = ttk.Button(sidebar, text=f"{role}: {text}", command=cmd, bootstyle=INFO)
-                btn.pack(fill=X, padx=10, pady=5)
+        # Show only actions for the user's role
+        if self.role in role_actions:
+            for label, command in role_actions[self.role]:
+                ttk.Button(sidebar, text=label, command=command, bootstyle=INFO).pack(pady=5, fill=X)
 
-        ttk.Button(sidebar, text="Logout", command=self.show_login, bootstyle=WARNING).pack(fill=X, padx=10, pady=5, side=BOTTOM)
+        ttk.Button(sidebar, text="Logout", command=self.logout, bootstyle=WARNING).pack(pady=20, fill=X)
 
-        self.main_frame = ttk.Frame(self.root)
-        self.main_frame.pack(side=LEFT, fill=BOTH, expand=True, padx=20, pady=20)
-        self.show_pump_list()
-
-    def show_pump_list(self):
-        for widget in self.main_frame.winfo_children():
-            widget.destroy()
-        ttk.Label(self.main_frame, text="Dashboard", font=("Helvetica", 16, "bold")).pack(pady=10)
+        # Dashboard content (pump list)
+        content = ttk.Frame(self.main_frame)
+        content.pack(side=RIGHT, fill=BOTH, expand=True, padx=10, pady=10)
+        ttk.Label(content, text=f"Welcome, {self.username} ({self.role})", font=("Helvetica", 14)).pack(pady=10)
         with connect_db() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT serial_number, status FROM pumps ORDER BY serial_number")
+            cursor.execute("SELECT serial_number, status FROM pumps")
             pumps = cursor.fetchall()
-        ttk.Label(self.main_frame, text=f"Total Pumps: {len(pumps)}").pack(pady=5)
-        for pump in pumps:
-            ttk.Label(self.main_frame, text=f"S/N: {pump['serial_number']} - Status: {pump['status']}").pack(pady=2)
+            for pump in pumps:
+                ttk.Label(content, text=f"S/N: {pump['serial_number']} - Status: {pump['status']}").pack()
+
+    def logout(self):
+        self.main_frame.destroy()
+        self.username = None
+        self.role = None
+        self.show_login_screen()
+        logger.info("User logged out")
 
 if __name__ == "__main__":
     root = ttk.Window(themename="flatly")
-    app = GuthPumpApp(root)
+    app = BaseGUI(root)
     root.mainloop()

@@ -32,12 +32,18 @@
     <Compile Include="gui\stores_gui.py" />
     <Compile Include="gui\testing_gui.py" />
     <Compile Include="main.py" />
+    <Compile Include="utils\bom_utils.py" />
+    <Compile Include="utils\config.py" />
+    <Compile Include="utils\doc_utils.py" />
+    <Compile Include="utils\export_utils.py" />
+    <Compile Include="utils\serial_utils.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|PythonCore|3.11" />
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <Content Include="logs\guth_pump_registry.log" />
     <Content Include="README.md" />
     <Content Include="requirements.txt" />
   </ItemGroup>
@@ -48,6 +54,7 @@
     <Folder Include="data\backups\" />
     <Folder Include="docs\" />
     <Folder Include="gui\" />
+    <Folder Include="logs\" />
     <Folder Include="utils\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
