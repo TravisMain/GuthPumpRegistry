@@ -81,9 +81,9 @@ def show_testing_gui(root, username):
             if email:
                 success = send_email(email, serial_number, pdf_path)
                 if not success:
-                    ttk.Label(frame, text=f"Email failed—certificate saved at {pdf_path}", bootstyle=WARNING).pack(pady=10)
+                    ttk.Label(frame, text=f"Email failedâ€”certificate saved at {pdf_path}", bootstyle=WARNING).pack(pady=10)
             else:
-                ttk.Label(frame, text=f"No email for {username}—certificate saved at {pdf_path}", bootstyle=WARNING).pack(pady=10)
+                ttk.Label(frame, text=f"No email for {username}â€”certificate saved at {pdf_path}", bootstyle=WARNING).pack(pady=10)
 
         for widget in frame.winfo_children():
             widget.destroy()

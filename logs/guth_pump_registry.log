@@ -71,3 +71,13 @@
 2025-03-16 10:41:45,085 - INFO - Registered new Pump Originator: Test1
 2025-03-16 10:53:45,381 - INFO - Certificate generated: C:\Users\travism\source\repos\GuthPumpRegistry\data\certificates\certificate_TEST-001.pdf
 2025-03-16 10:53:45,416 - INFO - Email sent to test@example.com for TEST-001
+2025-03-16 11:05:26,107 - INFO - User inserted: user1 with role Pump Originator
+2025-03-16 11:05:26,274 - INFO - User inserted: stores1 with role Stores
+2025-03-16 11:05:26,440 - INFO - User inserted: assembler1 with role Assembler
+2025-03-16 11:05:26,609 - INFO - User inserted: tester1 with role Testing
+2025-03-16 11:05:26,779 - INFO - User inserted: admin1 with role Admin
+2025-03-16 11:05:26,779 - INFO - Pump created: 5101 001 - 25 by user1
+2025-03-16 11:05:26,780 - INFO - Pump created: 5101 002 - 25 by user1
+2025-03-16 11:05:26,780 - INFO - Pump created: 5101 003 - 25 by user1
+2025-03-16 12:25:41,142 - INFO - Application started
+2025-03-16 12:25:49,395 - INFO - User admin1 logged in with role Admin

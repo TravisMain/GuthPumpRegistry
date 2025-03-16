@@ -102,16 +102,48 @@ def insert_user(cursor, username, password, role, name=None, surname=None, email
     """, (username, password_hash, role, name, surname, email))
     logger.info(f"User inserted: {username} with role {role}")
 
+def update_user(cursor, username, password=None, role=None, name=None, surname=None, email=None):
+    if password:
+        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    else:
+        cursor.execute("SELECT password_hash FROM users WHERE username = ?", (username,))
+        password_hash = cursor.fetchone()["password_hash"]
+    
+    cursor.execute("""
+        UPDATE users 
+        SET password_hash = ?, role = ?, name = ?, surname = ?, email = ?
+        WHERE username = ?
+    """, (password_hash, role or "Pump Originator", name, surname, email, username))
+    logger.info(f"User updated: {username}")
+
+def delete_user(cursor, username):
+    cursor.execute("DELETE FROM users WHERE username = ?", (username,))
+    logger.info(f"User deleted: {username}")
+
+def get_all_users(cursor):
+    cursor.execute("SELECT username, role, name, surname, email FROM users")
+    return cursor.fetchall()
+
+def get_all_pumps(cursor):
+    cursor.execute("SELECT serial_number, pump_model, customer, status, test_result, test_date FROM pumps")
+    return cursor.fetchall()
+
+def get_audit_log(cursor):
+    cursor.execute("SELECT timestamp, username, action FROM audit_log ORDER BY timestamp DESC")
+    return cursor.fetchall()
+
 def check_user(cursor, username, password):
     cursor.execute("SELECT password_hash, role FROM users WHERE username = ?", (username,))
     user = cursor.fetchone()
     if user and bcrypt.checkpw(password.encode('utf-8'), user["password_hash"]):
         return user["role"]
     return None
+
 def get_user_email(cursor, username):
     cursor.execute("SELECT email FROM users WHERE username = ?", (username,))
     user = cursor.fetchone()
     return user["email"] if user else None
+
 def create_pump(cursor, pump_model, configuration, customer, requested_by):
     serial = generate_serial_number(pump_model, configuration, cursor)
     cursor.execute("""
