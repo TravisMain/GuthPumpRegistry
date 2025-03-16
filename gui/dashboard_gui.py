@@ -12,8 +12,9 @@ import threading
 from utils.config import get_logger
 
 logger = get_logger("dashboard_gui")
-LOGO_PATH = r"C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png"
-OPTIONS_PATH = r"C:\Users\travism\source\repos\GuthPumpRegistry\assets\pump_options.json"
+BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo.png")
+OPTIONS_PATH = os.path.join(BASE_DIR, "assets", "pump_options.json")
 BUILD_NUMBER = "1.0.0"
 STORES_EMAIL = "stores@guth.co.za"  # Update as needed
 
@@ -117,13 +118,7 @@ def show_dashboard(root, username, role, logout_callback):
             cursor = conn.cursor()
             serial = create_pump(cursor, data["pump_model"], data["configuration"], data["customer"], username,
                                 data["branch"], data["impeller_size"], data["connection_type"], data["pressure_required"],
-                                data["flow_rate_required"], data["custom_motor"], data["flush_seal_housing"])
-            # Generate BOM (assuming bom.json exists)
-            with open(r"C:\Users\travism\source\repos\GuthPumpRegistry\assets\bom.json", "r") as f:
-                bom_data = json.load(f)
-                for part in bom_data.get(data["pump_model"], []):
-                    cursor.execute("INSERT INTO bom_items (serial_number, part_name, part_code, quantity) VALUES (?, ?, ?, ?)",
-                                  (serial, part["part_name"], part["part_code"], part["quantity"]))
+                                data["flow_rate_required"], data["custom_motor"], data["flush_seal_housing"], insert_bom=True)
             conn.commit()
             logger.info(f"New pump created by {username}: {serial} with BOM")
 
@@ -182,7 +177,7 @@ def send_email(serial, data):
         msg["From"] = "noreply@guth.co.za"
         msg["To"] = STORES_EMAIL
         with smtplib.SMTP("smtp.guth.co.za") as server:
-            server.login("username", "password")
+            server.login("username", "password")  # Update credentials
             server.send_message(msg)
         logger.info(f"Email sent for pump {serial}")
     except Exception as e:
@@ -190,7 +185,7 @@ def send_email(serial, data):
 
 def print_confirmation(serial, data):
     try:
-        pdf_path = f"C:/Users/travism/source/repos/GuthPumpRegistry/data/pump_{serial}_confirmation.pdf"
+        pdf_path = os.path.join(BASE_DIR, "data", f"pump_{serial}_confirmation.pdf")
         c = canvas.Canvas(pdf_path, pagesize=letter)
         c.setFont("Helvetica", 12)
         c.drawString(100, 750, f"New Pump Assembly Confirmation: {serial}")
@@ -226,7 +221,7 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
 
     edit_window = ttk.Toplevel(parent_frame)
     edit_window.title(f"Edit Pump {serial_number}")
-    edit_window.geometry("702x810")  # 35% bigger than 520x600
+    edit_window.geometry("702x810")
 
     header_frame = ttk.Frame(edit_window, style="white.TFrame")
     header_frame.pack(fill=X, pady=(0, 10), ipady=10)
@@ -245,7 +240,6 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
     frame = ttk.Frame(edit_window, padding=20)
     frame.pack(fill=BOTH, expand=True)
 
-    # Load options for dynamic fields
     options = load_options()
     fields = [
         ("serial_number", "entry", None),

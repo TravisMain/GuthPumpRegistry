@@ -485,3 +485,31 @@
 2025-03-16 22:01:42,090 - INFO - Logo scaled: 567x187
 2025-03-16 22:01:42,098 - INFO - Application started
 2025-03-16 22:01:46,461 - INFO - User user1 logged in with role Pump Originator
+2025-03-16 22:03:32,445 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 22:03:32,463 - INFO - Logo loaded: 378x125
+2025-03-16 22:03:32,509 - INFO - Logo scaled: 567x187
+2025-03-16 22:03:32,518 - INFO - Application started
+2025-03-16 22:03:36,328 - INFO - User user1 logged in with role Pump Originator
+2025-03-16 22:03:39,168 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 22:03:39,168 - INFO - Logo loaded: 378x125
+2025-03-16 22:03:39,212 - INFO - Logo scaled: 567x187
+2025-03-16 22:03:39,221 - INFO - User logged out
+2025-03-16 22:03:43,174 - INFO - User user1 logged in with role Pump Originator
+2025-03-16 22:03:50,209 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 22:03:50,209 - INFO - Logo loaded: 378x125
+2025-03-16 22:03:50,256 - INFO - Logo scaled: 567x187
+2025-03-16 22:03:50,267 - INFO - User logged out
+2025-03-16 22:03:54,752 - INFO - User admin1 logged in with role Admin
+2025-03-16 22:04:12,139 - INFO - Deleted pump 5101 002 - 25
+2025-03-16 22:04:15,174 - INFO - Deleted pump 5101 001 - 25
+2025-03-16 22:04:18,264 - INFO - Deleted pump 5101 003 - 25
+2025-03-16 22:22:14,235 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-16 22:22:14,250 - INFO - Logo loaded: 378x125
+2025-03-16 22:22:14,295 - INFO - Logo scaled: 567x187
+2025-03-16 22:22:14,307 - INFO - Application started
+2025-03-16 22:22:21,514 - INFO - User user1 logged in with role Pump Originator
+2025-03-16 22:22:44,050 - INFO - Inserted 22 BOM items for pump 8101 001 - 25
+2025-03-16 22:22:44,052 - INFO - Pump created: 8101 001 - 25 by user1
+2025-03-16 22:22:44,055 - INFO - New pump created by user1: 8101 001 - 25 with BOM
+2025-03-16 22:22:44,081 - ERROR - Email send failed for 8101 001 - 25: [Errno 11001] getaddrinfo failed
+2025-03-16 22:22:44,103 - INFO - Confirmation printed for pump 8101 001 - 25

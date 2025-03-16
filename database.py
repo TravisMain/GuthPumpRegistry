@@ -4,11 +4,13 @@ import threading
 from datetime import datetime
 import sys
 import bcrypt
+import json
 from utils.serial_utils import generate_serial_number
 from utils.config import get_logger
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "data", "guth_pump_registry.db")
+BOM_PATH = os.path.join(BASE_DIR, "assets", "bom.json")  # Added BOM file path
 DB_LOCK = threading.Lock()
 logger = get_logger("database")
 
@@ -158,8 +160,26 @@ def get_user_email(cursor, username):
     user = cursor.fetchone()
     return user["email"] if user else None
 
+def load_bom_from_json(pump_model, configuration):
+    """Load BOM data from bom.json for a given pump model and configuration."""
+    try:
+        with open(BOM_PATH, "r") as f:
+            bom_data = json.load(f)
+            return bom_data.get(pump_model, {}).get(configuration, [])
+    except FileNotFoundError:
+        logger.error(f"bom.json not found at {BOM_PATH}")
+        return []
+    except json.JSONDecodeError:
+        logger.error(f"Invalid JSON format in bom.json")
+        return []
+    except Exception as e:
+        logger.error(f"Error loading BOM from JSON: {str(e)}")
+        return []
+
 def create_pump(cursor, pump_model, configuration, customer, requested_by, branch, impeller_size, 
-                connection_type, pressure_required, flow_rate_required, custom_motor, flush_seal_housing):
+                connection_type, pressure_required, flow_rate_required, custom_motor, flush_seal_housing, 
+                insert_bom=True):
+    """Create a pump entry and optionally insert BOM items from bom.json."""
     serial = generate_serial_number(pump_model, configuration, cursor)
     cursor.execute("""
         INSERT INTO pumps (serial_number, pump_model, configuration, customer, status, created_at, requested_by,
@@ -168,6 +188,14 @@ def create_pump(cursor, pump_model, configuration, customer, requested_by, branc
         VALUES (?, ?, ?, ?, 'Stores', ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (serial, pump_model, configuration, customer, datetime.now(), requested_by, branch, impeller_size, 
           connection_type, pressure_required, flow_rate_required, custom_motor, flush_seal_housing))
+    
+    # Insert BOM items if requested
+    if insert_bom:
+        bom_items = load_bom_from_json(pump_model, configuration)
+        for item in bom_items:
+            create_bom_item(cursor, serial, item["part_name"], item["part_code"], item["quantity"])
+        logger.info(f"Inserted {len(bom_items)} BOM items for pump {serial}")
+
     log_action(cursor, requested_by, f"Created pump S/N: {serial}")
     logger.info(f"Pump created: {serial} by {requested_by}")
     return serial
@@ -216,9 +244,9 @@ def update_test_data(cursor, serial_number, invoice_number, job_number_1, job_nu
 def insert_test_data():
     print("Inserting test data...")
     test_pumps = [
-        ("P1 3.0kW", "Standard", "Guth Pinetown", "user1", "Guth Pinetown", "Medium", "Flange", "", "", "", "No"),
-        ("P1 3.0kW", "Standard", "Guth Durban", "user1", "Guth Durban", "Small", "Threaded", "", "", "", "Yes"),
-        ("P1 3.0kW", "Standard", "Guth Cape Town", "user1", "Guth Cape Town", "Large", "Welded", "", "", "", "No"),
+        ("P1 3.0KW", "Standard", "Guth Pinetown", "user1", "Guth Pinetown", "Medium", "Flange", "", "", "", "No"),
+        ("P1 3.0KW", "Standard", "Guth Durban", "user1", "Guth Durban", "Small", "Threaded", "", "", "", "Yes"),
+        ("P1 3.0KW", "Standard", "Guth Cape Town", "user1", "Guth Cape Town", "Large", "Welded", "", "", "", "No"),
     ]
     test_users = [
         ("user1", "password", "Pump Originator", "John", "Doe", "john.doe@example.com"),
