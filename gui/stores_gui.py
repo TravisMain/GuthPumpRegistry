@@ -63,7 +63,7 @@ def show_stores_dashboard(root, username, role, logout_callback):
                                             pump["pump_model"], pump["configuration"], pump["created_at"]))
 
     refresh_pump_list()
-    tree.bind("<Double-1>", lambda event: show_bom_window(main_frame, tree, username))
+    tree.bind("<Double-1>", lambda event: show_bom_window(main_frame, tree, username, refresh_pump_list))
 
     ttk.Button(main_frame, text="Logoff", command=logout_callback, bootstyle="warning", style="large.TButton").pack(pady=10)
     ttk.Label(main_frame, text="\u00A9 Guth South Africa", font=("Roboto", 10)).pack(pady=(5, 0))
@@ -71,7 +71,7 @@ def show_stores_dashboard(root, username, role, logout_callback):
 
     return main_frame
 
-def show_bom_window(parent_frame, tree, username):
+def show_bom_window(parent_frame, tree, username, refresh_callback):
     selected = tree.selection()
     if not selected:
         logger.debug("No pump selected in Treeview")
@@ -112,7 +112,6 @@ def show_bom_window(parent_frame, tree, username):
     bom_frame = ttk.LabelFrame(bom_window, text="Bill of Materials", padding=10)
     bom_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-    # Scrollable canvas
     canvas = ttk.Canvas(bom_frame)
     scrollbar = ttk.Scrollbar(bom_frame, orient=VERTICAL, command=canvas.yview)
     scrollable_frame = ttk.Frame(canvas)
@@ -124,14 +123,12 @@ def show_bom_window(parent_frame, tree, username):
     canvas.pack(side=LEFT, fill=BOTH, expand=True)
     scrollbar.pack(side=RIGHT, fill=Y)
 
-    # Headers
     ttk.Label(scrollable_frame, text="Part Number", font=("Roboto", 10, "bold")).grid(row=0, column=0, padx=5, pady=5, sticky=W)
     ttk.Label(scrollable_frame, text="Part Name", font=("Roboto", 10, "bold")).grid(row=0, column=1, padx=5, pady=5, sticky=W)
     ttk.Label(scrollable_frame, text="Quantity", font=("Roboto", 10, "bold")).grid(row=0, column=2, padx=5, pady=5, sticky=W)
     ttk.Label(scrollable_frame, text="Pulled", font=("Roboto", 10, "bold")).grid(row=0, column=3, padx=5, pady=5, sticky=W)
     ttk.Label(scrollable_frame, text="Reason", font=("Roboto", 10, "bold")).grid(row=0, column=4, padx=5, pady=5, sticky=W)
 
-    # BOM Items
     check_vars = []
     reason_entries = []
     for i, item in enumerate(bom_items, start=1):
@@ -157,9 +154,14 @@ def show_bom_window(parent_frame, tree, username):
 
         var.trace("w", toggle_reason)
 
-    # Submit Button
-    submit_btn = ttk.Button(bom_frame, text="Submit", bootstyle="success", style="large.TButton", state=DISABLED)
-    submit_btn.pack(pady=10)
+    # Footer Frame for Submit, Copyright, Build Number
+    footer_frame = ttk.Frame(bom_window)
+    footer_frame.pack(side=BOTTOM, pady=10)
+
+    submit_btn = ttk.Button(footer_frame, text="Submit", bootstyle="success", style="large.TButton", state=DISABLED)
+    submit_btn.pack(pady=5)
+    ttk.Label(footer_frame, text="\u00A9 Guth South Africa", font=("Roboto", 10)).pack()
+    ttk.Label(footer_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack()
 
     def check_submit_state():
         all_complete = True
@@ -217,11 +219,9 @@ def show_bom_window(parent_frame, tree, username):
             else:
                 logger.warning(f"No originator found for pump {serial_number}")
 
+        refresh_callback()  # Refresh the dashboard list
         bom_window.destroy()
 
     submit_btn.configure(command=submit_bom)
     check_submit_state()
     bom_window.after(100, check_submit_state)
-
-    ttk.Label(bom_frame, text="\u00A9 Guth South Africa", font=("Roboto", 10)).pack(pady=(5, 0))
-    ttk.Label(bom_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack()
