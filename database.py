@@ -33,9 +33,11 @@ def initialize_database():
                     pump_model TEXT NOT NULL,
                     configuration TEXT NOT NULL,
                     customer TEXT NOT NULL,
-                    status TEXT NOT NULL CHECK(status IN ('Stores', 'Assembler', 'Testing', 'Completed')),
+                    status TEXT NOT NULL CHECK(status IN ('Stores', 'Assembler', 'Testing', 'Pending Approval', 'Completed')),
                     created_at DATETIME NOT NULL,
                     requested_by TEXT NOT NULL,
+                    originator TEXT,  -- Added to store the tester who submitted the pump
+                    test_data TEXT,  -- Added to store test details as JSON
                     invoice_number TEXT,
                     job_number_1 TEXT,
                     job_number_2 TEXT,
@@ -73,7 +75,7 @@ def initialize_database():
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     username TEXT UNIQUE NOT NULL,
                     password_hash TEXT NOT NULL,
-                    role TEXT NOT NULL CHECK(role IN ('Admin', 'Stores', 'Assembler', 'Testing', 'Pump Originator')),
+                    role TEXT NOT NULL CHECK(role IN ('Admin', 'Stores', 'Assembler', 'Testing', 'Pump Originator', 'Approval')),
                     name TEXT,
                     surname TEXT,
                     email TEXT
@@ -202,6 +204,31 @@ def update_pump_status(cursor, serial_number, new_status, username):
     log_action(cursor, username, f"Updated S/N: {serial_number} to {new_status}")
     logger.info(f"Status updated: {serial_number} to {new_status} by {username}")
 
+def update_test_data(cursor, serial_number, test_data, username):
+    # Store test data as JSON and set status to 'Pending Approval'
+    cursor.execute("""
+        UPDATE pumps 
+        SET test_data = ?, status = 'Pending Approval', originator = ?
+        WHERE serial_number = ?
+    """, (json.dumps(test_data), username, serial_number))
+    log_action(cursor, username, f"Submitted test data for S/N: {serial_number}")
+    logger.info(f"Test data submitted for {serial_number} by {username}")
+
+def approve_pump(cursor, serial_number, username):
+    # Retrieve test data and update status to 'Completed'
+    cursor.execute("SELECT test_data, originator FROM pumps WHERE serial_number = ?", (serial_number,))
+    pump = cursor.fetchone()
+    if pump and pump["test_data"]:
+        test_data = json.loads(pump["test_data"])
+        test_data["approved_by"] = username
+        test_data["approval_date"] = datetime.now().strftime("%Y-%m-%d")
+        cursor.execute("UPDATE pumps SET status = 'Completed', test_data = ? WHERE serial_number = ?", 
+                      (json.dumps(test_data), serial_number))
+        log_action(cursor, username, f"Approved S/N: {serial_number}")
+        logger.info(f"Pump {serial_number} approved by {username}")
+        return test_data
+    return None
+
 def pull_bom_item(cursor, serial_number, part_code, username):
     cursor.execute("UPDATE bom_items SET pulled_at = ? WHERE serial_number = ? AND part_code = ?",
                    (datetime.now(), serial_number, part_code))
@@ -226,18 +253,6 @@ def create_bom_item(cursor, serial_number, part_name, part_code, quantity):
         VALUES (?, ?, ?, ?)
     """, (serial_number, part_name, part_code, quantity))
 
-def update_test_data(cursor, serial_number, invoice_number, job_number_1, job_number_2, test_result, test_comments,
-                     motor_voltage, motor_speed, mechanical_seal, test_date, username):
-    cursor.execute("""
-        UPDATE pumps
-        SET invoice_number = ?, job_number_1 = ?, job_number_2 = ?, test_result = ?, test_comments = ?,
-            motor_voltage = ?, motor_speed = ?, mechanical_seal = ?, test_date = ?, status = 'Completed'
-        WHERE serial_number = ?
-    """, (invoice_number, job_number_1, job_number_2, test_result, test_comments, motor_voltage, motor_speed,
-          mechanical_seal, test_date, serial_number))
-    log_action(cursor, username, f"Tested pump S/N: {serial_number} - Result: {test_result}")
-    logger.info(f"Test data updated for {serial_number} by {username}: Result = {test_result}")
-
 def insert_test_data():
     print("Inserting test data...")
     test_pumps = [
@@ -250,6 +265,7 @@ def insert_test_data():
         ("stores1", "password", "Stores", "Jane", "Smith", "jane.smith@example.com"),
         ("assembler1", "password", "Assembler", "Bob", "Jones", "bob.jones@example.com"),
         ("tester1", "password", "Testing", "Alice", "Brown", "alice.brown@example.com"),
+        ("approver1", "password", "Approval", "Manager", "Smith", "manager.smith@example.com"),  # New approval user
         ("admin1", "password", "Admin", "Admin", "User", "admin@example.com"),
     ]
     with connect_db() as conn:
@@ -268,7 +284,7 @@ if __name__ == "__main__":
         initialize_database()
         print("Database initialized. Inserting test data...")
         insert_test_data()
-        print("Database layer completed with 3 test pumps and 5 test users.")
+        print("Database layer completed with 3 test pumps and 6 test users.")
         sys.stdout.flush()
     except Exception as e:
         print(f"Error occurred: {e}")
