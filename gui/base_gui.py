@@ -8,7 +8,7 @@ from gui.admin_gui import show_admin_gui
 from gui.stores_gui import show_stores_dashboard
 from gui.assembler_gui import show_assembler_dashboard
 from gui.testing_gui import show_testing_dashboard
-from gui.approval_gui import show_approval_dashboard  # New import
+from gui.approval_gui import show_approval_dashboard
 from database import connect_db, check_user, insert_user
 from utils.config import get_logger
 
@@ -32,6 +32,10 @@ class BaseGUI:
         self.login_frame, self.error_label = show_login_screen(self.root, self.login, self.show_register)
 
     def login(self, username, password):
+        # Clear error message when attempting a new login
+        if self.error_label:
+            self.error_label.config(text="")
+        
         with connect_db() as conn:
             cursor = conn.cursor()
             role = check_user(cursor, username, password)
@@ -52,7 +56,7 @@ class BaseGUI:
             elif role == "Testing":
                 self.root.state("zoomed")
                 self.main_frame = show_testing_dashboard(self.root, self.username, self.role, self.logout)
-            elif role == "Approval":  # New condition for Approval role
+            elif role == "Approval":
                 self.root.state("zoomed")
                 self.main_frame = show_approval_dashboard(self.root, self.username, self.role, self.logout)
             else:  # Pump Originator, etc.
@@ -61,11 +65,11 @@ class BaseGUI:
             logger.info(f"User {username} logged in with role {role}")
         else:
             if self.error_label:
-                self.error_label.config(text="Invalid credentials - try again", bootstyle="danger")
+                self.error_label.config(text="Incorrect username or password", bootstyle="danger")
             logger.warning(f"Failed login attempt for {username}")
 
     def show_register(self):
-        show_register_window(self.root, self.username)
+        show_register_window(self.root, self.register)  # Pass the register method as callback
 
     def register(self, username, password, name, surname, email, error_label):
         if not all([username, password, name, surname, email]):

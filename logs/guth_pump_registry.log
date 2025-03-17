@@ -2274,3 +2274,187 @@
 2025-03-17 18:43:19,862 - INFO - Logo loaded: 378x125
 2025-03-17 18:43:19,922 - INFO - Logo scaled: 567x187
 2025-03-17 18:43:19,976 - INFO - User logged out
+2025-03-17 20:59:53,482 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 20:59:53,488 - INFO - Logo loaded: 378x125
+2025-03-17 20:59:53,536 - INFO - Logo scaled: 567x187
+2025-03-17 20:59:53,547 - INFO - Application started
+2025-03-17 21:02:54,966 - INFO - User admin1 logged in with role Admin
+2025-03-17 21:14:13,308 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 21:14:13,309 - INFO - Logo loaded: 378x125
+2025-03-17 21:14:13,355 - INFO - Logo scaled: 567x187
+2025-03-17 21:14:13,364 - INFO - User logged out
+2025-03-17 21:14:22,199 - INFO - User user1 logged in with role Pump Originator
+2025-03-17 21:24:07,130 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 21:24:07,131 - INFO - Logo loaded: 378x125
+2025-03-17 21:24:07,176 - INFO - Logo scaled: 567x187
+2025-03-17 21:24:07,186 - INFO - User logged out
+2025-03-17 21:24:13,972 - INFO - User stores1 logged in with role Stores
+2025-03-17 21:25:34,198 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 21:25:34,198 - INFO - Logo loaded: 378x125
+2025-03-17 21:25:34,243 - INFO - Logo scaled: 567x187
+2025-03-17 21:25:34,253 - INFO - User logged out
+2025-03-17 21:25:42,212 - INFO - User assembler1 logged in with role Assembler
+2025-03-17 21:28:17,347 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 21:28:17,347 - INFO - Logo loaded: 378x125
+2025-03-17 21:28:17,394 - INFO - Logo scaled: 567x187
+2025-03-17 21:28:17,412 - INFO - User logged out
+2025-03-17 21:28:29,500 - INFO - User approver1 logged in with role Approval
+2025-03-17 21:28:45,050 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 21:28:45,050 - INFO - Logo loaded: 378x125
+2025-03-17 21:28:45,095 - INFO - Logo scaled: 567x187
+2025-03-17 21:28:45,104 - INFO - User logged out
+2025-03-17 21:34:32,862 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 21:34:32,869 - INFO - Logo loaded: 378x125
+2025-03-17 21:34:32,917 - INFO - Logo scaled: 567x187
+2025-03-17 21:34:32,926 - INFO - Application started
+2025-03-17 21:34:50,835 - WARNING - Failed login attempt for admin
+2025-03-17 21:36:29,388 - WARNING - Failed login attempt for admin
+2025-03-17 21:38:57,634 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 21:38:57,643 - INFO - Logo loaded: 378x125
+2025-03-17 21:38:57,691 - INFO - Logo scaled: 567x187
+2025-03-17 21:38:57,701 - INFO - Application started
+2025-03-17 21:38:59,113 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 21:38:59,114 - INFO - Logo loaded: 378x125
+2025-03-17 21:38:59,158 - INFO - Logo scaled: 567x187
+2025-03-17 21:45:07,456 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 21:45:07,463 - INFO - Logo loaded: 378x125
+2025-03-17 21:45:07,511 - INFO - Logo scaled: 567x187
+2025-03-17 21:45:07,520 - INFO - Application started
+2025-03-17 21:46:18,977 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 21:46:18,985 - INFO - Logo loaded: 378x125
+2025-03-17 21:46:19,031 - INFO - Logo scaled: 567x187
+2025-03-17 21:46:19,039 - INFO - Application started
+2025-03-17 21:46:20,998 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 21:46:20,998 - INFO - Logo loaded: 378x125
+2025-03-17 21:46:21,016 - INFO - Logo scaled: 396x131
+2025-03-17 21:46:32,614 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 21:46:32,614 - INFO - Logo loaded: 378x125
+2025-03-17 21:46:32,633 - INFO - Logo scaled: 396x131
+2025-03-17 21:47:22,423 - INFO - User inserted: Travism with role Pump Originator
+2025-03-17 21:47:22,430 - INFO - Registered new Pump Originator: Travism
+2025-03-17 21:47:29,205 - INFO - User Travism logged in with role Pump Originator
+2025-03-17 21:47:33,819 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 21:47:33,819 - INFO - Logo loaded: 378x125
+2025-03-17 21:47:33,865 - INFO - Logo scaled: 567x187
+2025-03-17 21:47:33,877 - INFO - User logged out
+2025-03-17 21:47:39,764 - INFO - User admin1 logged in with role Admin
+2025-03-17 21:47:51,146 - INFO - Updated user Travism
+2025-03-17 21:48:41,180 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 21:48:41,186 - INFO - Logo loaded: 378x125
+2025-03-17 21:48:41,234 - INFO - Logo scaled: 567x187
+2025-03-17 21:48:41,243 - INFO - Application started
+2025-03-17 21:48:47,662 - INFO - User Travism logged in with role Admin
+2025-03-17 21:49:13,851 - INFO - Updated user Travism
+2025-03-17 21:52:36,395 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 21:52:36,402 - INFO - Logo loaded: 378x125
+2025-03-17 21:52:36,450 - INFO - Logo scaled: 567x187
+2025-03-17 21:52:36,460 - INFO - Application started
+2025-03-17 21:52:40,449 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 21:52:40,449 - INFO - Logo loaded: 378x125
+2025-03-17 21:52:40,467 - INFO - Logo scaled: 396x131
+2025-03-17 21:52:50,930 - INFO - User Travism logged in with role Admin
+2025-03-17 21:52:57,707 - INFO - Updated user Travism
+2025-03-17 21:53:06,441 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 21:53:06,443 - INFO - Logo loaded: 378x125
+2025-03-17 21:53:06,490 - INFO - Logo scaled: 567x187
+2025-03-17 21:53:06,507 - INFO - User logged out
+2025-03-17 21:53:56,124 - INFO - User Travism logged in with role Admin
+2025-03-17 22:00:32,626 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 22:00:32,633 - INFO - Logo loaded: 378x125
+2025-03-17 22:00:32,679 - INFO - Logo scaled: 567x187
+2025-03-17 22:00:32,689 - INFO - Application started
+2025-03-17 22:10:25,457 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 22:10:25,464 - INFO - Logo loaded: 378x125
+2025-03-17 22:10:25,509 - INFO - Logo scaled: 567x187
+2025-03-17 22:10:25,517 - INFO - Application started
+2025-03-17 22:10:31,594 - WARNING - Failed login attempt for Travism
+2025-03-17 22:10:34,955 - INFO - User Travism logged in with role Admin
+2025-03-17 22:10:49,986 - INFO - Exported activity log to activity_log_export_20250317_221049.xlsx
+2025-03-17 22:21:44,849 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 22:21:44,856 - INFO - Logo loaded: 378x125
+2025-03-17 22:21:44,903 - INFO - Logo scaled: 567x187
+2025-03-17 22:21:44,911 - INFO - Application started
+2025-03-17 22:21:49,630 - INFO - User Travism logged in with role Admin
+2025-03-17 22:21:53,149 - WARNING - Invalid value 'P1 3.0KW' for field 'pump_model'. Falling back to default: P1 3.0kW
+2025-03-17 22:21:53,161 - WARNING - Invalid value 'None' for field 'test_result'. Falling back to default: Pass
+2025-03-17 22:21:53,175 - WARNING - Invalid value '' for field 'custom_motor'. Falling back to default: Yes
+2025-03-17 22:22:12,915 - WARNING - Invalid value 'P1 3.0KW' for field 'pump_model'. Falling back to default: P1 3.0kW
+2025-03-17 22:22:12,927 - WARNING - Invalid value 'None' for field 'test_result'. Falling back to default: Pass
+2025-03-17 22:22:12,939 - WARNING - Invalid value '' for field 'custom_motor'. Falling back to default: Yes
+2025-03-17 22:22:27,183 - INFO - Database backed up to C:\Users\travism\source\repos\GuthPumpRegistry\data\guth_pump_registry.db.20250317_222227.bak
+2025-03-17 22:22:29,333 - ERROR - Restore failed: module 'ttkbootstrap.dialogs.dialogs' has no attribute 'askopenfilename'
+2025-03-17 22:22:31,311 - ERROR - Restore failed: module 'ttkbootstrap.dialogs.dialogs' has no attribute 'askopenfilename'
+2025-03-17 22:22:46,965 - INFO - Updated user user1
+2025-03-17 22:23:50,917 - WARNING - Invalid value 'P1 3.0KW' for field 'pump_model'. Falling back to default: P1 3.0kW
+2025-03-17 22:23:50,933 - WARNING - Invalid value 'None' for field 'test_result'. Falling back to default: Pass
+2025-03-17 22:23:50,945 - WARNING - Invalid value '' for field 'custom_motor'. Falling back to default: Yes
+2025-03-17 22:27:05,262 - WARNING - Invalid value 'P1 3.0KW' for field 'pump_model'. Falling back to default: P1 3.0kW
+2025-03-17 22:27:05,279 - WARNING - Invalid value 'None' for field 'test_result'. Falling back to default: Pass
+2025-03-17 22:27:05,297 - WARNING - Invalid value '' for field 'custom_motor'. Falling back to default: Yes
+2025-03-17 22:27:47,456 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 22:27:47,464 - INFO - Logo loaded: 378x125
+2025-03-17 22:27:47,509 - INFO - Logo scaled: 567x187
+2025-03-17 22:27:47,518 - INFO - Application started
+2025-03-17 22:27:52,306 - WARNING - Failed login attempt for Travism
+2025-03-17 22:27:56,932 - WARNING - Failed login attempt for Travism
+2025-03-17 22:32:04,307 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 22:32:04,314 - INFO - Logo loaded: 378x125
+2025-03-17 22:32:04,358 - INFO - Logo scaled: 567x187
+2025-03-17 22:32:04,372 - INFO - Application started
+2025-03-17 22:32:15,974 - INFO - User Travism logged in with role Admin
+2025-03-17 22:32:39,788 - WARNING - Invalid value 'P1 3.0KW' for field 'pump_model'. Falling back to default: P1 3.0kW
+2025-03-17 22:32:39,801 - WARNING - Invalid value '' for field 'custom_motor'. Falling back to default: Yes
+2025-03-17 22:32:54,337 - WARNING - Invalid value 'P1 1.1KW' for field 'pump_model'. Falling back to default: P1 3.0kW
+2025-03-17 22:32:54,342 - WARNING - Invalid value 'Meze foods' for field 'customer'. Falling back to default: Guth Pinetown
+2025-03-17 22:32:54,344 - WARNING - Invalid value 'Johannesburg' for field 'branch'. Falling back to default: Guth Pinetown
+2025-03-17 22:32:54,347 - WARNING - Invalid value '130mm' for field 'impeller_size'. Falling back to default: Small
+2025-03-17 22:32:54,349 - WARNING - Invalid value 'DIN' for field 'connection_type'. Falling back to default: Flange
+2025-03-17 22:32:54,352 - WARNING - Invalid value '' for field 'custom_motor'. Falling back to default: Yes
+2025-03-17 22:33:47,613 - ERROR - Restore failed: No valid backup file selected
+2025-03-17 22:33:51,166 - INFO - Database backed up to C:\Users\travism\source\repos\GuthPumpRegistry\data\guth_pump_registry.db.20250317_223351.bak
+2025-03-17 22:36:19,197 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 22:36:19,204 - INFO - Logo loaded: 378x125
+2025-03-17 22:36:19,249 - INFO - Logo scaled: 567x187
+2025-03-17 22:36:19,262 - INFO - Application started
+2025-03-17 22:36:25,271 - INFO - User user1 logged in with role Pump Originator
+2025-03-17 22:46:58,276 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 22:46:58,284 - INFO - Logo loaded: 378x125
+2025-03-17 22:46:58,330 - INFO - Logo scaled: 567x187
+2025-03-17 22:46:58,340 - INFO - Application started
+2025-03-17 22:47:03,931 - INFO - User user1 logged in with role Pump Originator
+2025-03-17 22:49:47,031 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 22:49:47,031 - INFO - Logo loaded: 378x125
+2025-03-17 22:49:47,074 - INFO - Logo scaled: 567x187
+2025-03-17 22:49:47,083 - INFO - User logged out
+2025-03-17 22:49:54,416 - INFO - User Travism logged in with role Admin
+2025-03-17 22:51:01,810 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 22:51:01,810 - INFO - Logo loaded: 378x125
+2025-03-17 22:51:01,857 - INFO - Logo scaled: 567x187
+2025-03-17 22:51:01,866 - INFO - User logged out
+2025-03-17 22:51:07,241 - INFO - User user1 logged in with role Pump Originator
+2025-03-17 23:44:08,101 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 23:44:08,109 - INFO - Logo loaded: 378x125
+2025-03-17 23:44:08,154 - INFO - Logo scaled: 567x187
+2025-03-17 23:44:08,162 - INFO - Application started
+2025-03-17 23:44:16,862 - INFO - User user1 logged in with role Pump Originator
+2025-03-17 23:47:22,672 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 23:47:22,679 - INFO - Logo loaded: 378x125
+2025-03-17 23:47:22,726 - INFO - Logo scaled: 567x187
+2025-03-17 23:47:22,737 - INFO - Application started
+2025-03-17 23:47:27,690 - INFO - User user1 logged in with role Pump Originator
+2025-03-17 23:50:16,126 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 23:50:16,133 - INFO - Logo loaded: 378x125
+2025-03-17 23:50:16,180 - INFO - Logo scaled: 567x187
+2025-03-17 23:50:16,196 - INFO - Application started
+2025-03-17 23:50:21,147 - INFO - User user1 logged in with role Pump Originator
+2025-03-17 23:50:50,568 - INFO - Pump 6101 001 - 25 set to Testing for retest by user1
+2025-03-17 23:52:25,088 - INFO - Pump 4101 001 - 25 set to Testing for retest by user1
+2025-03-17 23:55:07,392 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 23:55:07,398 - INFO - Logo loaded: 378x125
+2025-03-17 23:55:07,442 - INFO - Logo scaled: 567x187
+2025-03-17 23:55:07,451 - INFO - Application started
+2025-03-17 23:55:11,739 - INFO - User user1 logged in with role Pump Originator
+2025-03-17 23:55:36,382 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 23:55:36,382 - INFO - Logo loaded: 378x125
+2025-03-17 23:55:36,429 - INFO - Logo scaled: 567x187
+2025-03-17 23:55:36,437 - INFO - User logged out

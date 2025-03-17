@@ -66,6 +66,10 @@ def show_login_screen(root, login_callback, register_callback):
     show_password_check.pack(anchor=W, pady=5)
     ToolTip(show_password_check, text="Toggle password visibility", bootstyle="info")
 
+    # Error label placement
+    error_label = ttk.Label(input_frame, text="", font=("Roboto", 12), bootstyle="danger")
+    error_label.pack(fill=X, pady=(5, 0))  # Place below password field
+
     # Buttons
     button_frame = ttk.Frame(login_frame)
     button_frame.pack(pady=20)
@@ -85,4 +89,4 @@ def show_login_screen(root, login_callback, register_callback):
 
     # Bind Enter key
     root.bind("<Return>", lambda event: login_callback(username_entry.get(), password_entry.get()))
-    return login_frame, ttk.Label(input_frame, text="", font=("Roboto", 12))  # Return frame and error label
+    return login_frame, error_label  # Return frame and error label

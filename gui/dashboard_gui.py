@@ -1,5 +1,6 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
+from ttkbootstrap.dialogs import Messagebox  # For error messages
 from PIL import Image, ImageTk
 from database import connect_db, create_pump
 import os
@@ -18,9 +19,34 @@ OPTIONS_PATH = os.path.join(BASE_DIR, "assets", "pump_options.json")
 BUILD_NUMBER = "1.0.0"
 STORES_EMAIL = "stores@guth.co.za"  # Update as needed
 
+# Custom Tooltip class to replace ttkbootstrap.Tooltip
+class CustomTooltip:
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tooltip_window = None
+        self.widget.bind("<Enter>", self.show_tooltip)
+        self.widget.bind("<Leave>", self.hide_tooltip)
+
+    def show_tooltip(self, event=None):
+        x = self.widget.winfo_rootx() + 20
+        y = self.widget.winfo_rooty() + self.widget.winfo_height()
+        self.tooltip_window = ttk.Toplevel(self.widget)
+        self.tooltip_window.wm_overrideredirect(True)  # Remove window decorations
+        self.tooltip_window.wm_geometry(f"+{x}+{y}")
+        label = ttk.Label(self.tooltip_window, text=self.text, background="lightyellow", relief="solid", borderwidth=1, font=("Roboto", 10))
+        label.pack()
+
+    def hide_tooltip(self, event=None):
+        if self.tooltip_window:
+            self.tooltip_window.destroy()
+            self.tooltip_window = None
+
 def load_options():
     with open(OPTIONS_PATH, "r") as f:
-        return json.load(f)
+        options = json.load(f)
+    logger.debug(f"Loaded options from JSON: {options}")
+    return options
 
 def show_dashboard(root, username, role, logout_callback):
     for widget in root.winfo_children():
@@ -37,7 +63,8 @@ def show_dashboard(root, username, role, logout_callback):
     if os.path.exists(LOGO_PATH):
         try:
             img = Image.open(LOGO_PATH)
-            img_resized = img.resize((int(img.width * 0.75), int(img.height * 0.75)), Image.Resampling.LANCZOS)
+            # Increase size by 30% from 0.75 (0.75 * 1.3 = 0.975, round to 1.0)
+            img_resized = img.resize((int(img.width * 1.0), int(img.height * 1.0)), Image.Resampling.LANCZOS)
             logo = ImageTk.PhotoImage(img_resized)
             logo_label = ttk.Label(header_frame, image=logo)
             logo_label.image = logo
@@ -57,7 +84,7 @@ def show_dashboard(root, username, role, logout_callback):
         ("Branch", "combobox", options["branch"], True),
         ("Pump Model", "combobox", options["pump_model"], True),
         ("Configuration", "combobox", options["configuration"], True),
-        ("Impeller Size", "combobox", options["impeller_size"]["PT 0.55KW"], True),
+        ("Impeller Size", "combobox", None, True),  # Options will be set dynamically
         ("Connection Type", "combobox", options["connection_type"], True),
         ("Pressure Required", "entry", None, False),
         ("Flow Rate Required", "entry", None, False),
@@ -65,35 +92,89 @@ def show_dashboard(root, username, role, logout_callback):
         ("Flush Seal Housing", "checkbutton", None, False)
     ]
     entries = {}
+    custom_impeller_entry = ttk.Entry(form_frame, font=("Roboto", 12))
+    custom_impeller_entry.grid(row=fields.index(("Impeller Size", "combobox", None, True)), column=2, pady=5, padx=5, sticky=EW)
+    custom_impeller_entry.grid_remove()  # Hide initially
+
+    # For Connection Type "Other"
     other_entry = ttk.Entry(form_frame, font=("Roboto", 12), state="disabled")
+    other_entry.grid(row=fields.index(("Connection Type", "combobox", options["connection_type"], True)), column=2, pady=5, sticky=EW)
+    other_entry.grid_remove()
+
+    tooltips = {
+        "customer": "Select the customer branch for this pump",
+        "branch": "Select the branch responsible for this pump",
+        "pump model": "Select the pump model based on power rating",
+        "configuration": "Choose the pump configuration type",
+        "impeller size": "Choose the impeller size or enter a custom size if 'Other' is selected",
+        "connection type": "Select the type of connection for the pump or enter a custom type if 'Other' is selected",
+        "pressure required": "Enter the required pressure (e.g., 5 bar)",
+        "flow rate required": "Enter the required flow rate (e.g., 10 L/min)",
+        "custom motor": "Enter details if a custom motor is required",
+        "flush seal housing": "Check if flush seal housing is required"
+    }
+
     for i, (label, widget_type, opts, required) in enumerate(fields):
-        ttk.Label(form_frame, text=f"{label}{' *' if required else ''}:", font=("Roboto", 12)).grid(row=i, column=0, pady=5, sticky=W)
+        label_widget = ttk.Label(form_frame, text=f"{label}{' *' if required else ''}:", font=("Roboto", 12))
+        label_widget.grid(row=i, column=0, pady=5, sticky=W)
+        CustomTooltip(label_widget, tooltips[label.lower()])  # Use custom tooltip
+
         if widget_type == "entry":
             entry = ttk.Entry(form_frame, font=("Roboto", 12))
         elif widget_type == "combobox":
-            entry = ttk.Combobox(form_frame, values=opts, font=("Roboto", 12), state="readonly")
-            entry.set(opts[0])
+            if label == "Pump Model":
+                pump_model_combobox = ttk.Combobox(form_frame, values=opts, font=("Roboto", 12), state="readonly")
+                pump_model_combobox.set(opts[0])
+                entry = pump_model_combobox
+            elif label == "Impeller Size":
+                impeller_combobox = ttk.Combobox(form_frame, font=("Roboto", 12), state="readonly")
+                # Set initial options based on the default pump model
+                initial_pump_model = pump_model_combobox.get()
+                impeller_opts = options["impeller_size"].get(initial_pump_model, []) + ["Other"]
+                impeller_combobox["values"] = impeller_opts
+                impeller_combobox.set(impeller_opts[0])
+
+                def on_pump_model_select(event):
+                    selected_pump_model = pump_model_combobox.get()
+                    new_impeller_opts = options["impeller_size"].get(selected_pump_model, []) + ["Other"]
+                    impeller_combobox["values"] = new_impeller_opts
+                    impeller_combobox.set(new_impeller_opts[0])
+                    custom_impeller_entry.grid_remove()  # Hide custom field when options change
+
+                def on_impeller_select(event):
+                    if impeller_combobox.get() == "Other":
+                        custom_impeller_entry.grid()
+                    else:
+                        custom_impeller_entry.grid_remove()
+
+                pump_model_combobox.bind("<<ComboboxSelected>>", on_pump_model_select)
+                impeller_combobox.bind("<<ComboboxSelected>>", on_impeller_select)
+                entry = impeller_combobox
+            elif label == "Connection Type":
+                # Avoid duplicating "Other" if it's already in opts
+                connection_opts = opts.copy()
+                if "Other" not in connection_opts:
+                    connection_opts.append("Other")
+                connection_combobox = ttk.Combobox(form_frame, values=connection_opts, font=("Roboto", 12), state="readonly")
+                connection_combobox.set(connection_opts[0] if connection_opts[0] != "Other" else connection_opts[1] if len(connection_opts) > 1 else "")
+
+                def on_connection_select(event):
+                    if connection_combobox.get() == "Other":
+                        other_entry.grid()
+                        other_entry.configure(state="normal")
+                    else:
+                        other_entry.grid_remove()
+                        other_entry.configure(state="disabled")
+
+                connection_combobox.bind("<<ComboboxSelected>>", on_connection_select)
+                entry = connection_combobox
+            else:
+                entry = ttk.Combobox(form_frame, values=opts, font=("Roboto", 12), state="readonly")
+                entry.set(opts[0])
         elif widget_type == "checkbutton":
             entry = ttk.Checkbutton(form_frame, text="", bootstyle="success-round-toggle")
         entry.grid(row=i, column=1, pady=5, sticky=EW)
         entries[label.lower().replace(" ", "_")] = entry
-
-    # Bind events after entries is populated
-    def update_impeller(*args):
-        model = entries["pump_model"].get()
-        entries["impeller_size"]["values"] = options["impeller_size"][model]
-        entries["impeller_size"].set(options["impeller_size"][model][0])
-
-    def toggle_other(*args):
-        if entries["connection_type"].get() == "Other":
-            other_entry.grid(row=fields.index(("Connection Type", "combobox", options["connection_type"], True)), column=2, pady=5, sticky=EW)
-            other_entry.configure(state="normal")
-        else:
-            other_entry.grid_remove()
-            other_entry.configure(state="disabled")
-
-    entries["pump_model"].bind("<<ComboboxSelected>>", update_impeller)
-    entries["connection_type"].bind("<<ComboboxSelected>>", toggle_other)
 
     form_frame.grid_columnconfigure(1, weight=1)
     error_label = ttk.Label(form_frame, text="", font=("Roboto", 12), bootstyle="danger")
@@ -108,6 +189,12 @@ def show_dashboard(root, username, role, logout_callback):
                 data[key] = "Yes" if entry.instate(['selected']) else "No"
         if data["connection_type"] == "Other":
             data["connection_type"] = other_entry.get()
+        if data["impeller_size"] == "Other":
+            data["impeller_size"] = custom_impeller_entry.get().strip()
+            if not data["impeller_size"]:
+                error_label.config(text="Please enter a custom impeller size.")
+                return
+
         required_fields = [f[0].lower().replace(" ", "_") for f in fields if f[3]]
         missing = [field.replace("_", " ").title() for field in required_fields if not data[field]]
         if missing:
@@ -228,7 +315,8 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
     if os.path.exists(LOGO_PATH):
         try:
             img = Image.open(LOGO_PATH)
-            img_resized = img.resize((int(img.width * 0.5), int(img.height * 0.5)), Image.Resampling.LANCZOS)
+            # Increase size by 30% from 0.5 (0.5 * 1.3 = 0.65)
+            img_resized = img.resize((int(img.width * 0.65), int(img.height * 0.65)), Image.Resampling.LANCZOS)
             logo = ImageTk.PhotoImage(img_resized)
             logo_label = ttk.Label(header_frame, image=logo)
             logo_label.image = logo
@@ -247,7 +335,7 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
         ("branch", "combobox", options["branch"]),
         ("pump_model", "combobox", options["pump_model"]),
         ("configuration", "combobox", options["configuration"]),
-        ("impeller_size", "combobox", options["impeller_size"][pump_dict.get("pump_model", "PT 0.55KW")]),
+        ("impeller_size", "combobox", None),  # Options will be set dynamically
         ("connection_type", "combobox", options["connection_type"]),
         ("pressure_required", "entry", None),
         ("flow_rate_required", "entry", None),
@@ -255,6 +343,12 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
         ("flush_seal_housing", "checkbutton", None)
     ]
     entries = {}
+    custom_impeller_entry = ttk.Entry(frame, font=("Roboto", 12))
+    custom_impeller_entry.grid(row=fields.index(("impeller_size", "combobox", None)), column=2, pady=5, padx=5, sticky=EW)
+    if pump_dict.get("impeller_size") not in options["impeller_size"][pump_dict.get("pump_model", "PT 0.55KW")]:
+        custom_impeller_entry.insert(0, pump_dict.get("impeller_size", ""))
+    custom_impeller_entry.grid_remove()  # Hide if not "Other"
+
     for i, (field, widget_type, opts) in enumerate(fields):
         ttk.Label(frame, text=f"{field.replace('_', ' ').title()}:", font=("Roboto", 14)).grid(row=i, column=0, pady=5, sticky=W)
         value = pump_dict.get(field, "")
@@ -264,8 +358,49 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
             if field == "serial_number":
                 entry.configure(state="readonly")
         elif widget_type == "combobox":
-            entry = ttk.Combobox(frame, values=opts, font=("Roboto", 12), state="readonly")
-            entry.set(value if value in opts else opts[0])
+            if field == "pump_model":
+                pump_model_combobox = ttk.Combobox(frame, values=opts, font=("Roboto", 12), state="readonly")
+                pump_model_combobox.set(value if value in opts else opts[0])
+                entry = pump_model_combobox
+            elif field == "impeller_size":
+                impeller_combobox = ttk.Combobox(frame, font=("Roboto", 12), state="readonly")
+                # Set initial options based on the pump's current model
+                initial_pump_model = pump_dict.get("pump_model", "PT 0.55KW")
+                impeller_opts = options["impeller_size"].get(initial_pump_model, []) + ["Other"]
+                impeller_combobox["values"] = impeller_opts
+                if value in impeller_opts:
+                    impeller_combobox.set(value)
+                else:
+                    impeller_combobox.set("Other")
+                    custom_impeller_entry.grid()
+
+                def on_pump_model_select(event):
+                    selected_pump_model = pump_model_combobox.get()
+                    new_impeller_opts = options["impeller_size"].get(selected_pump_model, []) + ["Other"]
+                    impeller_combobox["values"] = new_impeller_opts
+                    impeller_combobox.set(new_impeller_opts[0])
+                    custom_impeller_entry.grid_remove()  # Hide custom field when options change
+
+                def on_impeller_select(event):
+                    if impeller_combobox.get() == "Other":
+                        custom_impeller_entry.grid()
+                    else:
+                        custom_impeller_entry.grid_remove()
+
+                pump_model_combobox.bind("<<ComboboxSelected>>", on_pump_model_select)
+                impeller_combobox.bind("<<ComboboxSelected>>", on_impeller_select)
+                entry = impeller_combobox
+            elif field == "connection_type":
+                # Avoid duplicating "Other" if it's already in opts
+                connection_opts = opts.copy()
+                if "Other" not in connection_opts:
+                    connection_opts.append("Other")
+                connection_combobox = ttk.Combobox(frame, values=connection_opts, font=("Roboto", 12), state="readonly")
+                connection_combobox.set(value if value in connection_opts else connection_opts[0] if connection_opts[0] != "Other" else connection_opts[1] if len(connection_opts) > 1 else "")
+                entry = connection_combobox
+            else:
+                entry = ttk.Combobox(frame, values=opts, font=("Roboto", 12), state="readonly")
+                entry.set(value if value in opts else opts[0])
         elif widget_type == "checkbutton":
             entry = ttk.Checkbutton(frame, text="", bootstyle="success-round-toggle")
             entry.state(['selected'] if value == "Yes" else ['!selected'])
@@ -281,6 +416,12 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
                 data[key] = entry.get()
             elif isinstance(entry, ttk.Checkbutton):
                 data[key] = "Yes" if entry.instate(['selected']) else "No"
+        if data["impeller_size"] == "Other":
+            data["impeller_size"] = custom_impeller_entry.get().strip()
+            if not data["impeller_size"]:
+                Messagebox.show_error("Error", "Please enter a custom impeller size.")
+                return
+
         with connect_db() as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -297,4 +438,16 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
         show_dashboard(root, username, role, logout_callback)
         edit_window.destroy()
 
-    ttk.Button(frame, text="Save", command=save_changes, bootstyle="success", style="large.TButton").grid(row=len(fields), column=0, columnspan=2, pady=10)
+    def retest_pump():
+        with connect_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("UPDATE pumps SET status = ? WHERE serial_number = ?", ("Testing", serial_number))
+            conn.commit()
+            logger.info(f"Pump {serial_number} set to Testing for retest by {username}")
+        show_dashboard(root, username, role, logout_callback)
+        edit_window.destroy()
+
+    button_frame = ttk.Frame(frame)
+    button_frame.grid(row=len(fields), column=0, columnspan=2, pady=10)
+    ttk.Button(button_frame, text="Save", command=save_changes, bootstyle="success", style="large.TButton").pack(side=LEFT, padx=5)
+    ttk.Button(button_frame, text="Retest", command=retest_pump, bootstyle="warning", style="large.TButton").pack(side=LEFT, padx=5)
