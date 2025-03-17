@@ -400,6 +400,9 @@ def show_approval_details(parent_frame, tree, username, refresh_callback):
             return
         test_data = json.loads(pump["test_data"]) if pump["test_data"] else {}
 
+    # Ensure 'configuration' is in test_data
+    test_data["configuration"] = pump["configuration"]  # Add the configuration from the pump record
+
     # Create a new window for approval details
     approval_window = ttk.Toplevel(parent_frame)
     approval_window.title(f"Approve Pump {serial_number}")
@@ -433,8 +436,11 @@ def show_approval_details(parent_frame, tree, username, refresh_callback):
     scrollbar.pack(side=RIGHT, fill=Y)
 
     def on_mouse_wheel(event):
-        canvas.yview_scroll(-1 * (event.delta // 120), "units")
-    canvas.bind_all("<MouseWheel>", on_mouse_wheel)
+        if approval_window.winfo_exists():  # Check if the window still exists
+            canvas.yview_scroll(-1 * (event.delta // 120), "units")
+
+    # Bind mouse wheel event with cleanup on window close
+    mouse_wheel_id = approval_window.bind_all("<MouseWheel>", on_mouse_wheel)
 
     # Pump Details (non-editable)
     details_frame = ttk.LabelFrame(main_frame, text="Pump Details", padding=10)
@@ -590,6 +596,8 @@ def show_approval_details(parent_frame, tree, username, refresh_callback):
         test_data["flowrate"] = [entry.get() for entry in flow_entries]
         test_data["pressure"] = [entry.get() for entry in pressure_entries]
         test_data["amperage"] = [entry.get() for entry in amp_entries]
+        # Ensure configuration is preserved (it's not editable, so we just keep the original value)
+        test_data["configuration"] = pump["configuration"]
 
     # Action Buttons
     action_frame = ttk.Frame(main_frame)
@@ -612,6 +620,10 @@ def show_approval_details(parent_frame, tree, username, refresh_callback):
         update_test_data_from_fields()
         test_data["approved_by"] = username  # Set the approver's username
         test_data["approval_date"] = datetime.now().strftime("%Y-%m-%d")
+        # Add other fields needed for the certificate that aren't in test_data yet
+        test_data["invoice_number"] = "INV123"  # Placeholder; fetch from DB if needed
+        test_data["job_number"] = "JOB456"  # Placeholder; fetch from DB if needed
+        test_data["customer"] = pump["customer"]  # Add customer to test_data
         pdf_path = generate_certificate(test_data, serial_number)
         with connect_db() as conn:
             cursor = conn.cursor()
@@ -624,6 +636,8 @@ def show_approval_details(parent_frame, tree, username, refresh_callback):
         test_data["originator"] = originator
         send_email(originator_email, pdf_path, test_data)
         refresh_callback()
+        # Unbind mouse wheel and destroy window
+        approval_window.unbind_all("<MouseWheel>", mouse_wheel_id)
         approval_window.destroy()
 
     def reject_pump():
@@ -637,11 +651,17 @@ def show_approval_details(parent_frame, tree, username, refresh_callback):
             conn.commit()
             logger.info(f"Pump {serial_number} rejected by {username}, returned to Testing with updated data")
         refresh_callback()
+        # Unbind mouse wheel and destroy window
+        approval_window.unbind_all("<MouseWheel>", mouse_wheel_id)
         approval_window.destroy()
 
     def close_window():
-        # Close the window without changing the pump's status
+        # Unbind mouse wheel and destroy window
+        approval_window.unbind_all("<MouseWheel>", mouse_wheel_id)
         approval_window.destroy()
+
+    # Set protocol for window close button [X]
+    approval_window.protocol("WM_DELETE_WINDOW", close_window)
 
     ttk.Button(action_frame, text="Save Changes", command=save_changes, bootstyle="info", style="large.TButton").pack(side=LEFT, padx=10)
     ttk.Button(action_frame, text="Approve", command=approve_pump, bootstyle="success", style="large.TButton").pack(side=LEFT, padx=10)

@@ -26,6 +26,7 @@
     <Compile Include="backup.py" />
     <Compile Include="database.py" />
     <Compile Include="gui\admin_gui.py" />
+    <Compile Include="gui\approval_gui.py" />
     <Compile Include="gui\assembler_gui.py" />
     <Compile Include="gui\base_gui.py" />
     <Compile Include="gui\dashboard_gui.py" />

@@ -2121,3 +2121,156 @@
 2025-03-17 16:46:45,376 - INFO - User approver1 logged in with role Approval
 2025-03-17 16:46:52,594 - INFO - Certificate generated: C:\Users\travism\source\repos\GuthPumpRegistry\certificates/Pump_Test_Report_6101 001 - 25.pdf
 2025-03-17 16:46:52,602 - INFO - Pump 6101 001 - 25 approved by approver1, status set to Completed
+2025-03-17 18:23:39,611 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 18:23:39,637 - INFO - Logo loaded: 378x125
+2025-03-17 18:23:39,690 - INFO - Logo scaled: 567x187
+2025-03-17 18:23:39,690 - INFO - Application started
+2025-03-17 18:24:02,501 - INFO - User approver1 logged in with role Approval
+2025-03-17 18:24:11,450 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 18:24:11,452 - INFO - Logo loaded: 378x125
+2025-03-17 18:24:11,532 - INFO - Logo scaled: 567x187
+2025-03-17 18:24:11,567 - INFO - User logged out
+2025-03-17 18:24:17,691 - INFO - User admin1 logged in with role Admin
+2025-03-17 18:24:33,851 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 18:24:33,851 - INFO - Logo loaded: 378x125
+2025-03-17 18:24:33,936 - INFO - Logo scaled: 567x187
+2025-03-17 18:24:33,975 - INFO - User logged out
+2025-03-17 18:24:38,384 - INFO - User stores1 logged in with role Stores
+2025-03-17 18:24:52,849 - INFO - Part pulled: 10.55.09005 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,850 - INFO - Part pulled: 10.55.10004 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,850 - INFO - Part pulled: 10.77.00005 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,850 - INFO - Part pulled: 10.77.00014 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,851 - INFO - Part pulled: 10.77.00020 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,851 - INFO - Part pulled: 10.77.00030 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,851 - INFO - Part pulled: 10.77.00035 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,851 - INFO - Part pulled: 10.77.00040 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,851 - INFO - Part pulled: 10.77.00240 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,852 - INFO - Part pulled: 10.77.00046 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,852 - INFO - Part pulled: 10.77.00050 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,852 - INFO - Part pulled: 10.77.00056 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,852 - INFO - Part pulled: 10.77.00087 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,852 - INFO - Part pulled: 10.77.00092 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,852 - INFO - Part pulled: 10.77.00094 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,852 - INFO - Part pulled: 10.77.00099 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,852 - INFO - Part pulled: 10.77.00110 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,852 - INFO - Part pulled: 10.77.00120 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,852 - INFO - Part pulled: 10.77.00136 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,853 - INFO - Part pulled: 10.77.00140 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,853 - INFO - Part pulled: 10.77.00150 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,853 - INFO - Part pulled: 10.77.00158 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,853 - INFO - Part pulled: 11.18.03109 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,853 - INFO - Part pulled: 11.18.03110 for 6101 003 - 25 by stores1
+2025-03-17 18:24:52,863 - INFO - BOM submitted for 6101 003 - 25 by stores1, moved to Assembler
+2025-03-17 18:24:53,039 - INFO - BOM printed for 6101 003 - 25
+2025-03-17 18:24:53,063 - ERROR - Failed to send email: [Errno 11001] getaddrinfo failed
+2025-03-17 18:25:14,524 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 18:25:14,525 - INFO - Logo loaded: 378x125
+2025-03-17 18:25:14,657 - INFO - Logo scaled: 567x187
+2025-03-17 18:25:14,690 - INFO - User logged out
+2025-03-17 18:25:22,513 - INFO - User assembler1 logged in with role Assembler
+2025-03-17 18:25:34,756 - INFO - Pump 6101 003 - 25 moved to Testing by assembler1
+2025-03-17 18:25:37,555 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 18:25:37,556 - INFO - Logo loaded: 378x125
+2025-03-17 18:25:37,632 - INFO - Logo scaled: 567x187
+2025-03-17 18:25:37,659 - INFO - User logged out
+2025-03-17 18:25:46,326 - INFO - User tester1 logged in with role Testing
+2025-03-17 18:26:02,067 - INFO - Pump 6101 003 - 25 submitted for approval by tester1
+2025-03-17 18:26:05,692 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 18:26:05,692 - INFO - Logo loaded: 378x125
+2025-03-17 18:26:05,798 - INFO - Logo scaled: 567x187
+2025-03-17 18:26:05,912 - INFO - User logged out
+2025-03-17 18:26:13,470 - INFO - User approver1 logged in with role Approval
+2025-03-17 18:26:25,042 - INFO - Certificate generated: C:\Users\travism\source\repos\GuthPumpRegistry\certificates/Pump_Test_Report_6101 003 - 25.pdf
+2025-03-17 18:26:25,053 - INFO - Pump 6101 003 - 25 approved by approver1, status set to Completed
+2025-03-17 18:31:21,747 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 18:31:21,755 - INFO - Logo loaded: 378x125
+2025-03-17 18:31:21,802 - INFO - Logo scaled: 567x187
+2025-03-17 18:31:21,817 - INFO - Application started
+2025-03-17 18:31:30,934 - INFO - User approver1 logged in with role Approval
+2025-03-17 18:32:09,653 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 18:32:09,653 - INFO - Logo loaded: 378x125
+2025-03-17 18:32:09,716 - INFO - Logo scaled: 567x187
+2025-03-17 18:32:09,741 - INFO - User logged out
+2025-03-17 18:32:15,500 - INFO - User user1 logged in with role Pump Originator
+2025-03-17 18:32:34,900 - INFO - Inserted 25 BOM items for pump 4101 001 - 25
+2025-03-17 18:32:34,901 - INFO - Pump created: 4101 001 - 25 by user1
+2025-03-17 18:32:34,916 - INFO - New pump created by user1: 4101 001 - 25 with BOM
+2025-03-17 18:32:34,962 - ERROR - Email send failed for 4101 001 - 25: [Errno 11001] getaddrinfo failed
+2025-03-17 18:32:35,003 - INFO - Confirmation printed for pump 4101 001 - 25
+2025-03-17 18:32:49,223 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 18:32:49,224 - INFO - Logo loaded: 378x125
+2025-03-17 18:32:49,289 - INFO - Logo scaled: 567x187
+2025-03-17 18:32:49,342 - INFO - User logged out
+2025-03-17 18:32:54,446 - INFO - User stores1 logged in with role Stores
+2025-03-17 18:33:13,302 - INFO - Part pulled: 10.55.09013 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,302 - INFO - Part pulled: 10.55.10004 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,302 - INFO - Part pulled: 10.77.00003 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,302 - INFO - Part pulled: 10.77.00012 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,302 - INFO - Part pulled: 10.77.00020 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,303 - INFO - Part pulled: 10.77.00030 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,303 - INFO - Part pulled: 10.77.00035 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,303 - INFO - Part pulled: 10.77.00040 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,303 - INFO - Part pulled: 10.77.00230 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,303 - INFO - Part pulled: 10.77.00046 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,303 - INFO - Part pulled: 10.77.00050 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,303 - INFO - Part pulled: 10.77.00056 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,303 - INFO - Part pulled: 10.77.00086 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,304 - INFO - Part pulled: 10.77.00092 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,304 - INFO - Part pulled: 10.77.00094 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,304 - INFO - Part pulled: 10.77.00096 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,304 - INFO - Part pulled: 10.77.00099 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,304 - INFO - Part pulled: 10.77.00110 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,304 - INFO - Part pulled: 10.77.00130 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,304 - INFO - Part pulled: 10.77.00136 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,304 - INFO - Part pulled: 10.77.00140 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,305 - INFO - Part pulled: 10.77.00146 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,305 - INFO - Part pulled: 10.77.00155 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,305 - INFO - Part pulled: 11.18.03109 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,305 - INFO - Part pulled: 11.18.03110 for 4101 001 - 25 by stores1
+2025-03-17 18:33:13,317 - INFO - BOM submitted for 4101 001 - 25 by stores1, moved to Assembler
+2025-03-17 18:33:13,475 - INFO - BOM printed for 4101 001 - 25
+2025-03-17 18:33:13,525 - ERROR - Failed to send email: [Errno 11001] getaddrinfo failed
+2025-03-17 18:33:20,548 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 18:33:20,548 - INFO - Logo loaded: 378x125
+2025-03-17 18:33:20,619 - INFO - Logo scaled: 567x187
+2025-03-17 18:33:20,643 - INFO - User logged out
+2025-03-17 18:33:28,501 - INFO - User assembler1 logged in with role Assembler
+2025-03-17 18:33:44,160 - INFO - Pump 4101 001 - 25 moved to Testing by assembler1
+2025-03-17 18:33:45,928 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 18:33:45,928 - INFO - Logo loaded: 378x125
+2025-03-17 18:33:46,000 - INFO - Logo scaled: 567x187
+2025-03-17 18:33:46,026 - INFO - User logged out
+2025-03-17 18:33:51,760 - INFO - User tester1 logged in with role Testing
+2025-03-17 18:35:11,350 - INFO - Pump 4101 001 - 25 submitted for approval by tester1
+2025-03-17 18:35:13,034 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 18:35:13,036 - INFO - Logo loaded: 378x125
+2025-03-17 18:35:13,096 - INFO - Logo scaled: 567x187
+2025-03-17 18:35:13,112 - INFO - User logged out
+2025-03-17 18:35:23,064 - INFO - User approver1 logged in with role Approval
+2025-03-17 18:35:34,537 - INFO - Certificate generated: C:\Users\travism\source\repos\GuthPumpRegistry\certificates/Pump_Test_Report_4101 001 - 25.pdf
+2025-03-17 18:35:34,546 - INFO - Pump 4101 001 - 25 approved by approver1, status set to Completed
+2025-03-17 18:35:37,193 - ERROR - Failed to send email to tester1@example.com: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5b1f17b1804b1-43d1ffc450esm109962515e9.23 - gsmtp')
+2025-03-17 18:36:53,230 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 18:36:53,230 - INFO - Logo loaded: 378x125
+2025-03-17 18:36:53,296 - INFO - Logo scaled: 567x187
+2025-03-17 18:36:53,348 - INFO - User logged out
+2025-03-17 18:39:36,094 - INFO - User admin1 logged in with role Admin
+2025-03-17 18:39:51,959 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 18:39:51,960 - INFO - Logo loaded: 378x125
+2025-03-17 18:39:52,032 - INFO - Logo scaled: 567x187
+2025-03-17 18:39:52,065 - INFO - User logged out
+2025-03-17 18:39:58,839 - INFO - User user1 logged in with role Pump Originator
+2025-03-17 18:43:00,001 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 18:43:00,009 - INFO - Logo loaded: 378x125
+2025-03-17 18:43:00,058 - INFO - Logo scaled: 567x187
+2025-03-17 18:43:00,070 - INFO - Application started
+2025-03-17 18:43:07,481 - INFO - User user1 logged in with role Pump Originator
+2025-03-17 18:43:12,650 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 18:43:12,651 - INFO - Logo loaded: 378x125
+2025-03-17 18:43:12,715 - INFO - Logo scaled: 567x187
+2025-03-17 18:43:12,763 - INFO - User logged out
+2025-03-17 18:43:17,209 - INFO - User approver1 logged in with role Approval
+2025-03-17 18:43:19,861 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-17 18:43:19,862 - INFO - Logo loaded: 378x125
+2025-03-17 18:43:19,922 - INFO - Logo scaled: 567x187
+2025-03-17 18:43:19,976 - INFO - User logged out
