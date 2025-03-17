@@ -6,7 +6,8 @@ from gui.register_gui import show_register_window
 from gui.dashboard_gui import show_dashboard
 from gui.admin_gui import show_admin_gui
 from gui.stores_gui import show_stores_dashboard
-from gui.assembler_gui import show_assembler_dashboard  # New import
+from gui.assembler_gui import show_assembler_dashboard
+from gui.testing_gui import show_testing_dashboard  # New import
 from database import connect_db, check_user, insert_user
 from utils.config import get_logger
 
@@ -44,10 +45,13 @@ class BaseGUI:
             elif role == "Stores":
                 self.root.state("zoomed")
                 self.main_frame = show_stores_dashboard(self.root, self.username, self.role, self.logout)
-            elif role == "Assembler":  # New condition for Assembler role
+            elif role == "Assembler":
                 self.root.state("zoomed")
                 self.main_frame = show_assembler_dashboard(self.root, self.username, self.role, self.logout)
-            else:  # Pump Originator, Testing, etc.
+            elif role == "Testing":  # New condition for Testing role
+                self.root.state("zoomed")
+                self.main_frame = show_testing_dashboard(self.root, self.username, self.role, self.logout)
+            else:  # Pump Originator, etc.
                 self.root.state("zoomed")
                 self.main_frame = show_dashboard(self.root, self.username, self.role, self.logout)
             logger.info(f"User {username} logged in with role {role}")
@@ -79,7 +83,7 @@ class BaseGUI:
             # Admin GUI doesn't use main_frame, just clear the root
             for widget in self.root.winfo_children():
                 widget.destroy()
-        elif self.main_frame:  # Non-Admin (including Stores and Assembler) uses main_frame
+        elif self.main_frame:  # Non-Admin (including Stores, Assembler, Testing) uses main_frame
             self.main_frame.destroy()
         self.username = None
         self.role = None
