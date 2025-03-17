@@ -6,8 +6,7 @@ from gui.register_gui import show_register_window
 from gui.dashboard_gui import show_dashboard
 from gui.admin_gui import show_admin_gui
 from gui.stores_gui import show_stores_dashboard
-from gui.assembler_gui import show_assembler_dashboard
-from gui.testing_gui import show_testing_dashboard
+from gui.combined_assembler_tester_gui import show_combined_assembler_tester_dashboard  # New import
 from gui.approval_gui import show_approval_dashboard
 from database import connect_db, check_user, insert_user
 from utils.config import get_logger
@@ -50,12 +49,9 @@ class BaseGUI:
             elif role == "Stores":
                 self.root.state("zoomed")
                 self.main_frame = show_stores_dashboard(self.root, self.username, self.role, self.logout)
-            elif role == "Assembler":
+            elif role in ["Assembler", "Testing"]:  # Combine Assembler and Tester roles
                 self.root.state("zoomed")
-                self.main_frame = show_assembler_dashboard(self.root, self.username, self.role, self.logout)
-            elif role == "Testing":
-                self.root.state("zoomed")
-                self.main_frame = show_testing_dashboard(self.root, self.username, self.role, self.logout)
+                self.main_frame = show_combined_assembler_tester_dashboard(self.root, self.username, role, self.logout)
             elif role == "Approval":
                 self.root.state("zoomed")
                 self.main_frame = show_approval_dashboard(self.root, self.username, self.role, self.logout)
