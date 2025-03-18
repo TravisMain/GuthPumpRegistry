@@ -5,8 +5,10 @@ from PIL import Image, ImageTk
 from database import connect_db
 import os
 from datetime import datetime
-from utils.config import get_logger
 import json
+import threading
+from utils.config import get_logger
+from export_utils import send_email, generate_pdf_notification, generate_pump_details_table, generate_test_data_table
 
 logger = get_logger("combined_assembler_tester_gui")
 BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
@@ -168,6 +170,8 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
         cursor.execute("SELECT part_name, part_code, quantity, pulled_at FROM bom_items WHERE serial_number = ? AND pulled_at IS NOT NULL", (serial_number,))
         bom_items = cursor.fetchall()
         logger.debug(f"Fetched {len(bom_items)} received BOM items for {serial_number}: {[(item['part_name'], item['part_code']) for item in bom_items]}")
+        cursor.execute("SELECT username, email FROM users WHERE username = ?", (pump["requested_by"],))
+        originator = cursor.fetchone()
 
     bom_window = ttk.Toplevel(parent_frame)
     bom_window.title(f"BOM for Pump {serial_number}")
@@ -273,6 +277,33 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
             new_status = cursor.fetchone()["status"]
             logger.debug(f"Post-submit status for {serial_number}: {new_status}")
 
+            if originator:
+                pump_data = {
+                    "serial_number": pump["serial_number"],
+                    "customer": pump["customer"],
+                    "branch": pump["branch"] if "branch" in pump else "",
+                    "pump_model": pump["pump_model"],
+                    "configuration": pump["configuration"],
+                    "impeller_size": pump["impeller_size"] if "impeller_size" in pump else "",
+                    "connection_type": pump["connection_type"] if "connection_type" in pump else "",
+                    "pressure_required": pump["pressure_required"] if "pressure_required" in pump else "",
+                    "flow_rate_required": pump["flow_rate_required"] if "flow_rate_required" in pump else "",
+                    "custom_motor": pump["custom_motor"] if "custom_motor" in pump else "",
+                    "flush_seal_housing": pump["flush_seal_housing"] if "flush_seal_housing" in pump else "",
+                }
+
+                subject = f"Pump {serial_number} Moved to Testing"
+                greeting = f"Dear {originator['username']},"
+                body_content = f"""
+                    <p>The assembly of pump {serial_number} is complete, and it has been moved to the Testing stage.</p>
+                    <h3 style="color: #34495e;">Pump Details</h3>
+                    {generate_pump_details_table(pump_data)}
+                """
+                footer = "Regards,<br>Assembly Team"
+                threading.Thread(target=send_email, args=(originator["email"], subject, greeting, body_content, footer), daemon=True).start()
+            else:
+                logger.warning(f"No originator found for pump {serial_number}")
+
         refresh_callback()
         bom_window.destroy()
 
@@ -293,11 +324,23 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
     serial_number = tree.item(selected[0])["values"][0]
     with connect_db() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT customer, pump_model, configuration FROM pumps WHERE serial_number = ?", (serial_number,))
+        # Updated query to include requested_by and other relevant columns
+        cursor.execute("""
+            SELECT serial_number, customer, pump_model, configuration, requested_by, branch, impeller_size,
+                   connection_type, pressure_required, flow_rate_required, custom_motor, flush_seal_housing
+            FROM pumps WHERE serial_number = ?
+        """, (serial_number,))
         pump = cursor.fetchone()
         if not pump:
             logger.warning(f"No pump found for serial_number: {serial_number}")
             return
+
+        # Fetch originator's details
+        cursor.execute("SELECT username, email FROM users WHERE username = ?", (pump["requested_by"],))
+        originator = cursor.fetchone()
+        if not originator or not originator["email"]:
+            logger.warning(f"No email found for requested_by {pump['requested_by']} of pump {serial_number}")
+            originator = None  # Proceed without email if not found
 
     test_window = ttk.Toplevel(parent_frame)
     test_window.title(f"Test Report for Pump {serial_number}")
@@ -372,6 +415,7 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
 
     ttk.Label(fab_frame, text="Impeller Diameter:", font=("Roboto", 10)).grid(row=2, column=0, padx=5, pady=5, sticky=W)
     impeller_entry = ttk.Entry(fab_frame, width=20)
+    impeller_entry.insert(0, pump["impeller_size"] if "impeller_size" in pump else "")  # Safe access
     impeller_entry.grid(row=2, column=1, padx=5, pady=5, sticky=W)
 
     ttk.Label(fab_frame, text="Assembled By:", font=("Roboto", 10)).grid(row=3, column=0, padx=5, pady=5, sticky=W)
@@ -486,7 +530,11 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
             "approval_date": datetime.now().strftime("%Y-%m-%d"),
         }
 
-        # Store test data and originator in the database
+        # Validate test data
+        if not all(test_data["flowrate"]) or not all(test_data["pressure"]) or not all(test_data["amperage"]):
+            Messagebox.show_error("Error", "All test data fields must be filled.")
+            return
+
         with connect_db() as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -498,6 +546,41 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
             """, (username, json.dumps(test_data), serial_number))
             conn.commit()
             logger.info(f"Pump {serial_number} submitted for approval by {username}")
+
+            if originator:
+                pump_data = {
+                    "serial_number": test_data["serial_number"],
+                    "customer": test_data["customer"],
+                    "branch": pump["branch"] if "branch" in pump else "",
+                    "pump_model": test_data["pump_model"],
+                    "configuration": pump["configuration"],
+                    "impeller_size": test_data["impeller_diameter"],
+                    "connection_type": test_data["pump_connection"],
+                    "pressure_required": pump["pressure_required"] if "pressure_required" in pump else "",
+                    "flow_rate_required": pump["flow_rate_required"] if "flow_rate_required" in pump else "",
+                    "custom_motor": test_data["motor_size"],
+                    "flush_seal_housing": test_data["flush_arrangement"],
+                }
+
+                # Generate PDF certificate
+                pdf_path = generate_pdf_notification(serial_number, pump_data, title=f"Test Certificate - {serial_number}")
+                subject = f"Pump {serial_number} Submitted for Approval"
+                greeting = f"Dear {originator['username']},"
+                body_content = f"""
+                    <p>The testing of pump {serial_number} is complete, and it has been submitted for approval.</p>
+                    <h3 style="color: #34495e;">Pump Details</h3>
+                    {generate_pump_details_table(pump_data)}
+                    <h3 style="color: #34495e;">Test Data</h3>
+                    {generate_test_data_table({
+                        "flowrate": test_data["flowrate"],
+                        "pressure": test_data["pressure"],
+                        "amperage": test_data["amperage"]
+                    })}
+                """
+                footer = "Regards,<br>Testing Team"
+                threading.Thread(target=send_email, args=(originator["email"], subject, greeting, body_content, footer, pdf_path), daemon=True).start()
+            else:
+                logger.warning(f"No originator found for pump {serial_number}")
 
         refresh_callback()
         test_window.destroy()

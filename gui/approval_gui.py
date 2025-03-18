@@ -16,6 +16,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from export_utils import send_email, generate_pump_details_table  # Import email function and helper
 
 logger = get_logger("approval_gui")
 BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
@@ -485,10 +486,35 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
         pdf_path = generate_certificate(updated_test_data, serial_number)
         with connect_db() as conn:
             cursor = conn.cursor()
+            cursor.execute("SELECT originator FROM pumps WHERE serial_number = ?", (serial_number,))
+            originator_data = cursor.fetchone()
+            if originator_data and originator_data["originator"]:
+                originator_username = originator_data["originator"]
+                cursor.execute("SELECT email FROM users WHERE username = ?", (originator_username,))
+                originator_email = cursor.fetchone()
+                if originator_email and originator_email["email"]:
+                    # Prepare email content
+                    subject = f"Pump {serial_number} Approved"
+                    greeting = f"Dear {originator_username},"
+                    body_content = f"""
+                        <p>The pump with serial number {serial_number} has been approved.</p>
+                        <h3 style="color: #34495e;">Pump Details</h3>
+                        {generate_pump_details_table(updated_test_data)}
+                        <p>Please find the attached certificate for your records.</p>
+                    """
+                    footer = "Regards,<br>Approval Team"
+                    # Send email with PDF attachment
+                    send_email(originator_email["email"], subject, greeting, body_content, footer, pdf_path)
+                else:
+                    logger.warning(f"No email found for originator {originator_username} of pump {serial_number}")
+            else:
+                logger.warning(f"No originator found for pump {serial_number}")
+
             cursor.execute("UPDATE pumps SET status = 'Completed', test_data = ? WHERE serial_number = ?",
                            (json.dumps(updated_test_data), serial_number))
             conn.commit()
             logger.info(f"Pump {serial_number} approved by {username}")
+
         refresh_callback()
         details_window.destroy()
         os.startfile(pdf_path)

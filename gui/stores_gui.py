@@ -1,12 +1,13 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
+from ttkbootstrap.dialogs import Messagebox
 from PIL import Image, ImageTk
 from database import connect_db, pull_bom_item
 import os
 from datetime import datetime
-import smtplib
-from email.mime.text import MIMEText
+import threading
 from utils.config import get_logger
+from export_utils import send_email, generate_pump_details_table, generate_bom_table
 
 logger = get_logger("stores_gui")
 BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
@@ -35,7 +36,7 @@ def show_stores_dashboard(root, username, role, logout_callback):
             logger.error(f"Stores logo load failed: {str(e)}")
     ttk.Label(header_frame, text=f"Welcome, {username}", font=("Roboto", 18, "bold")).pack(anchor=W, padx=10)
     ttk.Label(header_frame, text="Pumps to be Assembled", font=("Roboto", 12)).pack(anchor=W, padx=10)
-    ttk.Label(header_frame, text="Pumps to be Assembled", font=("Roboto", 16, "bold")).pack(pady=10)  # Updated heading
+    ttk.Label(header_frame, text="Pumps to be Assembled", font=("Roboto", 16, "bold")).pack(pady=10)
 
     # Pumps in Stores (to be assembled) Table
     pump_list_frame = ttk.LabelFrame(main_frame, text="Pumps in Stores", padding=10)
@@ -73,7 +74,7 @@ def show_stores_dashboard(root, username, role, logout_callback):
     all_tree = ttk.Treeview(all_pumps_frame, columns=all_columns, show="headings", height=15)
     for col in all_columns:
         all_tree.heading(col, text=col, anchor=W)
-        all_tree.column(col, width=120, anchor=W)  # Adjusted width for extra column
+        all_tree.column(col, width=120, anchor=W)
     all_tree.pack(side=LEFT, fill=BOTH, expand=True)
     all_scrollbar = ttk.Scrollbar(all_pumps_frame, orient=VERTICAL, command=all_tree.yview)
     all_scrollbar.pack(side=RIGHT, fill=Y)
@@ -111,10 +112,12 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
     with connect_db() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM pumps WHERE serial_number = ?", (serial_number,))
-        pump = cursor.fetchone()
-        if not pump:
+        pump_row = cursor.fetchone()
+        if not pump_row:
             logger.warning(f"No pump found for serial_number: {serial_number}")
             return
+        # Convert sqlite3.Row to dict
+        pump = dict(pump_row)
         cursor.execute("SELECT part_name, part_code, quantity, pulled_at FROM bom_items WHERE serial_number = ?", (serial_number,))
         bom_items = cursor.fetchall()
         logger.debug(f"Fetched {len(bom_items)} BOM items for {serial_number}: {[(item['part_name'], item['part_code']) for item in bom_items]}")
@@ -210,12 +213,22 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
         with connect_db() as conn:
             cursor = conn.cursor()
             bom_text = f"BOM for Pump {serial_number}:\n"
+            bom_items_list = []
             for part_code, var in check_vars:
                 pulled = var.get()
                 reason = next(e.get().strip() for pc, e in reason_entries if pc == part_code)
                 if pulled and not next(item["pulled_at"] for item in bom_items if item["part_code"] == part_code):
                     pull_bom_item(cursor, serial_number, part_code, username)
-                bom_text += f"Part: {next(item['part_name'] for item in bom_items if item['part_code'] == part_code)} ({part_code}), Qty: {next(item['quantity'] for item in bom_items if item['part_code'] == part_code)}, Pulled: {'Yes' if pulled else 'No'}, Reason: {reason}\n"
+                part_name = next(item['part_name'] for item in bom_items if item['part_code'] == part_code)
+                quantity = next(item['quantity'] for item in bom_items if item['part_code'] == part_code)
+                bom_text += f"Part: {part_name} ({part_code}), Qty: {quantity}, Pulled: {'Yes' if pulled else 'No'}, Reason: {reason}\n"
+                bom_items_list.append({
+                    "part_name": part_name,
+                    "part_code": part_code,
+                    "quantity": quantity,
+                    "pulled": "Yes" if pulled else "No",
+                    "reason": reason
+                })
                 if reason:
                     cursor.execute("INSERT INTO audit_log (timestamp, username, action) VALUES (?, ?, ?)",
                                   (datetime.now(), username, f"Reason for not pulling {part_code} on {serial_number}: {reason}"))
@@ -235,21 +248,35 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
                 logger.error(f"Failed to print BOM: {str(e)}")
 
             if originator:
-                try:
-                    msg = MIMEText(f"Dear {originator['username']},\n\nAll items have been pulled from stock for pump {serial_number}:\n\n{bom_text}\n\nDetails:\n- Model: {pump['pump_model']}\n- Config: {pump['configuration']}\n- Customer: {pump['customer']}\n- Branch: {pump['branch']}\n\nRegards,\nStores Team")
-                    msg["Subject"] = f"Pump {serial_number} Stock Pulled"
-                    msg["From"] = "stores@guthpumps.example.com"
-                    msg["To"] = originator["email"]
-                    with smtplib.SMTP("smtp.example.com", 587) as server:
-                        server.login("your_email", "your_password")
-                        server.send_message(msg)
-                    logger.info(f"Email sent to {originator['email']} for {serial_number}")
-                except Exception as e:
-                    logger.error(f"Failed to send email: {str(e)}")
+                # Prepare pump data for email
+                pump_data = {
+                    "serial_number": pump["serial_number"],
+                    "customer": pump["customer"],
+                    "branch": pump["branch"],
+                    "pump_model": pump["pump_model"],
+                    "configuration": pump["configuration"],
+                    "impeller_size": pump.get("impeller_size", ""),
+                    "connection_type": pump.get("connection_type", ""),
+                    "pressure_required": pump.get("pressure_required", ""),
+                    "flow_rate_required": pump.get("flow_rate_required", ""),
+                    "custom_motor": pump.get("custom_motor", ""),
+                    "flush_seal_housing": pump.get("flush_seal_housing", ""),
+                }
+
+                subject = f"Pump {serial_number} Moved to Assembly"
+                greeting = f"Dear {originator['username']},"
+                body_content = f"""
+                    <p>We are pleased to inform you that all items for pump {serial_number} have been pulled from stock and the pump has moved to the Assembly stage.</p>
+                    <h3 style="color: #34495e;">Pump Details</h3>
+                    {generate_pump_details_table(pump_data)}
+                    {generate_bom_table(bom_items_list)}
+                """
+                footer = "Regards,<br>Stores Team"
+                threading.Thread(target=send_email, args=(originator["email"], subject, greeting, body_content, footer), daemon=True).start()
             else:
                 logger.warning(f"No originator found for pump {serial_number}")
 
-        refresh_callback()  # Refresh the dashboard list
+        refresh_callback()
         bom_window.destroy()
 
     submit_btn.configure(command=submit_bom)

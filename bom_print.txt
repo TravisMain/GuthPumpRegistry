@@ -1,4 +1,4 @@
-BOM for Pump 1101 005 - 25:
+BOM for Pump 1101 013 - 25:
 Part: Front cover 'O' ring (Black nitrile) (10.55.090011), Qty: 1, Pulled: Yes, Reason: 
 Part: Mechanical shaft seal (10.55.100047), Qty: 1, Pulled: Yes, Reason: 
 Part: Impeller assembly (10.77.000051), Qty: 1, Pulled: Yes, Reason: 

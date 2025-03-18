@@ -5,12 +5,9 @@ from PIL import Image, ImageTk
 from database import connect_db, create_pump
 import os
 import json
-import smtplib
-from email.mime.text import MIMEText
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
 import threading
 from utils.config import get_logger
+from export_utils import send_email, generate_pdf_notification, generate_pump_details_table
 
 logger = get_logger("dashboard_gui")
 BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
@@ -207,8 +204,40 @@ def show_dashboard(root, username, role, logout_callback):
             conn.commit()
             logger.info(f"New pump created by {username}: {serial} with BOM")
 
-        threading.Thread(target=send_email, args=(serial, data), daemon=True).start()
-        threading.Thread(target=print_confirmation, args=(serial, data), daemon=True).start()
+        # Prepare pump data for email and PDF
+        pump_data = {
+            "serial_number": serial,
+            "customer": data["customer"],
+            "branch": data["branch"],
+            "pump_model": data["pump_model"],
+            "configuration": data["configuration"],
+            "impeller_size": data["impeller_size"],
+            "connection_type": data["connection_type"],
+            "pressure_required": data["pressure_required"],
+            "flow_rate_required": data["flow_rate_required"],
+            "custom_motor": data["custom_motor"],
+            "flush_seal_housing": data["flush_seal_housing"],
+            "requested_by": username,
+        }
+
+        # Generate PDF and open print dialog
+        try:
+            pdf_path = generate_pdf_notification(serial, pump_data, title="New Pump Assembly Notification")
+            os.startfile(pdf_path, "print")
+            logger.info(f"PDF generated and print dialog opened for pump {serial}")
+        except Exception as e:
+            logger.error(f"Failed to generate PDF or open print dialog for {serial}: {str(e)}")
+
+        # Send email to stores
+        subject = f"New Pump Assembly Created: {serial}"
+        greeting = "Dear Stores Team,"
+        body_content = f"""
+            <p>A new pump assembly has been created and requires stock to be booked out of Sage and pulled. Please open the Guth Pump Assembly Program to start the process.</p>
+            <h3 style="color: #34495e;">Pump Details</h3>
+            {generate_pump_details_table(pump_data)}
+        """
+        footer = "Regards,<br>Guth Pump Registry"
+        threading.Thread(target=send_email, args=(STORES_EMAIL, subject, greeting, body_content, footer), daemon=True).start()
 
         error_label.config(text="Pump created successfully!", bootstyle="success")
         refresh_pump_list()
@@ -289,37 +318,6 @@ def show_dashboard(root, username, role, logout_callback):
     tree.bind("<Double-1>", lambda event: edit_pump_window(main_frame, tree, root, username, role, logout_callback))
 
     return main_frame
-
-def send_email(serial, data):
-    try:
-        msg = MIMEText(f"New pump {serial} is ready for stock pull.\nDetails:\n{json.dumps(data, indent=2)}")
-        msg["Subject"] = f"New Pump Assembly: {serial}"
-        msg["From"] = "noreply@guth.co.za"
-        msg["To"] = STORES_EMAIL
-        with smtplib.SMTP("smtp.guth.co.za") as server:
-            server.login("username", "password")  # Update credentials
-            server.send_message(msg)
-        logger.info(f"Email sent for pump {serial}")
-    except Exception as e:
-        logger.error(f"Email send failed for {serial}: {str(e)}")
-
-def print_confirmation(serial, data):
-    try:
-        pdf_path = os.path.join(BASE_DIR, "data", f"pump_{serial}_confirmation.pdf")
-        c = canvas.Canvas(pdf_path, pagesize=letter)
-        c.setFont("Helvetica", 12)
-        c.drawString(100, 750, f"New Pump Assembly Confirmation: {serial}")
-        c.drawString(100, 730, "Instructions: Please pull stock for the following pump:")
-        y = 710
-        for key, value in data.items():
-            c.drawString(100, y, f"{key.replace('_', ' ').title()}: {value}")
-            y -= 20
-        c.showPage()
-        c.save()
-        os.startfile(pdf_path, "print")
-        logger.info(f"Confirmation printed for pump {serial}")
-    except Exception as e:
-        logger.error(f"Print failed for {serial}: {str(e)}")
 
 def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
     selected = tree.selection()
