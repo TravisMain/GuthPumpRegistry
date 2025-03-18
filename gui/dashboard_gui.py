@@ -76,8 +76,8 @@ def show_dashboard(root, username, role, logout_callback):
     ttk.Label(header_frame, text="Create New Pump Assembly", font=("Roboto", 16, "bold")).pack(pady=10)
 
     # Form
-    form_frame = ttk.LabelFrame(main_frame, text="New Pump Details", padding=20, bootstyle="default")
-    form_frame.pack(fill=X, padx=10, pady=10)
+    form_frame = ttk.LabelFrame(main_frame, text="New Pump Details", padding=10, bootstyle="default")
+    form_frame.pack(fill=X, padx=10, pady=5)
 
     fields = [
         ("Customer", "entry", None, True),
@@ -92,13 +92,13 @@ def show_dashboard(root, username, role, logout_callback):
         ("Flush Seal Housing", "checkbutton", None, False)
     ]
     entries = {}
-    custom_impeller_entry = ttk.Entry(form_frame, font=("Roboto", 12))
-    custom_impeller_entry.grid(row=fields.index(("Impeller Size", "combobox", None, True)), column=2, pady=5, padx=5, sticky=EW)
+    custom_impeller_entry = ttk.Entry(form_frame, font=("Roboto", 10))
+    custom_impeller_entry.grid(row=fields.index(("Impeller Size", "combobox", None, True)), column=2, pady=3, padx=5, sticky=EW)
     custom_impeller_entry.grid_remove()  # Hide initially
 
     # For Connection Type "Other"
-    other_entry = ttk.Entry(form_frame, font=("Roboto", 12), state="disabled")
-    other_entry.grid(row=fields.index(("Connection Type", "combobox", options["connection_type"], True)), column=2, pady=5, sticky=EW)
+    other_entry = ttk.Entry(form_frame, font=("Roboto", 10), state="disabled")
+    other_entry.grid(row=fields.index(("Connection Type", "combobox", options["connection_type"], True)), column=2, pady=3, sticky=EW)
     other_entry.grid_remove()
 
     tooltips = {
@@ -115,20 +115,19 @@ def show_dashboard(root, username, role, logout_callback):
     }
 
     for i, (label, widget_type, opts, required) in enumerate(fields):
-        label_widget = ttk.Label(form_frame, text=f"{label}{' *' if required else ''}:", font=("Roboto", 12))
-        label_widget.grid(row=i, column=0, pady=5, sticky=W)
+        label_widget = ttk.Label(form_frame, text=f"{label}{' *' if required else ''}:", font=("Roboto", 10))
+        label_widget.grid(row=i, column=0, pady=3, sticky=W)
         CustomTooltip(label_widget, tooltips[label.lower()])  # Use custom tooltip
 
         if widget_type == "entry":
-            entry = ttk.Entry(form_frame, font=("Roboto", 12))
+            entry = ttk.Entry(form_frame, font=("Roboto", 10))
         elif widget_type == "combobox":
             if label == "Pump Model":
-                pump_model_combobox = ttk.Combobox(form_frame, values=opts, font=("Roboto", 12), state="readonly")
+                pump_model_combobox = ttk.Combobox(form_frame, values=opts, font=("Roboto", 10), state="readonly")
                 pump_model_combobox.set(opts[0])
                 entry = pump_model_combobox
             elif label == "Impeller Size":
-                impeller_combobox = ttk.Combobox(form_frame, font=("Roboto", 12), state="readonly")
-                # Set initial options based on the default pump model
+                impeller_combobox = ttk.Combobox(form_frame, font=("Roboto", 10), state="readonly")
                 initial_pump_model = pump_model_combobox.get()
                 impeller_opts = options["impeller_size"].get(initial_pump_model, []) + ["Other"]
                 impeller_combobox["values"] = impeller_opts
@@ -139,7 +138,7 @@ def show_dashboard(root, username, role, logout_callback):
                     new_impeller_opts = options["impeller_size"].get(selected_pump_model, []) + ["Other"]
                     impeller_combobox["values"] = new_impeller_opts
                     impeller_combobox.set(new_impeller_opts[0])
-                    custom_impeller_entry.grid_remove()  # Hide custom field when options change
+                    custom_impeller_entry.grid_remove()
 
                 def on_impeller_select(event):
                     if impeller_combobox.get() == "Other":
@@ -151,11 +150,10 @@ def show_dashboard(root, username, role, logout_callback):
                 impeller_combobox.bind("<<ComboboxSelected>>", on_impeller_select)
                 entry = impeller_combobox
             elif label == "Connection Type":
-                # Avoid duplicating "Other" if it's already in opts
                 connection_opts = opts.copy()
                 if "Other" not in connection_opts:
                     connection_opts.append("Other")
-                connection_combobox = ttk.Combobox(form_frame, values=connection_opts, font=("Roboto", 12), state="readonly")
+                connection_combobox = ttk.Combobox(form_frame, values=connection_opts, font=("Roboto", 10), state="readonly")
                 connection_combobox.set(connection_opts[0] if connection_opts[0] != "Other" else connection_opts[1] if len(connection_opts) > 1 else "")
 
                 def on_connection_select(event):
@@ -169,16 +167,16 @@ def show_dashboard(root, username, role, logout_callback):
                 connection_combobox.bind("<<ComboboxSelected>>", on_connection_select)
                 entry = connection_combobox
             else:
-                entry = ttk.Combobox(form_frame, values=opts, font=("Roboto", 12), state="readonly")
+                entry = ttk.Combobox(form_frame, values=opts, font=("Roboto", 10), state="readonly")
                 entry.set(opts[0])
         elif widget_type == "checkbutton":
             entry = ttk.Checkbutton(form_frame, text="", bootstyle="success-round-toggle")
-        entry.grid(row=i, column=1, pady=5, sticky=EW)
+        entry.grid(row=i, column=1, pady=3, sticky=EW)
         entries[label.lower().replace(" ", "_")] = entry
 
     form_frame.grid_columnconfigure(1, weight=1)
-    error_label = ttk.Label(form_frame, text="", font=("Roboto", 12), bootstyle="danger")
-    error_label.grid(row=len(fields), column=0, columnspan=2, pady=5)
+    error_label = ttk.Label(form_frame, text="", font=("Roboto", 10), bootstyle="danger")
+    error_label.grid(row=len(fields), column=0, columnspan=2, pady=3)
 
     def submit_pump():
         data = {}
@@ -215,14 +213,39 @@ def show_dashboard(root, username, role, logout_callback):
         error_label.config(text="Pump created successfully!", bootstyle="success")
         refresh_pump_list()
 
-    ttk.Button(form_frame, text="Submit", command=submit_pump, bootstyle="success", style="large.TButton").grid(row=len(fields) + 1, column=0, columnspan=2, pady=10)
+    # Place Submit and Logoff buttons side by side
+    ttk.Button(form_frame, text="Submit", command=submit_pump, bootstyle="success", style="large.TButton").grid(row=len(fields) + 1, column=0, pady=5, padx=5, sticky=W)
+    ttk.Button(form_frame, text="Logoff", command=logout_callback, bootstyle="secondary", style="large.TButton").grid(row=len(fields) + 1, column=1, pady=5, padx=5, sticky=W)
 
-    # Pump List
+    # Footer
+    footer_frame = ttk.Frame(main_frame)
+    footer_frame.pack(side=BOTTOM, pady=5, fill=X)
+    ttk.Label(footer_frame, text="\u00A9 Guth South Africa", font=("Roboto", 10)).pack(expand=True)
+    ttk.Label(footer_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack(expand=True)
+
+    # Pump List with Search and Filter
     pump_list_frame = ttk.LabelFrame(main_frame, text="All Pumps", padding=10)
-    pump_list_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
+    pump_list_frame.pack(fill=BOTH, expand=True, padx=10, pady=5)
+
+    # Search and Filter Section
+    search_filter_frame = ttk.Frame(pump_list_frame)
+    search_filter_frame.pack(fill=X, pady=(0, 5))
+
+    ttk.Label(search_filter_frame, text="Search by Serial Number:", font=("Roboto", 10)).pack(side=LEFT, padx=5)
+    search_entry = ttk.Entry(search_filter_frame, font=("Roboto", 10), width=20)
+    search_entry.pack(side=LEFT, padx=5)
+    CustomTooltip(search_entry, "Enter a serial number to search (partial matches allowed)")
+
+    ttk.Label(search_filter_frame, text="Filter by Status:", font=("Roboto", 10)).pack(side=LEFT, padx=5)
+    filter_combobox = ttk.Combobox(search_filter_frame, values=["All", "Pending", "Testing", "Completed"], font=("Roboto", 10), state="readonly")
+    filter_combobox.set("All")
+    filter_combobox.pack(side=LEFT, padx=5)
+    CustomTooltip(filter_combobox, "Filter pumps by their current status")
+
+    # Pump List Treeview
     columns = ("Serial Number", "Customer", "Branch", "Pump Model", "Configuration", "Impeller Size", "Connection Type", 
                "Pressure Required", "Flow Rate Required", "Custom Motor", "Flush Seal Housing", "Status")
-    tree = ttk.Treeview(pump_list_frame, columns=columns, show="headings", height=10)
+    tree = ttk.Treeview(pump_list_frame, columns=columns, show="headings", height=12)  # Increased height for more rows
     for col in columns:
         tree.heading(col, text=col, anchor=W)
         tree.column(col, width=120, anchor=W)
@@ -234,26 +257,36 @@ def show_dashboard(root, username, role, logout_callback):
     def refresh_pump_list():
         for item in tree.get_children():
             tree.delete(item)
+        search_term = search_entry.get().lower()
+        filter_status = filter_combobox.get()
+
         with connect_db() as conn:
             cursor = conn.cursor()
-            cursor.execute("""
+            query = """
                 SELECT serial_number, customer, branch, pump_model, configuration, impeller_size, connection_type, 
                        pressure_required, flow_rate_required, custom_motor, flush_seal_housing, status 
                 FROM pumps
-            """)
+            """
+            params = []
+            if filter_status != "All":
+                query += " WHERE status = ?"
+                params.append(filter_status)
+            cursor.execute(query, params)
+
             for pump in cursor.fetchall():
-                tree.insert("", END, values=(pump["serial_number"], pump["customer"], pump["branch"], pump["pump_model"], 
-                                            pump["configuration"], pump["impeller_size"], pump["connection_type"], 
-                                            pump["pressure_required"], pump["flow_rate_required"], pump["custom_motor"], 
-                                            pump["flush_seal_housing"], pump["status"]))
+                # Apply search filter on serial number
+                if search_term in pump["serial_number"].lower():
+                    tree.insert("", END, values=(pump["serial_number"], pump["customer"], pump["branch"], pump["pump_model"], 
+                                                pump["configuration"], pump["impeller_size"], pump["connection_type"], 
+                                                pump["pressure_required"], pump["flow_rate_required"], pump["custom_motor"], 
+                                                pump["flush_seal_housing"], pump["status"]))
+
+    # Bind search and filter updates
+    search_entry.bind("<KeyRelease>", lambda event: refresh_pump_list())
+    filter_combobox.bind("<<ComboboxSelected>>", lambda event: refresh_pump_list())
 
     refresh_pump_list()
     tree.bind("<Double-1>", lambda event: edit_pump_window(main_frame, tree, root, username, role, logout_callback))
-
-    # Footer
-    ttk.Button(main_frame, text="Logoff", command=logout_callback, bootstyle="warning", style="large.TButton").pack(pady=10)
-    ttk.Label(main_frame, text="\u00A9 Guth South Africa", font=("Roboto", 10)).pack(pady=(5, 0))
-    ttk.Label(main_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack()
 
     return main_frame
 
@@ -364,7 +397,6 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
                 entry = pump_model_combobox
             elif field == "impeller_size":
                 impeller_combobox = ttk.Combobox(frame, font=("Roboto", 12), state="readonly")
-                # Set initial options based on the pump's current model
                 initial_pump_model = pump_dict.get("pump_model", "PT 0.55KW")
                 impeller_opts = options["impeller_size"].get(initial_pump_model, []) + ["Other"]
                 impeller_combobox["values"] = impeller_opts
@@ -379,7 +411,7 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
                     new_impeller_opts = options["impeller_size"].get(selected_pump_model, []) + ["Other"]
                     impeller_combobox["values"] = new_impeller_opts
                     impeller_combobox.set(new_impeller_opts[0])
-                    custom_impeller_entry.grid_remove()  # Hide custom field when options change
+                    custom_impeller_entry.grid_remove()
 
                 def on_impeller_select(event):
                     if impeller_combobox.get() == "Other":
@@ -391,7 +423,6 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
                 impeller_combobox.bind("<<ComboboxSelected>>", on_impeller_select)
                 entry = impeller_combobox
             elif field == "connection_type":
-                # Avoid duplicating "Other" if it's already in opts
                 connection_opts = opts.copy()
                 if "Other" not in connection_opts:
                     connection_opts.append("Other")
@@ -451,3 +482,8 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
     button_frame.grid(row=len(fields), column=0, columnspan=2, pady=10)
     ttk.Button(button_frame, text="Save", command=save_changes, bootstyle="success", style="large.TButton").pack(side=LEFT, padx=5)
     ttk.Button(button_frame, text="Retest", command=retest_pump, bootstyle="warning", style="large.TButton").pack(side=LEFT, padx=5)
+
+if __name__ == "__main__":
+    root = ttk.Window(themename="flatly")
+    show_dashboard(root, "testuser", "admin", lambda: print("Logged off"))
+    root.mainloop()

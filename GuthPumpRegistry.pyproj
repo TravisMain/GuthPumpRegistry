@@ -29,6 +29,7 @@
     <Compile Include="gui\approval_gui.py" />
     <Compile Include="gui\assembler_gui.py" />
     <Compile Include="gui\base_gui.py" />
+    <Compile Include="gui\combined_assembler_tester_gui.py" />
     <Compile Include="gui\dashboard_gui.py" />
     <Compile Include="gui\login_gui.py" />
     <Compile Include="gui\pump_originator_gui.py" />

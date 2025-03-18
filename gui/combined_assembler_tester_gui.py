@@ -75,7 +75,7 @@ def show_combined_assembler_tester_dashboard(root, username, role, logout_callba
     # Assembler Pump Inventory
     assembler_list_frame = ttk.LabelFrame(assembler_frame, text="Pumps in Assembler", padding=10)
     assembler_list_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
-    assembler_columns = ("Serial Number", "Customer", "Branch", "Pump Model", "Configuration", "Received")
+    assembler_columns = ("Serial Number", "Customer", "Branch", "Pump Model", "Configuration")  # Removed "Received"
     assembler_tree = ttk.Treeview(assembler_list_frame, columns=assembler_columns, show="headings", height=10)
     for col in assembler_columns:
         assembler_tree.heading(col, text=col, anchor=W)
@@ -91,16 +91,15 @@ def show_combined_assembler_tester_dashboard(root, username, role, logout_callba
         with connect_db() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT p.serial_number, p.customer, p.branch, p.pump_model, p.configuration,
-                       CASE WHEN COUNT(b.pulled_at) = COUNT(b.part_code) THEN 'Yes' ELSE 'No' END AS received
+                SELECT p.serial_number, p.customer, p.branch, p.pump_model, p.configuration
                 FROM pumps p
                 LEFT JOIN bom_items b ON p.serial_number = b.serial_number
                 WHERE p.status = 'Assembler'
                 GROUP BY p.serial_number, p.customer, p.branch, p.pump_model, p.configuration
-            """)
+            """)  # Removed CASE statement for "Received"
             for pump in cursor.fetchall():
                 assembler_tree.insert("", END, values=(pump["serial_number"], pump["customer"], pump["branch"],
-                                                      pump["pump_model"], pump["configuration"], pump["received"]))
+                                                      pump["pump_model"], pump["configuration"]))  # Removed "received"
 
     refresh_assembler_pump_list()
     assembler_tree.bind("<Double-1>", lambda event: show_bom_window(main_frame, assembler_tree, username, refresh_assembler_pump_list))
@@ -141,7 +140,11 @@ def show_combined_assembler_tester_dashboard(root, username, role, logout_callba
     # Footer
     footer_frame = ttk.Frame(main_frame)
     footer_frame.pack(side=BOTTOM, pady=10)
-    ttk.Button(footer_frame, text="Logoff", command=logout_callback, bootstyle="warning", style="large.TButton").pack(pady=5)
+    refresh_btn = ttk.Button(footer_frame, text="Refresh", command=lambda: [refresh_assembler_pump_list(), refresh_testing_pump_list()], 
+                            bootstyle="info", style="large.TButton")
+    refresh_btn.pack(side=LEFT, padx=5)
+    CustomTooltip(refresh_btn, text="Refresh the assembler and tester pump lists")
+    ttk.Button(footer_frame, text="Logoff", command=logout_callback, bootstyle="warning", style="large.TButton").pack(side=LEFT, padx=5)
     ttk.Label(footer_frame, text="\u00A9 Guth South Africa", font=("Roboto", 10)).pack()
     ttk.Label(footer_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack()
 
@@ -443,9 +446,6 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
 
     approval_frame = ttk.Frame(main_frame)
     approval_frame.grid(row=2, column=0, pady=15, sticky=W+E)
-    ttk.Label(approval_frame, text="Approved By:", font=("Roboto", 10)).pack(side=LEFT, padx=10)
-    name_entry = ttk.Entry(approval_frame, width=20)
-    name_entry.pack(side=LEFT, padx=10)
     ttk.Label(approval_frame, text="Date:", font=("Roboto", 10)).pack(side=LEFT, padx=10)
     ttk.Label(approval_frame, text=datetime.now().strftime("%Y-%m-%d"), font=("Roboto", 10)).pack(side=LEFT, padx=10)
 
@@ -483,7 +483,6 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
             "flowrate": [entry.get() for entry in flow_entries],
             "pressure": [entry.get() for entry in pressure_entries],
             "amperage": [entry.get() for entry in amp_entries],
-            "approved_by": name_entry.get(),
             "approval_date": datetime.now().strftime("%Y-%m-%d"),
         }
 

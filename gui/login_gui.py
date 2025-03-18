@@ -83,6 +83,13 @@ def show_login_screen(root, login_callback, register_callback):
     register_button.pack(side=LEFT, padx=10)
     ToolTip(register_button, text="Register a new account", bootstyle="danger")
 
+    # Forgot Password Button
+    forgot_button = ttk.Button(login_frame, text="Forgot Password?", 
+                              command=lambda: forgot_password_window(root, username_entry.get()), 
+                              bootstyle="info", style="large.TButton")
+    forgot_button.pack(pady=(5, 10))
+    ToolTip(forgot_button, text="Request a password reset link", bootstyle="info")
+
     # Copyright and Build Number
     ttk.Label(login_frame, text="\u00A9 Guth South Africa", font=("Roboto", 10)).pack(pady=(5, 0))
     ttk.Label(login_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack()
@@ -90,3 +97,64 @@ def show_login_screen(root, login_callback, register_callback):
     # Bind Enter key
     root.bind("<Return>", lambda event: login_callback(username_entry.get(), password_entry.get()))
     return login_frame, error_label  # Return frame and error label
+
+def forgot_password_window(root, username):
+    # Create a new top-level window for password recovery
+    forgot_window = ttk.Toplevel(root)
+    forgot_window.title("Forgot Password")
+    forgot_window.geometry("300x200")
+    forgot_window.transient(root)  # Keep it on top of the main window
+    forgot_window.grab_set()  # Modal behavior
+
+    # Frame for layout
+    forgot_frame = ttk.Frame(forgot_window, padding=10)
+    forgot_frame.pack(fill=BOTH, expand=True)
+
+    # Instructions
+    ttk.Label(forgot_frame, text="Enter your username or email to reset your password:", font=("Roboto", 12)).pack(pady=10)
+
+    # Username/Email Entry
+    reset_entry = ttk.Entry(forgot_frame, width=30, font=("Roboto", 12))
+    reset_entry.insert(0, username)  # Pre-fill with current username
+    reset_entry.pack(pady=5)
+    ToolTip(reset_entry, text="Enter your username or registered email", bootstyle="info")
+
+    # Error/Success Label
+    result_label = ttk.Label(forgot_frame, text="", font=("Roboto", 10), bootstyle="danger")
+    result_label.pack(pady=5)
+
+    def submit_reset():
+        reset_value = reset_entry.get().strip()
+        if not reset_value:
+            result_label.config(text="Please enter a username or email.", bootstyle="danger")
+            return
+        
+        # Simulate password reset process (replace with actual logic)
+        try:
+            logger.info(f"Password reset requested for: {reset_value}")
+            # Here you would typically:
+            # 1. Check if the username/email exists in the database
+            # 2. Generate a reset token
+            # 3. Send an email with a reset link
+            # For now, simulate success
+            result_label.config(text=f"Reset link sent to {reset_value} (simulated). Check your email.", bootstyle="success")
+            forgot_window.after(2000, forgot_window.destroy)  # Auto-close after 2 seconds
+        except Exception as e:
+            logger.error(f"Password reset failed: {str(e)}")
+            result_label.config(text="Error sending reset link. Try again.", bootstyle="danger")
+
+    # Submit Button
+    ttk.Button(forgot_frame, text="Submit", command=submit_reset, bootstyle="success", style="large.TButton").pack(pady=10)
+    ToolTip(forgot_frame, text="Submit your request to receive a password reset link", bootstyle="success")
+
+    # Ensure the window stays open until closed or auto-closed
+    forgot_window.wait_window()
+
+if __name__ == "__main__":
+    root = ttk.Window(themename="flatly")
+    def mock_login(username, password):
+        print(f"Login attempted with {username}, {password}")
+    def mock_register():
+        print("Register clicked")
+    show_login_screen(root, mock_login, mock_register)
+    root.mainloop()
