@@ -4,6 +4,7 @@ from ttkbootstrap.dialogs import Messagebox  # For error messages
 from PIL import Image, ImageTk
 from database import connect_db, create_pump
 import os
+from datetime import datetime
 import json
 import threading
 from utils.config import get_logger
@@ -13,8 +14,37 @@ logger = get_logger("dashboard_gui")
 BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
 LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo.png")
 OPTIONS_PATH = os.path.join(BASE_DIR, "assets", "pump_options.json")
+CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 BUILD_NUMBER = "1.0.0"
 STORES_EMAIL = "stores@guth.co.za"  # Update as needed
+
+# Default directories if not specified in config
+DEFAULT_DIRS = {
+    "certificate": os.path.join(BASE_DIR, "certificates"),
+    "bom": os.path.join(BASE_DIR, "boms"),
+    "confirmation": os.path.join(BASE_DIR, "confirmations"),
+    "reports": os.path.join(BASE_DIR, "reports"),
+    "excel_exports": os.path.join(BASE_DIR, "exports")
+}
+
+def load_config():
+    """Load configuration from config.json, or create it with defaults if it doesn't exist."""
+    if not os.path.exists(CONFIG_PATH):
+        # Create default config
+        config = {"document_dirs": DEFAULT_DIRS}
+        with open(CONFIG_PATH, "w") as f:
+            json.dump(config, f, indent=4)
+        logger.info(f"Created default config file at {CONFIG_PATH}")
+        return config
+    with open(CONFIG_PATH, "r") as f:
+        config = json.load(f)
+    # Ensure all required keys exist
+    if "document_dirs" not in config:
+        config["document_dirs"] = DEFAULT_DIRS
+    for key, default_path in DEFAULT_DIRS.items():
+        if key not in config["document_dirs"]:
+            config["document_dirs"][key] = default_path
+    return config
 
 # Custom Tooltip class to replace ttkbootstrap.Tooltip
 class CustomTooltip:
@@ -220,15 +250,36 @@ def show_dashboard(root, username, role, logout_callback):
             "requested_by": username,
         }
 
-        # Generate PDF and open print dialog
+        # Load configuration
+        config = load_config()
+        certificate_dir = config["document_dirs"]["certificate"]
+        confirmation_dir = config["document_dirs"]["confirmation"]
+        if not os.path.exists(certificate_dir):
+            os.makedirs(certificate_dir)
+        if not os.path.exists(confirmation_dir):
+            os.makedirs(confirmation_dir)
+
+        # Generate PDF for new pump assembly notification and save to certificate directory
+        pdf_path = os.path.join(certificate_dir, f"new_pump_notification_{serial}.pdf")
         try:
-            pdf_path = generate_pdf_notification(serial, pump_data, title="New Pump Assembly Notification")
+            generate_pdf_notification(serial, pump_data, title="New Pump Assembly Notification", output_path=pdf_path)
             os.startfile(pdf_path, "print")
-            logger.info(f"PDF generated and print dialog opened for pump {serial}")
+            logger.info(f"PDF generated and print dialog opened for pump {serial} at {pdf_path}")
         except Exception as e:
             logger.error(f"Failed to generate PDF or open print dialog for {serial}: {str(e)}")
 
-        # Send email to stores
+        # Generate confirmation document for pump creation
+        confirmation_path = os.path.join(confirmation_dir, f"confirmation_pump_created_{serial}.pdf")
+        confirmation_data = {
+            "serial_number": serial,
+            "status": "Created",
+            "created_by": username,
+            "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        generate_pdf_notification(serial, confirmation_data, title=f"Confirmation - Pump Created {serial}", output_path=confirmation_path)
+        logger.info(f"Saved confirmation to {confirmation_path}")
+
+        # Send email to stores with both PDFs attached
         subject = f"New Pump Assembly Created: {serial}"
         greeting = "Dear Stores Team,"
         body_content = f"""
@@ -237,7 +288,8 @@ def show_dashboard(root, username, role, logout_callback):
             {generate_pump_details_table(pump_data)}
         """
         footer = "Regards,<br>Guth Pump Registry"
-        threading.Thread(target=send_email, args=(STORES_EMAIL, subject, greeting, body_content, footer), daemon=True).start()
+        attachments = [pdf_path, confirmation_path]
+        threading.Thread(target=send_email, args=(STORES_EMAIL, subject, greeting, body_content, footer, *attachments), daemon=True).start()
 
         error_label.config(text="Pump created successfully!", bootstyle="success")
         refresh_pump_list()
@@ -473,6 +525,41 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
             cursor.execute("UPDATE pumps SET status = ? WHERE serial_number = ?", ("Testing", serial_number))
             conn.commit()
             logger.info(f"Pump {serial_number} set to Testing for retest by {username}")
+
+            # Load configuration
+            config = load_config()
+            confirmation_dir = config["document_dirs"]["confirmation"]
+            if not os.path.exists(confirmation_dir):
+                os.makedirs(confirmation_dir)
+
+            # Generate confirmation document for retest
+            confirmation_path = os.path.join(confirmation_dir, f"confirmation_retest_{serial_number}.pdf")
+            confirmation_data = {
+                "serial_number": serial_number,
+                "status": "Sent for Retest",
+                "action_by": username,
+                "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            generate_pdf_notification(serial_number, confirmation_data, title=f"Confirmation - Retest {serial_number}", output_path=confirmation_path)
+            logger.info(f"Saved retest confirmation to {confirmation_path}")
+
+            # Send email to stores with confirmation PDF attached
+            subject = f"Pump {serial_number} Sent for Retest"
+            greeting = "Dear Stores Team,"
+            body_content = f"""
+                <p>Pump {serial_number} has been sent for retesting. Please ensure the necessary preparations are made.</p>
+                <h3 style="color: #34495e;">Pump Details</h3>
+                <table border="1" style="border-collapse: collapse;">
+                    <tr><th>Serial Number</th><td>{serial_number}</td></tr>
+                    <tr><th>Customer</th><td>{pump_dict['customer']}</td></tr>
+                    <tr><th>Branch</th><td>{pump_dict['branch']}</td></tr>
+                    <tr><th>Pump Model</th><td>{pump_dict['pump_model']}</td></tr>
+                    <tr><th>Configuration</th><td>{pump_dict['configuration']}</td></tr>
+                </table>
+            """
+            footer = "Regards,<br>Guth Pump Registry"
+            threading.Thread(target=send_email, args=(STORES_EMAIL, subject, greeting, body_content, footer, confirmation_path), daemon=True).start()
+
         show_dashboard(root, username, role, logout_callback)
         edit_window.destroy()
 

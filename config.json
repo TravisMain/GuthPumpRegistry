@@ -1,0 +1,9 @@
+{
+    "document_dirs": {
+        "certificate": "C:\\Users\\travism\\source\\repos\\GuthPumpRegistry\\certificates",
+        "bom": "C:\\Users\\travism\\source\\repos\\GuthPumpRegistry\\boms",
+        "confirmation": "C:\\Users\\travism\\source\\repos\\GuthPumpRegistry\\confirmations",
+        "reports": "C:\\Users\\travism\\source\\repos\\GuthPumpRegistry\\reports",
+        "excel_exports": "C:/Users/travism/OneDrive - Guth South Africa (Pty) Ltd/Desktop"
+    }
+}

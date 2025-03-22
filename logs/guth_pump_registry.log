@@ -3616,3 +3616,522 @@
 2025-03-18 16:55:54,092 - INFO - Logo loaded: 378x125
 2025-03-18 16:55:54,135 - INFO - Logo scaled: 567x187
 2025-03-18 16:55:54,145 - INFO - User logged out
+2025-03-19 10:39:23,729 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-19 10:39:23,753 - INFO - Logo loaded: 378x125
+2025-03-19 10:39:23,802 - INFO - Logo scaled: 567x187
+2025-03-19 10:39:23,820 - INFO - Application started
+2025-03-19 10:39:31,651 - INFO - User user1 logged in with role Pump Originator
+2025-03-19 10:39:38,955 - INFO - Inserted 12 BOM items for pump 1101 014 - 25
+2025-03-19 10:39:38,955 - INFO - Pump created: 1101 014 - 25 by user1
+2025-03-19 10:39:38,959 - INFO - New pump created by user1: 1101 014 - 25 with BOM
+2025-03-19 10:39:38,960 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-19 10:39:38,960 - INFO - Logo loaded: (378, 125)
+2025-03-19 10:39:38,962 - INFO - Logo scaled: (567, 187)
+2025-03-19 10:39:39,060 - INFO - PDF notification generated: C:\Users\travism\source\repos\GuthPumpRegistry\data\notification_1101 014 - 25.pdf
+2025-03-19 10:39:39,094 - INFO - PDF generated and print dialog opened for pump 1101 014 - 25
+2025-03-19 10:39:39,158 - WARNING - Email attempt 1 failed: SMTP AUTH extension not supported by server.
+2025-03-19 10:39:41,190 - WARNING - Email attempt 2 failed: SMTP AUTH extension not supported by server.
+2025-03-19 10:39:43,225 - WARNING - Email attempt 3 failed: SMTP AUTH extension not supported by server.
+2025-03-19 10:39:43,225 - ERROR - Failed to send email to stores@guth.co.za after 3 attempts
+2025-03-19 10:39:56,167 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-19 10:39:56,168 - INFO - Logo loaded: 378x125
+2025-03-19 10:39:56,215 - INFO - Logo scaled: 567x187
+2025-03-19 10:39:56,236 - INFO - User logged out
+2025-03-19 10:40:02,118 - INFO - User stores1 logged in with role Stores
+2025-03-19 10:40:11,327 - INFO - Part pulled: 10.55.090011 for 1101 014 - 25 by stores1
+2025-03-19 10:40:11,327 - INFO - Part pulled: 10.55.100047 for 1101 014 - 25 by stores1
+2025-03-19 10:40:11,328 - INFO - Part pulled: 10.77.000051 for 1101 014 - 25 by stores1
+2025-03-19 10:40:11,328 - INFO - Part pulled: 10.77.000052 for 1101 014 - 25 by stores1
+2025-03-19 10:40:11,328 - INFO - Part pulled: 10.77.000053 for 1101 014 - 25 by stores1
+2025-03-19 10:40:11,328 - INFO - Part pulled: 10.77.00258 for 1101 014 - 25 by stores1
+2025-03-19 10:40:11,328 - INFO - Part pulled: 10.77.00056 for 1101 014 - 25 by stores1
+2025-03-19 10:40:11,328 - INFO - Part pulled: 10.77.00092 for 1101 014 - 25 by stores1
+2025-03-19 10:40:11,328 - INFO - Part pulled: 10.77.00110 for 1101 014 - 25 by stores1
+2025-03-19 10:40:11,328 - INFO - Part pulled: 10.77.00135 for 1101 014 - 25 by stores1
+2025-03-19 10:40:11,328 - INFO - Part pulled: 11.18.03107 for 1101 014 - 25 by stores1
+2025-03-19 10:40:11,328 - INFO - Part pulled: 11.18.03109 for 1101 014 - 25 by stores1
+2025-03-19 10:40:11,332 - INFO - BOM submitted for 1101 014 - 25 by stores1, moved to Assembler
+2025-03-19 10:40:11,454 - INFO - BOM printed for 1101 014 - 25
+2025-03-19 10:40:11,478 - WARNING - Email attempt 1 failed: SMTP AUTH extension not supported by server.
+2025-03-19 10:40:13,499 - WARNING - Email attempt 2 failed: SMTP AUTH extension not supported by server.
+2025-03-19 10:40:14,156 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-19 10:40:14,156 - INFO - Logo loaded: 378x125
+2025-03-19 10:40:14,204 - INFO - Logo scaled: 567x187
+2025-03-19 10:40:14,214 - INFO - User logged out
+2025-03-19 10:40:15,532 - WARNING - Email attempt 3 failed: SMTP AUTH extension not supported by server.
+2025-03-19 10:40:15,532 - ERROR - Failed to send email to john.doe@example.com after 3 attempts
+2025-03-19 10:40:20,767 - INFO - User tester1 logged in with role Testing
+2025-03-19 10:40:30,103 - INFO - Pump 1101 014 - 25 moved to Testing by tester1
+2025-03-19 10:40:30,132 - WARNING - Email attempt 1 failed: SMTP AUTH extension not supported by server.
+2025-03-19 10:40:32,175 - WARNING - Email attempt 2 failed: SMTP AUTH extension not supported by server.
+2025-03-19 10:40:34,212 - WARNING - Email attempt 3 failed: SMTP AUTH extension not supported by server.
+2025-03-19 10:40:34,212 - ERROR - Failed to send email to john.doe@example.com after 3 attempts
+2025-03-19 10:41:01,279 - INFO - Pump 1101 014 - 25 submitted for approval by tester1
+2025-03-19 10:41:01,279 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-19 10:41:01,280 - INFO - Logo loaded: (378, 125)
+2025-03-19 10:41:01,282 - INFO - Logo scaled: (567, 187)
+2025-03-19 10:41:01,382 - INFO - PDF notification generated: C:\Users\travism\source\repos\GuthPumpRegistry\data\notification_1101 014 - 25.pdf
+2025-03-19 10:41:01,454 - WARNING - Email attempt 1 failed: SMTP AUTH extension not supported by server.
+2025-03-19 10:41:03,482 - WARNING - Email attempt 2 failed: SMTP AUTH extension not supported by server.
+2025-03-19 10:41:05,110 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-19 10:41:05,110 - INFO - Logo loaded: 378x125
+2025-03-19 10:41:05,160 - INFO - Logo scaled: 567x187
+2025-03-19 10:41:05,171 - INFO - User logged out
+2025-03-19 10:41:05,510 - WARNING - Email attempt 3 failed: SMTP AUTH extension not supported by server.
+2025-03-19 10:41:05,510 - ERROR - Failed to send email to john.doe@example.com after 3 attempts
+2025-03-19 10:41:11,104 - INFO - User approver1 logged in with role Approval
+2025-03-19 10:41:19,718 - INFO - Certificate generated: C:\Users\travism\source\repos\GuthPumpRegistry\certificates/Pump_Test_Report_1101 014 - 25.pdf
+2025-03-19 10:41:19,771 - WARNING - Email attempt 1 failed: SMTP AUTH extension not supported by server.
+2025-03-19 10:41:21,793 - WARNING - Email attempt 2 failed: SMTP AUTH extension not supported by server.
+2025-03-19 10:41:23,819 - WARNING - Email attempt 3 failed: SMTP AUTH extension not supported by server.
+2025-03-19 10:41:23,819 - ERROR - Failed to send email to alice.brown@example.com after 3 attempts
+2025-03-19 10:41:23,825 - INFO - Pump 1101 014 - 25 approved by approver1
+2025-03-19 10:41:51,078 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-19 10:41:51,078 - INFO - Logo loaded: 378x125
+2025-03-19 10:41:51,125 - INFO - Logo scaled: 567x187
+2025-03-19 10:41:51,136 - INFO - User logged out
+2025-03-19 10:42:03,616 - INFO - User user1 logged in with role Pump Originator
+2025-03-19 10:42:29,510 - INFO - Updated pump 1101 014 - 25 by user1
+2025-03-19 10:42:31,921 - INFO - Pump 1101 014 - 25 set to Testing for retest by user1
+2025-03-19 10:42:37,061 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-19 10:42:37,061 - INFO - Logo loaded: 378x125
+2025-03-19 10:42:37,100 - INFO - Logo scaled: 567x187
+2025-03-19 10:42:37,113 - INFO - User logged out
+2025-03-19 13:20:05,368 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-19 13:20:05,388 - INFO - Logo loaded: 378x125
+2025-03-19 13:20:05,438 - INFO - Logo scaled: 567x187
+2025-03-19 13:20:05,456 - INFO - Application started
+2025-03-19 13:20:17,011 - INFO - User tester1 logged in with role Testing
+2025-03-19 13:20:36,186 - INFO - Pump 1101 014 - 25 submitted for approval by tester1
+2025-03-19 13:20:36,186 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-19 13:20:36,187 - INFO - Logo loaded: (378, 125)
+2025-03-19 13:20:36,188 - INFO - Logo scaled: (567, 187)
+2025-03-19 13:20:36,236 - INFO - PDF notification generated: C:\Users\travism\source\repos\GuthPumpRegistry\data\notification_1101 014 - 25.pdf
+2025-03-19 13:20:36,294 - WARNING - Email attempt 1 failed: SMTP AUTH extension not supported by server.
+2025-03-19 13:20:38,317 - WARNING - Email attempt 2 failed: SMTP AUTH extension not supported by server.
+2025-03-19 13:20:39,040 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-19 13:20:39,040 - INFO - Logo loaded: 378x125
+2025-03-19 13:20:39,084 - INFO - Logo scaled: 567x187
+2025-03-19 13:20:39,096 - INFO - User logged out
+2025-03-19 13:20:40,350 - WARNING - Email attempt 3 failed: SMTP AUTH extension not supported by server.
+2025-03-19 13:20:40,350 - ERROR - Failed to send email to john.doe@example.com after 3 attempts
+2025-03-19 13:20:47,669 - INFO - User approver1 logged in with role Approval
+2025-03-19 13:21:04,267 - INFO - Certificate generated: C:\Users\travism\source\repos\GuthPumpRegistry\certificates/Pump_Test_Report_1101 014 - 25.pdf
+2025-03-19 13:21:04,339 - WARNING - Email attempt 1 failed: SMTP AUTH extension not supported by server.
+2025-03-19 13:21:06,395 - WARNING - Email attempt 2 failed: SMTP AUTH extension not supported by server.
+2025-03-19 13:21:08,441 - WARNING - Email attempt 3 failed: SMTP AUTH extension not supported by server.
+2025-03-19 13:21:08,441 - ERROR - Failed to send email to alice.brown@example.com after 3 attempts
+2025-03-19 13:21:08,450 - INFO - Pump 1101 014 - 25 approved by approver1
+2025-03-19 13:21:40,517 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-19 13:21:40,517 - INFO - Logo loaded: 378x125
+2025-03-19 13:21:40,562 - INFO - Logo scaled: 567x187
+2025-03-19 13:21:40,573 - INFO - User logged out
+2025-03-19 13:21:47,575 - INFO - User user1 logged in with role Pump Originator
+2025-03-19 13:21:50,135 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-19 13:21:50,135 - INFO - Logo loaded: 378x125
+2025-03-19 13:21:50,175 - INFO - Logo scaled: 567x187
+2025-03-19 13:21:50,183 - INFO - User logged out
+2025-03-19 13:22:00,177 - INFO - User user1 logged in with role Pump Originator
+2025-03-19 13:22:06,292 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-19 13:22:06,293 - INFO - Logo loaded: 378x125
+2025-03-19 13:22:06,334 - INFO - Logo scaled: 567x187
+2025-03-19 13:22:06,345 - INFO - User logged out
+2025-03-19 13:22:18,375 - INFO - User stores1 logged in with role Stores
+2025-03-19 13:22:19,902 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-19 13:22:19,902 - INFO - Logo loaded: 378x125
+2025-03-19 13:22:19,942 - INFO - Logo scaled: 567x187
+2025-03-19 13:22:19,958 - INFO - User logged out
+2025-03-20 11:13:17,806 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:13:17,832 - INFO - Logo loaded: 378x125
+2025-03-20 11:13:17,876 - INFO - Logo scaled: 567x187
+2025-03-20 11:13:17,890 - INFO - Application started
+2025-03-20 11:13:31,755 - INFO - User user1 logged in with role Pump Originator
+2025-03-20 11:13:40,770 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:13:40,771 - INFO - Logo loaded: 378x125
+2025-03-20 11:13:40,814 - INFO - Logo scaled: 567x187
+2025-03-20 11:13:40,824 - INFO - User logged out
+2025-03-20 11:13:50,562 - INFO - User user1 logged in with role Pump Originator
+2025-03-20 11:14:14,751 - INFO - Inserted 24 BOM items for pump 7101 001 - 25
+2025-03-20 11:14:14,751 - INFO - Pump created: 7101 001 - 25 by user1
+2025-03-20 11:14:14,755 - INFO - New pump created by user1: 7101 001 - 25 with BOM
+2025-03-20 11:14:14,755 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:14:14,756 - INFO - Logo loaded: (378, 125)
+2025-03-20 11:14:14,758 - INFO - Logo scaled: (567, 187)
+2025-03-20 11:14:14,857 - INFO - PDF notification generated: C:\Users\travism\source\repos\GuthPumpRegistry\data\notification_7101 001 - 25.pdf
+2025-03-20 11:14:14,896 - INFO - PDF generated and print dialog opened for pump 7101 001 - 25
+2025-03-20 11:14:15,050 - WARNING - Email attempt 1 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:14:17,066 - WARNING - Email attempt 2 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:14:19,082 - WARNING - Email attempt 3 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:14:19,082 - ERROR - Failed to send email to stores@guth.co.za after 3 attempts
+2025-03-20 11:14:23,340 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:14:23,340 - INFO - Logo loaded: 378x125
+2025-03-20 11:14:23,384 - INFO - Logo scaled: 567x187
+2025-03-20 11:14:23,402 - INFO - User logged out
+2025-03-20 11:14:28,651 - INFO - User stores1 logged in with role Stores
+2025-03-20 11:15:04,103 - INFO - Part pulled: 10.55.09005 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,103 - INFO - Part pulled: 10.55.10004 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,103 - INFO - Part pulled: 10.77.00005 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,104 - INFO - Part pulled: 10.77.00014 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,104 - INFO - Part pulled: 10.77.00020 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,104 - INFO - Part pulled: 10.77.00030 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,104 - INFO - Part pulled: 10.77.00035 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,104 - INFO - Part pulled: 10.77.00040 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,104 - INFO - Part pulled: 10.77.00240 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,105 - INFO - Part pulled: 10.77.00046 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,105 - INFO - Part pulled: 10.77.00050 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,105 - INFO - Part pulled: 10.77.00056 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,105 - INFO - Part pulled: 10.77.00087 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,105 - INFO - Part pulled: 10.77.00092 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,105 - INFO - Part pulled: 10.77.00094 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,105 - INFO - Part pulled: 10.77.00099 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,106 - INFO - Part pulled: 10.77.00110 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,106 - INFO - Part pulled: 10.77.00120 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,106 - INFO - Part pulled: 10.77.00136 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,106 - INFO - Part pulled: 10.77.00140 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,106 - INFO - Part pulled: 10.77.00150 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,106 - INFO - Part pulled: 10.77.00158 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,106 - INFO - Part pulled: 11.18.03109 for 7101 001 - 25 by stores1
+2025-03-20 11:15:04,111 - INFO - BOM submitted for 7101 001 - 25 by stores1, moved to Assembler
+2025-03-20 11:15:04,224 - INFO - BOM printed for 7101 001 - 25
+2025-03-20 11:15:04,242 - WARNING - Email attempt 1 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:15:06,272 - WARNING - Email attempt 2 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:15:07,940 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:15:07,941 - INFO - Logo loaded: 378x125
+2025-03-20 11:15:07,984 - INFO - Logo scaled: 567x187
+2025-03-20 11:15:07,994 - INFO - User logged out
+2025-03-20 11:15:08,319 - WARNING - Email attempt 3 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:15:08,319 - ERROR - Failed to send email to john.doe@example.com after 3 attempts
+2025-03-20 11:15:13,578 - INFO - User tester1 logged in with role Testing
+2025-03-20 11:15:42,920 - INFO - Pump 7101 001 - 25 moved to Testing by tester1
+2025-03-20 11:15:42,959 - WARNING - Email attempt 1 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:15:44,992 - WARNING - Email attempt 2 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:15:47,035 - WARNING - Email attempt 3 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:15:47,035 - ERROR - Failed to send email to john.doe@example.com after 3 attempts
+2025-03-20 11:17:33,192 - INFO - Pump 7101 001 - 25 submitted for approval by tester1
+2025-03-20 11:17:33,193 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:17:33,193 - INFO - Logo loaded: (378, 125)
+2025-03-20 11:17:33,195 - INFO - Logo scaled: (567, 187)
+2025-03-20 11:17:33,296 - INFO - PDF notification generated: C:\Users\travism\source\repos\GuthPumpRegistry\data\notification_7101 001 - 25.pdf
+2025-03-20 11:17:33,342 - WARNING - Email attempt 1 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:17:35,362 - WARNING - Email attempt 2 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:17:35,948 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:17:35,950 - INFO - Logo loaded: 378x125
+2025-03-20 11:17:35,993 - INFO - Logo scaled: 567x187
+2025-03-20 11:17:36,001 - INFO - User logged out
+2025-03-20 11:17:37,398 - WARNING - Email attempt 3 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:17:37,398 - ERROR - Failed to send email to john.doe@example.com after 3 attempts
+2025-03-20 11:17:55,667 - INFO - User approver1 logged in with role Approval
+2025-03-20 11:18:10,896 - INFO - Certificate generated: C:\Users\travism\source\repos\GuthPumpRegistry\certificates/Pump_Test_Report_7101 001 - 25.pdf
+2025-03-20 11:18:10,953 - WARNING - Email attempt 1 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:18:12,994 - WARNING - Email attempt 2 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:18:15,023 - WARNING - Email attempt 3 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:18:15,023 - ERROR - Failed to send email to alice.brown@example.com after 3 attempts
+2025-03-20 11:18:15,035 - INFO - Pump 7101 001 - 25 approved by approver1
+2025-03-20 11:18:34,856 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:18:34,856 - INFO - Logo loaded: 378x125
+2025-03-20 11:18:34,901 - INFO - Logo scaled: 567x187
+2025-03-20 11:18:34,909 - INFO - User logged out
+2025-03-20 11:18:39,120 - WARNING - Failed login attempt for admin
+2025-03-20 11:18:41,451 - INFO - User admin1 logged in with role Admin
+2025-03-20 11:18:43,914 - WARNING - Invalid value 'PT 0.55KW' for field 'pump_model'. Falling back to default: P1 3.0kW
+2025-03-20 11:18:43,919 - WARNING - Invalid value '123' for field 'customer'. Falling back to default: Guth Pinetown
+2025-03-20 11:18:43,922 - WARNING - Invalid value 'Johannesburg' for field 'branch'. Falling back to default: Guth Pinetown
+2025-03-20 11:18:43,925 - WARNING - Invalid value '92mm' for field 'impeller_size'. Falling back to default: Small
+2025-03-20 11:18:43,927 - WARNING - Invalid value 'DIN' for field 'connection_type'. Falling back to default: Flange
+2025-03-20 11:18:43,931 - WARNING - Invalid value '' for field 'custom_motor'. Falling back to default: Yes
+2025-03-20 11:19:13,907 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:19:13,907 - INFO - Logo loaded: 378x125
+2025-03-20 11:19:13,950 - INFO - Logo scaled: 567x187
+2025-03-20 11:19:13,958 - INFO - User logged out
+2025-03-20 11:19:19,637 - INFO - User user1 logged in with role Pump Originator
+2025-03-20 11:19:45,460 - INFO - Updated pump 7101 001 - 25 by user1
+2025-03-20 11:19:49,732 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:19:49,733 - INFO - Logo loaded: 378x125
+2025-03-20 11:19:49,774 - INFO - Logo scaled: 567x187
+2025-03-20 11:19:49,792 - INFO - User logged out
+2025-03-20 11:19:54,622 - INFO - User stores1 logged in with role Stores
+2025-03-20 11:20:29,879 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:20:29,879 - INFO - Logo loaded: 378x125
+2025-03-20 11:20:29,922 - INFO - Logo scaled: 567x187
+2025-03-20 11:20:29,932 - INFO - User logged out
+2025-03-20 11:22:51,859 - INFO - User admin1 logged in with role Admin
+2025-03-20 11:22:55,559 - WARNING - Invalid value 'P1 4.0KW' for field 'pump_model'. Falling back to default: P1 3.0kW
+2025-03-20 11:22:55,565 - WARNING - Invalid value 'Stores' for field 'customer'. Falling back to default: Guth Pinetown
+2025-03-20 11:22:55,568 - WARNING - Invalid value 'Johannesburg' for field 'branch'. Falling back to default: Guth Pinetown
+2025-03-20 11:22:55,571 - WARNING - Invalid value '160mm' for field 'impeller_size'. Falling back to default: Small
+2025-03-20 11:22:55,574 - WARNING - Invalid value 'DIN' for field 'connection_type'. Falling back to default: Flange
+2025-03-20 11:22:55,578 - WARNING - Invalid value '' for field 'custom_motor'. Falling back to default: Yes
+2025-03-20 11:23:16,977 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:23:16,977 - INFO - Logo loaded: 378x125
+2025-03-20 11:23:17,021 - INFO - Logo scaled: 567x187
+2025-03-20 11:23:17,029 - INFO - User logged out
+2025-03-20 11:38:09,773 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:38:09,781 - INFO - Logo loaded: 378x125
+2025-03-20 11:38:09,828 - INFO - Logo scaled: 567x187
+2025-03-20 11:38:09,840 - INFO - Application started
+2025-03-20 11:38:39,928 - INFO - User user1 logged in with role Pump Originator
+2025-03-20 11:39:08,943 - INFO - Inserted 25 BOM items for pump 4101 002 - 25
+2025-03-20 11:39:08,943 - INFO - Pump created: 4101 002 - 25 by user1
+2025-03-20 11:39:08,948 - INFO - New pump created by user1: 4101 002 - 25 with BOM
+2025-03-20 11:39:08,948 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:39:08,948 - INFO - Logo loaded: (378, 125)
+2025-03-20 11:39:08,950 - INFO - Logo scaled: (567, 187)
+2025-03-20 11:39:09,050 - INFO - PDF notification generated: C:\Users\travism\source\repos\GuthPumpRegistry\data\notification_4101 002 - 25.pdf
+2025-03-20 11:39:09,086 - INFO - PDF generated and print dialog opened for pump 4101 002 - 25
+2025-03-20 11:39:09,129 - WARNING - Email attempt 1 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:39:11,148 - WARNING - Email attempt 2 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:39:13,171 - WARNING - Email attempt 3 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:39:13,172 - ERROR - Failed to send email to stores@guth.co.za after 3 attempts
+2025-03-20 11:39:24,430 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:39:24,430 - INFO - Logo loaded: 378x125
+2025-03-20 11:39:24,476 - INFO - Logo scaled: 567x187
+2025-03-20 11:39:24,486 - INFO - User logged out
+2025-03-20 11:39:29,829 - INFO - User stores1 logged in with role Stores
+2025-03-20 11:40:10,405 - INFO - Part pulled: 10.55.09013 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,405 - INFO - Part pulled: 10.55.10004 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,405 - INFO - Part pulled: 10.77.00003 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,405 - INFO - Part pulled: 10.77.00012 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,405 - INFO - Part pulled: 10.77.00020 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,405 - INFO - Part pulled: 10.77.00030 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,405 - INFO - Part pulled: 10.77.00035 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,405 - INFO - Part pulled: 10.77.00040 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,405 - INFO - Part pulled: 10.77.00230 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,405 - INFO - Part pulled: 10.77.00046 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,406 - INFO - Part pulled: 10.77.00050 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,406 - INFO - Part pulled: 10.77.00056 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,406 - INFO - Part pulled: 10.77.00086 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,406 - INFO - Part pulled: 10.77.00092 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,406 - INFO - Part pulled: 10.77.00094 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,406 - INFO - Part pulled: 10.77.00096 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,406 - INFO - Part pulled: 10.77.00099 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,406 - INFO - Part pulled: 10.77.00110 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,406 - INFO - Part pulled: 10.77.00130 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,406 - INFO - Part pulled: 10.77.00136 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,406 - INFO - Part pulled: 10.77.00140 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,407 - INFO - Part pulled: 10.77.00146 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,407 - INFO - Part pulled: 10.77.00155 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,407 - INFO - Part pulled: 11.18.03109 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,407 - INFO - Part pulled: 11.18.03110 for 4101 002 - 25 by stores1
+2025-03-20 11:40:10,410 - INFO - BOM submitted for 4101 002 - 25 by stores1, moved to Assembler
+2025-03-20 11:40:10,513 - INFO - BOM printed for 4101 002 - 25
+2025-03-20 11:40:10,559 - WARNING - Email attempt 1 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:40:12,578 - WARNING - Email attempt 2 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:40:14,619 - WARNING - Email attempt 3 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:40:14,619 - ERROR - Failed to send email to john.doe@example.com after 3 attempts
+2025-03-20 11:40:17,210 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:40:17,212 - INFO - Logo loaded: 378x125
+2025-03-20 11:40:17,253 - INFO - Logo scaled: 567x187
+2025-03-20 11:40:17,262 - INFO - User logged out
+2025-03-20 11:40:25,463 - INFO - User tester1 logged in with role Testing
+2025-03-20 11:40:56,505 - INFO - Pump 4101 002 - 25 moved to Testing by tester1
+2025-03-20 11:40:56,525 - WARNING - Email attempt 1 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:40:58,549 - WARNING - Email attempt 2 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:41:00,580 - WARNING - Email attempt 3 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:41:00,580 - ERROR - Failed to send email to john.doe@example.com after 3 attempts
+2025-03-20 11:42:15,426 - INFO - Pump 4101 002 - 25 submitted for approval by tester1
+2025-03-20 11:42:15,426 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:42:15,427 - INFO - Logo loaded: (378, 125)
+2025-03-20 11:42:15,429 - INFO - Logo scaled: (567, 187)
+2025-03-20 11:42:15,528 - INFO - PDF notification generated: C:\Users\travism\source\repos\GuthPumpRegistry\data\notification_4101 002 - 25.pdf
+2025-03-20 11:42:15,578 - WARNING - Email attempt 1 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:42:17,516 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:42:17,516 - INFO - Logo loaded: 378x125
+2025-03-20 11:42:17,560 - INFO - Logo scaled: 567x187
+2025-03-20 11:42:17,569 - INFO - User logged out
+2025-03-20 11:42:17,603 - WARNING - Email attempt 2 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:42:19,632 - WARNING - Email attempt 3 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:42:19,632 - ERROR - Failed to send email to john.doe@example.com after 3 attempts
+2025-03-20 11:42:25,029 - INFO - User approver1 logged in with role Approval
+2025-03-20 11:42:42,909 - INFO - Certificate generated: C:\Users\travism\source\repos\GuthPumpRegistry\certificates/Pump_Test_Report_4101 002 - 25.pdf
+2025-03-20 11:42:42,970 - WARNING - Email attempt 1 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:42:44,994 - WARNING - Email attempt 2 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:42:47,013 - WARNING - Email attempt 3 failed: SMTP AUTH extension not supported by server.
+2025-03-20 11:42:47,013 - ERROR - Failed to send email to alice.brown@example.com after 3 attempts
+2025-03-20 11:42:47,022 - INFO - Pump 4101 002 - 25 approved by approver1
+2025-03-20 11:44:52,807 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:44:52,808 - INFO - Logo loaded: 378x125
+2025-03-20 11:44:52,854 - INFO - Logo scaled: 567x187
+2025-03-20 11:44:52,863 - INFO - User logged out
+2025-03-20 11:44:59,123 - INFO - User user1 logged in with role Pump Originator
+2025-03-20 11:48:13,853 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:48:13,853 - INFO - Logo loaded: 378x125
+2025-03-20 11:48:13,902 - INFO - Logo scaled: 567x187
+2025-03-20 11:48:13,919 - INFO - User logged out
+2025-03-20 11:48:18,997 - INFO - User stores1 logged in with role Stores
+2025-03-20 11:48:42,131 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-20 11:48:42,131 - INFO - Logo loaded: 378x125
+2025-03-20 11:48:42,173 - INFO - Logo scaled: 567x187
+2025-03-20 11:48:42,183 - INFO - User logged out
+2025-03-20 11:48:46,888 - INFO - User user1 logged in with role Pump Originator
+2025-03-22 10:27:50,571 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 10:27:50,597 - INFO - Logo loaded: 378x125
+2025-03-22 10:27:50,649 - INFO - Logo scaled: 567x187
+2025-03-22 10:27:50,669 - INFO - Application started
+2025-03-22 10:27:54,582 - INFO - User admin1 logged in with role Admin
+2025-03-22 10:35:32,296 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 10:35:32,304 - INFO - Logo loaded: 378x125
+2025-03-22 10:35:32,350 - INFO - Logo scaled: 567x187
+2025-03-22 10:35:32,359 - INFO - Application started
+2025-03-22 10:35:38,408 - INFO - Created default config file at C:\Users\travism\source\repos\GuthPumpRegistry\config.json
+2025-03-22 10:35:38,495 - INFO - Exported reports to C:\Users\travism\source\repos\GuthPumpRegistry\reports\reports_export_20250322_103538.xlsx
+2025-03-22 10:39:51,741 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 10:39:51,748 - INFO - Logo loaded: 378x125
+2025-03-22 10:39:51,795 - INFO - Logo scaled: 567x187
+2025-03-22 10:39:51,814 - INFO - Application started
+2025-03-22 10:39:58,232 - INFO - Exported reports to C:\Users\travism\source\repos\GuthPumpRegistry\reports\reports_export_20250322_103958.xlsx
+2025-03-22 10:39:58,249 - INFO - User admin1 logged in with role Admin
+2025-03-22 11:04:07,626 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 11:04:07,647 - INFO - Logo loaded: 378x125
+2025-03-22 11:04:07,697 - INFO - Logo scaled: 567x187
+2025-03-22 11:04:07,714 - INFO - Application started
+2025-03-22 11:04:16,611 - INFO - Exported reports to C:\Users\travism\source\repos\GuthPumpRegistry\reports\reports_export_20250322_110416.xlsx
+2025-03-22 11:04:16,630 - INFO - User admin1 logged in with role Admin
+2025-03-22 11:07:05,979 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 11:07:05,986 - INFO - Logo loaded: 378x125
+2025-03-22 11:07:06,031 - INFO - Logo scaled: 567x187
+2025-03-22 11:07:06,040 - INFO - Application started
+2025-03-22 11:07:13,082 - INFO - Exported reports to C:\Users\travism\source\repos\GuthPumpRegistry\reports\reports_export_20250322_110713.xlsx
+2025-03-22 11:07:13,098 - INFO - User admin1 logged in with role Admin
+2025-03-22 11:07:15,595 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 11:07:15,595 - INFO - Logo loaded: 378x125
+2025-03-22 11:07:15,638 - INFO - Logo scaled: 567x187
+2025-03-22 11:07:15,646 - INFO - User logged out
+2025-03-22 11:07:26,973 - INFO - User tester1 logged in with role Testing
+2025-03-22 11:07:30,615 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 11:07:30,615 - INFO - Logo loaded: 378x125
+2025-03-22 11:07:30,658 - INFO - Logo scaled: 567x187
+2025-03-22 11:07:30,672 - INFO - User logged out
+2025-03-22 11:19:21,445 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 11:19:21,453 - INFO - Logo loaded: 378x125
+2025-03-22 11:19:21,499 - INFO - Logo scaled: 567x187
+2025-03-22 11:19:21,520 - INFO - Application started
+2025-03-22 11:19:27,715 - INFO - Exported reports to C:\Users\travism\source\repos\GuthPumpRegistry\reports\reports_export_20250322_111927.xlsx
+2025-03-22 11:19:27,729 - INFO - User admin1 logged in with role Admin
+2025-03-22 11:19:42,928 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\reports\summary_report_20250322_111942.pdf
+2025-03-22 11:19:42,929 - INFO - Generated PDF report at C:\Users\travism\source\repos\GuthPumpRegistry\reports\summary_report_20250322_111942.pdf
+2025-03-22 11:21:25,730 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 11:21:25,737 - INFO - Logo loaded: 378x125
+2025-03-22 11:21:25,781 - INFO - Logo scaled: 567x187
+2025-03-22 11:21:25,793 - INFO - Application started
+2025-03-22 11:21:32,613 - INFO - User user1 logged in with role Pump Originator
+2025-03-22 11:21:39,041 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 11:21:39,042 - INFO - Logo loaded: 378x125
+2025-03-22 11:21:39,088 - INFO - Logo scaled: 567x187
+2025-03-22 11:21:39,095 - INFO - User logged out
+2025-03-22 11:21:46,054 - INFO - User stores1 logged in with role Stores
+2025-03-22 11:22:30,117 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 11:22:30,117 - INFO - Logo loaded: 378x125
+2025-03-22 11:22:30,166 - INFO - Logo scaled: 567x187
+2025-03-22 11:22:30,182 - INFO - User logged out
+2025-03-22 11:22:41,883 - INFO - User approver1 logged in with role Approval
+2025-03-22 11:22:43,982 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 11:22:43,983 - INFO - Logo loaded: 378x125
+2025-03-22 11:22:44,035 - INFO - Logo scaled: 567x187
+2025-03-22 11:22:44,047 - INFO - User logged out
+2025-03-22 11:22:53,025 - INFO - User tester1 logged in with role Testing
+2025-03-22 11:22:55,889 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 11:22:55,890 - INFO - Logo loaded: 378x125
+2025-03-22 11:22:55,932 - INFO - Logo scaled: 567x187
+2025-03-22 11:22:55,944 - INFO - User logged out
+2025-03-22 11:25:04,718 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 11:25:04,725 - INFO - Logo loaded: 378x125
+2025-03-22 11:25:04,774 - INFO - Logo scaled: 567x187
+2025-03-22 11:25:04,782 - INFO - Application started
+2025-03-22 11:25:10,533 - WARNING - Failed login attempt for admin1
+2025-03-22 11:25:14,327 - INFO - Exported reports to C:\Users\travism\source\repos\GuthPumpRegistry\reports\reports_export_20250322_112514.xlsx
+2025-03-22 11:25:14,342 - INFO - User admin1 logged in with role Admin
+2025-03-22 11:25:26,053 - INFO - Created directory C:\Users\travism\source\repos\GuthPumpRegistry\exports for Excel exports
+2025-03-22 11:28:27,447 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 11:28:27,455 - INFO - Logo loaded: 378x125
+2025-03-22 11:28:27,500 - INFO - Logo scaled: 567x187
+2025-03-22 11:28:27,508 - INFO - Application started
+2025-03-22 11:28:37,723 - INFO - Exported reports to C:\Users\travism\source\repos\GuthPumpRegistry\reports\reports_export_20250322_112837.xlsx
+2025-03-22 11:28:37,737 - INFO - User admin1 logged in with role Admin
+2025-03-22 11:28:40,153 - INFO - Exported pumps to C:\Users\travism\source\repos\GuthPumpRegistry\exports\pumps_export_20250322_112840.xlsx
+2025-03-22 11:32:29,376 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 11:32:29,383 - INFO - Logo loaded: 378x125
+2025-03-22 11:32:29,428 - INFO - Logo scaled: 567x187
+2025-03-22 11:32:29,438 - INFO - Application started
+2025-03-22 11:32:32,614 - WARNING - Failed login attempt for admin
+2025-03-22 11:32:35,675 - INFO - Exported reports to C:\Users\travism\source\repos\GuthPumpRegistry\reports\reports_export_20250322_113235.xlsx
+2025-03-22 11:32:35,690 - INFO - User admin1 logged in with role Admin
+2025-03-22 11:32:37,876 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 11:32:37,876 - INFO - Logo loaded: 378x125
+2025-03-22 11:32:37,920 - INFO - Logo scaled: 567x187
+2025-03-22 11:32:37,930 - INFO - User logged out
+2025-03-22 11:32:42,099 - INFO - User user1 logged in with role Pump Originator
+2025-03-22 11:32:45,727 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 11:32:45,728 - INFO - Logo loaded: 378x125
+2025-03-22 11:32:45,769 - INFO - Logo scaled: 567x187
+2025-03-22 11:32:45,778 - INFO - User logged out
+2025-03-22 11:32:53,628 - INFO - User stores1 logged in with role Stores
+2025-03-22 11:32:55,334 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 11:32:55,335 - INFO - Logo loaded: 378x125
+2025-03-22 11:32:55,377 - INFO - Logo scaled: 567x187
+2025-03-22 11:32:55,387 - INFO - User logged out
+2025-03-22 11:33:00,624 - INFO - User tester1 logged in with role Testing
+2025-03-22 11:33:02,643 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 11:33:02,643 - INFO - Logo loaded: 378x125
+2025-03-22 11:33:02,689 - INFO - Logo scaled: 567x187
+2025-03-22 11:33:02,697 - INFO - User logged out
+2025-03-22 11:33:08,867 - INFO - User approver1 logged in with role Approval
+2025-03-22 11:33:13,346 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 11:33:13,346 - INFO - Logo loaded: 378x125
+2025-03-22 11:33:13,387 - INFO - Logo scaled: 567x187
+2025-03-22 11:33:13,396 - INFO - User logged out
+2025-03-22 11:34:09,892 - INFO - Exported reports to C:\Users\travism\source\repos\GuthPumpRegistry\reports\reports_export_20250322_113409.xlsx
+2025-03-22 11:34:09,907 - INFO - User admin1 logged in with role Admin
+2025-03-22 11:34:11,976 - WARNING - Invalid value 'PT 0.55KW' for field 'pump_model'. Falling back to default: P1 3.0kW
+2025-03-22 11:34:11,980 - WARNING - Invalid value '123' for field 'customer'. Falling back to default: Guth Pinetown
+2025-03-22 11:34:11,983 - WARNING - Invalid value 'Johannesburg' for field 'branch'. Falling back to default: Guth Pinetown
+2025-03-22 11:34:11,985 - WARNING - Invalid value '92mm' for field 'impeller_size'. Falling back to default: Small
+2025-03-22 11:34:11,988 - WARNING - Invalid value 'DIN' for field 'connection_type'. Falling back to default: Flange
+2025-03-22 11:34:11,991 - WARNING - Invalid value '' for field 'custom_motor'. Falling back to default: Yes
+2025-03-22 11:34:22,034 - WARNING - Invalid value 'P1 4.0KW' for field 'pump_model'. Falling back to default: P1 3.0kW
+2025-03-22 11:34:22,038 - WARNING - Invalid value 'Stores' for field 'customer'. Falling back to default: Guth Pinetown
+2025-03-22 11:34:22,041 - WARNING - Invalid value 'Johannesburg' for field 'branch'. Falling back to default: Guth Pinetown
+2025-03-22 11:34:22,043 - WARNING - Invalid value '160mm' for field 'impeller_size'. Falling back to default: Small
+2025-03-22 11:34:22,045 - WARNING - Invalid value 'DIN' for field 'connection_type'. Falling back to default: Flange
+2025-03-22 11:34:22,048 - WARNING - Invalid value '' for field 'custom_motor'. Falling back to default: Yes
+2025-03-22 11:34:25,551 - WARNING - Invalid value 'P1 1.1KW' for field 'pump_model'. Falling back to default: P1 3.0kW
+2025-03-22 11:34:25,556 - WARNING - Invalid value 'Lancewood' for field 'customer'. Falling back to default: Guth Pinetown
+2025-03-22 11:34:25,558 - WARNING - Invalid value 'Cape Town' for field 'branch'. Falling back to default: Guth Pinetown
+2025-03-22 11:34:25,560 - WARNING - Invalid value '150mm' for field 'impeller_size'. Falling back to default: Small
+2025-03-22 11:34:25,563 - WARNING - Invalid value 'DIN' for field 'connection_type'. Falling back to default: Flange
+2025-03-22 11:34:25,566 - WARNING - Invalid value '' for field 'custom_motor'. Falling back to default: Yes
+2025-03-22 11:34:54,033 - INFO - Exported activity log to C:\Users\travism\source\repos\GuthPumpRegistry\exports\activity_log_export_20250322_113453.xlsx
+2025-03-22 11:34:57,290 - INFO - Database backed up to C:\Users\travism\source\repos\GuthPumpRegistry\data\guth_pump_registry.db.20250322_113457.bak
+2025-03-22 11:35:00,623 - ERROR - Restore failed: No valid backup file selected
+2025-03-22 11:35:11,038 - INFO - Created directory C:\Users\travism\source\repos\GuthPumpRegistry\boms for bom
+2025-03-22 11:35:11,039 - INFO - Created directory C:\Users\travism\source\repos\GuthPumpRegistry\confirmations for confirmation
+2025-03-22 11:35:11,041 - INFO - Saved config to C:\Users\travism\source\repos\GuthPumpRegistry\config.json
+2025-03-22 11:35:14,522 - INFO - Exported activity log to C:/Users/travism/OneDrive - Guth South Africa (Pty) Ltd/Desktop\activity_log_export_20250322_113514.xlsx
+2025-03-22 12:38:54,274 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 12:38:54,282 - INFO - Logo loaded: 378x125
+2025-03-22 12:38:54,327 - INFO - Logo scaled: 567x187
+2025-03-22 12:38:54,335 - INFO - Application started
+2025-03-22 12:42:55,061 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 12:42:55,068 - INFO - Logo loaded: 378x125
+2025-03-22 12:42:55,116 - INFO - Logo scaled: 567x187
+2025-03-22 12:42:55,124 - INFO - Application started
+2025-03-22 12:43:01,658 - INFO - User admin1 logged in with role Admin
+2025-03-22 12:47:39,099 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 12:47:39,107 - INFO - Logo loaded: 378x125
+2025-03-22 12:47:39,159 - INFO - Logo scaled: 567x187
+2025-03-22 12:47:39,168 - INFO - Application started
+2025-03-22 12:47:46,786 - INFO - User admin1 logged in with role Admin
+2025-03-22 12:52:08,438 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 12:52:08,446 - INFO - Logo loaded: 378x125
+2025-03-22 12:52:08,498 - INFO - Logo scaled: 567x187
+2025-03-22 12:52:08,507 - INFO - Application started
+2025-03-22 12:52:15,749 - INFO - User admin1 logged in with role Admin
+2025-03-22 12:56:13,245 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 12:56:13,252 - INFO - Logo loaded: 378x125
+2025-03-22 12:56:13,301 - INFO - Logo scaled: 567x187
+2025-03-22 12:56:13,312 - INFO - Application started
+2025-03-22 12:56:21,877 - INFO - User admin1 logged in with role Admin
+2025-03-22 13:50:52,943 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-22 13:50:52,950 - INFO - Logo loaded: 378x125
+2025-03-22 13:50:53,000 - INFO - Logo scaled: 567x187
+2025-03-22 13:50:53,011 - INFO - Application started
+2025-03-22 13:51:01,433 - INFO - User admin1 logged in with role Admin
