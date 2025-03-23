@@ -14,6 +14,8 @@ import tkinter.filedialog as filedialog
 from utils.config import get_logger
 import json
 from export_utils import generate_pdf_notification
+import smtplib
+from email.mime.text import MIMEText
 
 logger = get_logger("admin_gui")
 BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
@@ -30,11 +32,24 @@ DEFAULT_DIRS = {
     "excel_exports": os.path.join(BASE_DIR, "exports")
 }
 
+# Default email settings
+DEFAULT_EMAIL_SETTINGS = {
+    "smtp_host": "",
+    "smtp_port": "587",
+    "smtp_username": "",
+    "smtp_password": "",
+    "sender_email": "",
+    "use_tls": True
+}
+
 def load_config():
     """Load configuration from config.json, or create it with defaults if it doesn't exist."""
     if not os.path.exists(CONFIG_PATH):
         # Create default config
-        config = {"document_dirs": DEFAULT_DIRS}
+        config = {
+            "document_dirs": DEFAULT_DIRS,
+            "email_settings": DEFAULT_EMAIL_SETTINGS
+        }
         with open(CONFIG_PATH, "w") as f:
             json.dump(config, f, indent=4)
         logger.info(f"Created default config file at {CONFIG_PATH}")
@@ -47,6 +62,11 @@ def load_config():
     for key, default_path in DEFAULT_DIRS.items():
         if key not in config["document_dirs"]:
             config["document_dirs"][key] = default_path
+    if "email_settings" not in config:
+        config["email_settings"] = DEFAULT_EMAIL_SETTINGS
+    for key, default_value in DEFAULT_EMAIL_SETTINGS.items():
+        if key not in config["email_settings"]:
+            config["email_settings"][key] = default_value
     return config
 
 def save_config(config):
@@ -121,6 +141,10 @@ def show_admin_gui(root, username, logout_callback):
     config_frame = ttk.Frame(notebook)
     notebook.add(config_frame, text="Configuration")
     show_config_tab(config_frame)
+
+    email_frame = ttk.Frame(notebook)
+    notebook.add(email_frame, text="Email")
+    show_email_tab(email_frame)
 
     ttk.Button(main_frame, text="Logoff", command=logout_callback, bootstyle="warning", style="large.TButton").pack(pady=10)
     ttk.Label(main_frame, text="\u00A9 Guth South Africa", font=("Roboto", 10)).pack(pady=(5, 0))
@@ -902,6 +926,108 @@ def show_config_tab(frame):
         Messagebox.show_info("Success", "Configuration saved successfully")
 
     ttk.Button(config_frame, text="Save Configuration", command=save_config_changes, bootstyle="success", style="large.TButton").grid(row=len(doc_types) + 1, column=0, columnspan=3, pady=10)
+
+def show_email_tab(frame):
+    email_frame = ttk.Frame(frame, padding=20)
+    email_frame.pack(fill=BOTH, expand=True)
+
+    # Title
+    ttk.Label(email_frame, text="Email Configuration", font=("Roboto", 14)).grid(row=0, column=0, columnspan=2, pady=10)
+
+    # Load current email settings
+    config = load_config()
+    email_settings = config["email_settings"]
+
+    # Email settings fields
+    fields = [
+        ("smtp_host", "SMTP Host"),
+        ("smtp_port", "SMTP Port"),
+        ("smtp_username", "SMTP Username"),
+        ("smtp_password", "SMTP Password"),
+        ("sender_email", "Sender Email")
+    ]
+    entries = {}
+    for i, (key, label) in enumerate(fields, start=1):
+        ttk.Label(email_frame, text=f"{label}:", font=("Roboto", 12)).grid(row=i, column=0, pady=5, sticky=W)
+        if key == "smtp_password":
+            entry = ttk.Entry(email_frame, font=("Roboto", 12), show="*")  # Mask password
+        else:
+            entry = ttk.Entry(email_frame, font=("Roboto", 12))
+        entry.insert(0, email_settings.get(key, ""))
+        entry.grid(row=i, column=1, pady=5, padx=5, sticky=EW)
+        entries[key] = entry
+
+    # SSL/TLS Toggle
+    use_tls_var = ttk.BooleanVar(value=email_settings.get("use_tls", True))
+    ttk.Checkbutton(email_frame, text="Use TLS", variable=use_tls_var, bootstyle="success").grid(row=len(fields) + 1, column=0, columnspan=2, pady=5)
+
+    # Test email recipient field
+    ttk.Label(email_frame, text="Test Email Recipient:", font=("Roboto", 12)).grid(row=len(fields) + 2, column=0, pady=5, sticky=W)
+    test_recipient_entry = ttk.Entry(email_frame, font=("Roboto", 12))
+    test_recipient_entry.grid(row=len(fields) + 2, column=1, pady=5, padx=5, sticky=EW)
+
+    email_frame.grid_columnconfigure(1, weight=1)
+
+    # Error/Success message label
+    message_label = ttk.Label(email_frame, text="", font=("Roboto", 12), bootstyle="danger")
+    message_label.grid(row=len(fields) + 3, column=0, columnspan=2, pady=5)
+
+    def save_email_settings():
+        config = load_config()
+        for key, entry in entries.items():
+            config["email_settings"][key] = entry.get().strip()
+        config["email_settings"]["use_tls"] = use_tls_var.get()
+        save_config(config)
+        message_label.config(text="Email settings saved successfully", bootstyle="success")
+        logger.info("Email settings saved")
+
+    def test_email():
+        recipient = test_recipient_entry.get().strip()
+        if not recipient:
+            message_label.config(text="Please enter a recipient email address", bootstyle="danger")
+            return
+
+        # Load the current settings
+        config = load_config()
+        email_settings = config["email_settings"]
+        smtp_host = email_settings.get("smtp_host", "")
+        smtp_port = email_settings.get("smtp_port", "587")
+        smtp_username = email_settings.get("smtp_username", "")
+        smtp_password = email_settings.get("smtp_password", "")
+        sender_email = email_settings.get("sender_email", "")
+        use_tls = email_settings.get("use_tls", True)
+
+        # Validate required fields
+        if not all([smtp_host, smtp_port, sender_email]):
+            message_label.config(text="SMTP Host, Port, and Sender Email are required", bootstyle="danger")
+            return
+
+        # Create the test email
+        msg = MIMEText("This is a test email from Guth Pump Registry.")
+        msg["Subject"] = "Test Email - Guth Pump Registry"
+        msg["From"] = sender_email
+        msg["To"] = recipient
+
+        try:
+            # Connect to the SMTP server
+            server = smtplib.SMTP(smtp_host, int(smtp_port))
+            if use_tls:
+                server.starttls()
+            if smtp_username and smtp_password:
+                server.login(smtp_username, smtp_password)
+            server.sendmail(sender_email, recipient, msg.as_string())
+            server.quit()
+            message_label.config(text="Test email sent successfully", bootstyle="success")
+            logger.info(f"Test email sent to {recipient}")
+        except Exception as e:
+            message_label.config(text=f"Failed to send test email: {str(e)}", bootstyle="danger")
+            logger.error(f"Failed to send test email to {recipient}: {str(e)}")
+
+    # Buttons
+    button_frame = ttk.Frame(email_frame)
+    button_frame.grid(row=len(fields) + 4, column=0, columnspan=2, pady=10)
+    ttk.Button(button_frame, text="Save Email Settings", command=save_email_settings, bootstyle="success", style="large.TButton").pack(side=LEFT, padx=5)
+    ttk.Button(button_frame, text="Test Email", command=test_email, bootstyle="info", style="large.TButton").pack(side=LEFT, padx=5)
 
 def edit_user_window(parent_frame, username):
     with connect_db() as conn:

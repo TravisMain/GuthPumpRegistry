@@ -4135,3 +4135,12 @@
 2025-03-22 13:50:53,000 - INFO - Logo scaled: 567x187
 2025-03-22 13:50:53,011 - INFO - Application started
 2025-03-22 13:51:01,433 - INFO - User admin1 logged in with role Admin
+2025-03-23 11:44:27,021 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-23 11:44:27,043 - INFO - Logo loaded: 378x125
+2025-03-23 11:44:27,090 - INFO - Logo scaled: 567x187
+2025-03-23 11:44:27,100 - INFO - Application started
+2025-03-23 11:44:32,857 - INFO - User admin1 logged in with role Admin
+2025-03-23 11:45:53,200 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-23 11:45:53,201 - INFO - Logo loaded: 378x125
+2025-03-23 11:45:53,243 - INFO - Logo scaled: 567x187
+2025-03-23 11:45:53,252 - INFO - User logged out
