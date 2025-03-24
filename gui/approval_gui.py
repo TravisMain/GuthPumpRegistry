@@ -16,12 +16,13 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from export_utils import send_email, generate_pump_details_table  # Import email function and helper
+import threading
+from export_utils import send_email
 
 logger = get_logger("approval_gui")
 BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
 LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo.png")
-PDF_LOGO_PATH = os.path.join(BASE_DIR, "assets", "guth_logo.png")  # New logo for PDF
+PDF_LOGO_PATH = os.path.join(BASE_DIR, "assets", "guth_logo.png")
 FONT_PATH = os.path.join(BASE_DIR, "assets", "Roboto-Regular.ttf")
 FONT_BOLD_PATH = os.path.join(BASE_DIR, "assets", "Roboto-Black.ttf")
 BUILD_NUMBER = "1.0.0"
@@ -247,8 +248,25 @@ def generate_certificate(data, serial_number):
     desaturated_blue = (100/255, 149/255, 237/255)  # #6495ED
     desaturated_red = (255/255, 99/255, 71/255)     # #FF6347
     
-    ax1.plot([float(x or 0) for x in data["flowrate"]], [float(x or 0) for x in data["pressure"]], 
-             color=desaturated_blue, linestyle='-')
+    # Convert flowrate, pressure, and amperage to floats, defaulting to 0 for invalid values
+    flowrate_values = []
+    pressure_values = []
+    amperage_values = []
+    for f, p, a in zip(data["flowrate"], data["pressure"], data["amperage"]):
+        try:
+            flowrate_values.append(float(f) if f else 0.0)
+        except (ValueError, TypeError):
+            flowrate_values.append(0.0)
+        try:
+            pressure_values.append(float(p) if p else 0.0)
+        except (ValueError, TypeError):
+            pressure_values.append(0.0)
+        try:
+            amperage_values.append(float(a) if a else 0.0)
+        except (ValueError, TypeError):
+            amperage_values.append(0.0)
+
+    ax1.plot(flowrate_values, pressure_values, color=desaturated_blue, linestyle='-')
     ax1.set_xlabel("Flow (L/h)", fontsize=10)
     ax1.set_ylabel("Pressure (bar)", color=desaturated_blue, fontsize=10)
     ax1.tick_params('y', colors=desaturated_blue)
@@ -262,8 +280,7 @@ def generate_certificate(data, serial_number):
         spine.set_linewidth(0.5)
 
     ax2 = ax1.twinx()
-    ax2.plot([float(x or 0) for x in data["flowrate"]], [float(x or 0) for x in data["amperage"]], 
-             color=desaturated_red, linestyle='-')
+    ax2.plot(flowrate_values, amperage_values, color=desaturated_red, linestyle='-')
     ax2.set_ylabel("Amperage (A)", color=desaturated_red, fontsize=10)
     ax2.tick_params('y', colors=desaturated_red)
     ax2.set_ylim(0, 7)
@@ -486,29 +503,45 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
         pdf_path = generate_certificate(updated_test_data, serial_number)
         with connect_db() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT originator FROM pumps WHERE serial_number = ?", (serial_number,))
-            originator_data = cursor.fetchone()
-            if originator_data and originator_data["originator"]:
-                originator_username = originator_data["originator"]
-                cursor.execute("SELECT email FROM users WHERE username = ?", (originator_username,))
-                originator_email = cursor.fetchone()
-                if originator_email and originator_email["email"]:
+            cursor.execute("SELECT requested_by FROM pumps WHERE serial_number = ?", (serial_number,))
+            requested_by_data = cursor.fetchone()
+            if requested_by_data and requested_by_data["requested_by"]:
+                requested_by_username = requested_by_data["requested_by"]
+                cursor.execute("SELECT email FROM users WHERE username = ?", (requested_by_username,))
+                requested_by_email = cursor.fetchone()
+                if requested_by_email and requested_by_email["email"]:
                     # Prepare email content
                     subject = f"Pump {serial_number} Approved"
-                    greeting = f"Dear {originator_username},"
+                    greeting = f"Dear {requested_by_username},"
                     body_content = f"""
-                        <p>The pump with serial number {serial_number} has been approved.</p>
-                        <h3 style="color: #34495e;">Pump Details</h3>
-                        {generate_pump_details_table(updated_test_data)}
-                        <p>Please find the attached certificate for your records.</p>
+                        <p>We are pleased to inform you that the pump with serial number <strong>{serial_number}</strong> has been approved on {updated_test_data["approval_date"]}.</p>
+                        <p>Please find the attached pump certificate for your records.</p>
                     """
-                    footer = "Regards,<br>Approval Team"
-                    # Send email with PDF attachment
-                    send_email(originator_email["email"], subject, greeting, body_content, footer, pdf_path)
+                    footer = "Best regards,<br>Guth Pump Registry Approval Team"
+                    try:
+                        # Send email in a separate thread
+                        threading.Thread(
+                            target=send_email,
+                            args=(
+                                requested_by_email["email"],
+                                subject,
+                                greeting,
+                                body_content,
+                                footer,
+                                pdf_path
+                            ),
+                            daemon=True
+                        ).start()
+                        logger.info(f"Approval email sent to {requested_by_email['email']} for pump {serial_number}")
+                    except Exception as e:
+                        logger.error(f"Failed to send approval email to {requested_by_email['email']}: {str(e)}")
+                        Messagebox.show_error("Email Sending Failed", f"Failed to send approval email to {requested_by_email['email']}: {str(e)}")
                 else:
-                    logger.warning(f"No email found for originator {originator_username} of pump {serial_number}")
+                    logger.warning(f"No email found for requested_by user {requested_by_username} of pump {serial_number}")
+                    Messagebox.show_warning("Email Not Sent", f"No email address found for requested_by user {requested_by_username}.")
             else:
-                logger.warning(f"No originator found for pump {serial_number}")
+                logger.warning(f"No requested_by user found for pump {serial_number}")
+                Messagebox.show_warning("Email Not Sent", "No requested_by user found for this pump.")
 
             cursor.execute("UPDATE pumps SET status = 'Completed', test_data = ? WHERE serial_number = ?",
                            (json.dumps(updated_test_data), serial_number))

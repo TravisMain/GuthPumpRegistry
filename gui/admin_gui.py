@@ -32,9 +32,9 @@ DEFAULT_DIRS = {
     "excel_exports": os.path.join(BASE_DIR, "exports")
 }
 
-# Default email settings
+# Default email settings (updated for Gmail)
 DEFAULT_EMAIL_SETTINGS = {
-    "smtp_host": "",
+    "smtp_host": "smtp.gmail.com",
     "smtp_port": "587",
     "smtp_username": "",
     "smtp_password": "",
@@ -932,7 +932,16 @@ def show_email_tab(frame):
     email_frame.pack(fill=BOTH, expand=True)
 
     # Title
-    ttk.Label(email_frame, text="Email Configuration", font=("Roboto", 14)).grid(row=0, column=0, columnspan=2, pady=10)
+    ttk.Label(email_frame, text="Email Configuration (Gmail)", font=("Roboto", 14)).grid(row=0, column=0, columnspan=2, pady=10)
+
+    # Note about Gmail App Password
+    note = (
+        "Note: This application uses Gmail for sending emails. To authenticate:\n"
+        "1. Enable 2-Step Verification on your Gmail account.\n"
+        "2. Generate an App Password in your Google Account settings (Security > App Passwords).\n"
+        "3. Use your Gmail address as the SMTP Username and Sender Email, and the App Password as the SMTP Password."
+    )
+    ttk.Label(email_frame, text=note, font=("Roboto", 12), wraplength=600, justify=LEFT, bootstyle="info").grid(row=1, column=0, columnspan=2, pady=10)
 
     # Load current email settings
     config = load_config()
@@ -947,7 +956,7 @@ def show_email_tab(frame):
         ("sender_email", "Sender Email")
     ]
     entries = {}
-    for i, (key, label) in enumerate(fields, start=1):
+    for i, (key, label) in enumerate(fields, start=2):  # Start at row 2 to leave space for title and note
         ttk.Label(email_frame, text=f"{label}:", font=("Roboto", 12)).grid(row=i, column=0, pady=5, sticky=W)
         if key == "smtp_password":
             entry = ttk.Entry(email_frame, font=("Roboto", 12), show="*")  # Mask password
@@ -959,18 +968,18 @@ def show_email_tab(frame):
 
     # SSL/TLS Toggle
     use_tls_var = ttk.BooleanVar(value=email_settings.get("use_tls", True))
-    ttk.Checkbutton(email_frame, text="Use TLS", variable=use_tls_var, bootstyle="success").grid(row=len(fields) + 1, column=0, columnspan=2, pady=5)
+    ttk.Checkbutton(email_frame, text="Use TLS", variable=use_tls_var, bootstyle="success").grid(row=len(fields) + 2, column=0, columnspan=2, pady=5)
 
     # Test email recipient field
-    ttk.Label(email_frame, text="Test Email Recipient:", font=("Roboto", 12)).grid(row=len(fields) + 2, column=0, pady=5, sticky=W)
+    ttk.Label(email_frame, text="Test Email Recipient:", font=("Roboto", 12)).grid(row=len(fields) + 3, column=0, pady=5, sticky=W)
     test_recipient_entry = ttk.Entry(email_frame, font=("Roboto", 12))
-    test_recipient_entry.grid(row=len(fields) + 2, column=1, pady=5, padx=5, sticky=EW)
+    test_recipient_entry.grid(row=len(fields) + 3, column=1, pady=5, padx=5, sticky=EW)
 
     email_frame.grid_columnconfigure(1, weight=1)
 
     # Error/Success message label
     message_label = ttk.Label(email_frame, text="", font=("Roboto", 12), bootstyle="danger")
-    message_label.grid(row=len(fields) + 3, column=0, columnspan=2, pady=5)
+    message_label.grid(row=len(fields) + 4, column=0, columnspan=2, pady=5)
 
     def save_email_settings():
         config = load_config()
@@ -987,15 +996,13 @@ def show_email_tab(frame):
             message_label.config(text="Please enter a recipient email address", bootstyle="danger")
             return
 
-        # Load the current settings
-        config = load_config()
-        email_settings = config["email_settings"]
-        smtp_host = email_settings.get("smtp_host", "")
-        smtp_port = email_settings.get("smtp_port", "587")
-        smtp_username = email_settings.get("smtp_username", "")
-        smtp_password = email_settings.get("smtp_password", "")
-        sender_email = email_settings.get("sender_email", "")
-        use_tls = email_settings.get("use_tls", True)
+        # Load the current settings from the entries
+        smtp_host = entries["smtp_host"].get().strip()
+        smtp_port = entries["smtp_port"].get().strip()
+        smtp_username = entries["smtp_username"].get().strip()
+        smtp_password = entries["smtp_password"].get().strip()
+        sender_email = entries["sender_email"].get().strip()
+        use_tls = use_tls_var.get()
 
         # Validate required fields
         if not all([smtp_host, smtp_port, sender_email]):
@@ -1025,7 +1032,7 @@ def show_email_tab(frame):
 
     # Buttons
     button_frame = ttk.Frame(email_frame)
-    button_frame.grid(row=len(fields) + 4, column=0, columnspan=2, pady=10)
+    button_frame.grid(row=len(fields) + 5, column=0, columnspan=2, pady=10)
     ttk.Button(button_frame, text="Save Email Settings", command=save_email_settings, bootstyle="success", style="large.TButton").pack(side=LEFT, padx=5)
     ttk.Button(button_frame, text="Test Email", command=test_email, bootstyle="info", style="large.TButton").pack(side=LEFT, padx=5)
 

@@ -1,5 +1,6 @@
 import smtplib
 import os
+import sys
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
@@ -11,22 +12,33 @@ from reportlab.lib.units import inch
 from utils.config import get_logger
 import tempfile
 from datetime import datetime
+import json
 
 logger = get_logger("export_utils")
 
-# Email configuration (update with your actual SMTP settings)
-SMTP_SERVER = "smtp.gmail.com"  # Example: Gmail SMTP server
-SMTP_PORT = 587  # Port for TLS
-SMTP_USER = "your-email@gmail.com"  # Update with your email
-SMTP_PASSWORD = "your-app-password"  # Update with your app-specific password
-
 # Paths
 BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
-LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo.png")
+CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+
+def load_config():
+    """Load configuration from config.json."""
+    if not os.path.exists(CONFIG_PATH):
+        raise FileNotFoundError(f"Config file not found at {CONFIG_PATH}")
+    with open(CONFIG_PATH, "r") as f:
+        config = json.load(f)
+    return config
+
+def resource_path(relative_path):
+    """Get the absolute path to a resource, works for dev and PyInstaller."""
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
+
+LOGO_PATH = resource_path(os.path.join("assets", "logo.png"))
 
 def send_email(to_email, subject, greeting, body_content, footer, *attachments):
     """
-    Send an email with the specified subject, body, and attachments.
+    Send an email using the SMTP settings from config.json.
     
     Args:
         to_email (str): Recipient's email address.
@@ -36,10 +48,26 @@ def send_email(to_email, subject, greeting, body_content, footer, *attachments):
         footer (str): Footer text (e.g., "Regards,<br>Guth Pump Registry").
         *attachments (str): Paths to files to attach.
     """
+    # Load email settings from config
+    config = load_config()
+    email_settings = config.get("email_settings", {})
+    
+    SMTP_SERVER = email_settings.get("smtp_host", "")
+    SMTP_PORT = int(email_settings.get("smtp_port", 587))
+    SENDER_EMAIL = email_settings.get("sender_email", "")
+    SMTP_USERNAME = email_settings.get("smtp_username", "")
+    SMTP_PASSWORD = email_settings.get("smtp_password", "")
+    USE_TLS = email_settings.get("use_tls", True)
+
+    # Validate required settings
+    if not all([SMTP_SERVER, SMTP_PORT, SENDER_EMAIL]):
+        logger.error("Required email settings (smtp_host, smtp_port, sender_email) not found in config.json")
+        raise ValueError("Required email settings not set in config.json")
+
     try:
         # Create the email message
         msg = MIMEMultipart()
-        msg["From"] = SMTP_USER
+        msg["From"] = SENDER_EMAIL
         msg["To"] = to_email
         msg["Subject"] = subject
 
@@ -67,11 +95,13 @@ def send_email(to_email, subject, greeting, body_content, footer, *attachments):
                 msg.attach(part)
             logger.info(f"Attached file to email: {attachment_path}")
 
-        # Send the email
+        # Send the email using the configured SMTP server
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-            server.starttls()  # Enable TLS
-            server.login(SMTP_USER, SMTP_PASSWORD)
-            server.sendmail(SMTP_USER, to_email, msg.as_string())
+            if USE_TLS:
+                server.starttls()  # Enable TLS
+            if SMTP_USERNAME and SMTP_PASSWORD:
+                server.login(SMTP_USERNAME, SMTP_PASSWORD)
+            server.sendmail(SENDER_EMAIL, to_email, msg.as_string())
             logger.info(f"Email sent to {to_email} with subject '{subject}' and {len(attachments)} attachments")
 
     except Exception as e:

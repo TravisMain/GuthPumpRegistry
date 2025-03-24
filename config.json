@@ -5,5 +5,13 @@
         "confirmation": "C:\\Users\\travism\\source\\repos\\GuthPumpRegistry\\confirmations",
         "reports": "C:\\Users\\travism\\source\\repos\\GuthPumpRegistry\\reports",
         "excel_exports": "C:/Users/travism/OneDrive - Guth South Africa (Pty) Ltd/Desktop"
+    },
+    "email_settings": {
+        "smtp_host": "smtp.gmail.com",
+        "smtp_port": "587",
+        "smtp_username": "guthsouthafrica@gmail.com",
+        "smtp_password": "baar tgsr fjvp ktgw",
+        "sender_email": "guth@guth.co.za",
+        "use_tls": true
     }
 }

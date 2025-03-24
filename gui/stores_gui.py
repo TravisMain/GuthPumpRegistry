@@ -67,35 +67,6 @@ def show_stores_dashboard(root, username, role, logout_callback):
     refresh_pump_list()
     tree.bind("<Double-1>", lambda event: show_bom_window(main_frame, tree, username, refresh_pump_list))
 
-    # All Pumps in Stores Table
-    all_pumps_frame = ttk.LabelFrame(main_frame, text="All Pumps in Stores", padding=10)
-    all_pumps_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
-    all_columns = ("Serial Number", "Customer", "Branch", "Pump Model", "Configuration", "Created At", "Status")
-    all_tree = ttk.Treeview(all_pumps_frame, columns=all_columns, show="headings", height=15)
-    for col in all_columns:
-        all_tree.heading(col, text=col, anchor=W)
-        all_tree.column(col, width=120, anchor=W)
-    all_tree.pack(side=LEFT, fill=BOTH, expand=True)
-    all_scrollbar = ttk.Scrollbar(all_pumps_frame, orient=VERTICAL, command=all_tree.yview)
-    all_scrollbar.pack(side=RIGHT, fill=Y)
-    all_tree.configure(yscrollcommand=all_scrollbar.set)
-
-    def refresh_all_pumps_list():
-        for item in all_tree.get_children():
-            all_tree.delete(item)
-        with connect_db() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT serial_number, customer, branch, pump_model, configuration, created_at, status
-                FROM pumps WHERE customer = 'Stores'
-            """)
-            for pump in cursor.fetchall():
-                all_tree.insert("", END, values=(pump["serial_number"], pump["customer"], pump["branch"],
-                                                pump["pump_model"], pump["configuration"], pump["created_at"], pump["status"]))
-
-    refresh_all_pumps_list()
-    all_tree.bind("<Double-1>", lambda event: show_bom_window(main_frame, all_tree, username, refresh_all_pumps_list))
-
     ttk.Button(main_frame, text="Logoff", command=logout_callback, bootstyle="warning", style="large.TButton").pack(pady=10)
     ttk.Label(main_frame, text="\u00A9 Guth South Africa", font=("Roboto", 10)).pack(pady=(5, 0))
     ttk.Label(main_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack()
