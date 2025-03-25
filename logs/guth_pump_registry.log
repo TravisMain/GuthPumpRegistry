@@ -4572,3 +4572,317 @@
 2025-03-24 09:11:53,670 - INFO - Pump 5101 001 - 25 approved by approver1
 2025-03-24 09:11:53,684 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\certificates/Pump_Test_Report_5101 001 - 25.pdf
 2025-03-24 09:11:58,674 - INFO - Email sent to travis.m@guth.co.za with subject 'Pump 5101 001 - 25 Approved' and 1 attachments
+2025-03-24 10:24:08,988 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 10:24:08,996 - INFO - Logo loaded: 378x125
+2025-03-24 10:24:09,040 - INFO - Logo scaled: 567x187
+2025-03-24 10:24:09,058 - INFO - Application started
+2025-03-24 10:28:11,450 - INFO - User admin1 logged in with role Admin
+2025-03-24 10:35:55,307 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 10:35:55,308 - INFO - Logo loaded: 378x125
+2025-03-24 10:35:55,367 - INFO - Logo scaled: 567x187
+2025-03-24 10:35:55,406 - INFO - User logged out
+2025-03-24 10:36:02,485 - WARNING - Failed login attempt for Travis
+2025-03-24 10:36:07,437 - WARNING - Failed login attempt for travis
+2025-03-24 10:36:08,703 - WARNING - Failed login attempt for travis
+2025-03-24 10:36:15,872 - WARNING - Failed login attempt for Travis
+2025-03-24 10:36:17,227 - WARNING - Failed login attempt for Travis
+2025-03-24 10:36:22,343 - INFO - User user1 logged in with role Pump Originator
+2025-03-24 10:40:18,220 - INFO - Inserted 25 BOM items for pump 4101 003 - 25
+2025-03-24 10:40:18,220 - INFO - Pump created: 4101 003 - 25 by user1
+2025-03-24 10:40:18,230 - INFO - New pump created by user1: 4101 003 - 25 with BOM
+2025-03-24 10:40:18,248 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_4101 003 - 25.pdf
+2025-03-24 10:40:18,289 - INFO - PDF generated and print dialog opened for pump 4101 003 - 25 at C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_4101 003 - 25.pdf
+2025-03-24 10:40:18,311 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_4101 003 - 25.pdf
+2025-03-24 10:40:18,311 - INFO - Saved confirmation to C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_4101 003 - 25.pdf
+2025-03-24 10:40:18,332 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_4101 003 - 25.pdf
+2025-03-24 10:40:18,343 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_4101 003 - 25.pdf
+2025-03-24 10:40:23,168 - INFO - Email sent to stores@guth.co.za with subject 'New Pump Assembly Created: 4101 003 - 25' and 2 attachments
+2025-03-24 10:41:56,589 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 10:41:56,590 - INFO - Logo loaded: 378x125
+2025-03-24 10:41:56,711 - INFO - Logo scaled: 567x187
+2025-03-24 10:41:56,786 - INFO - User logged out
+2025-03-24 10:42:06,707 - INFO - User stores1 logged in with role Stores
+2025-03-24 10:43:57,810 - INFO - Part pulled: 10.55.09013 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,812 - INFO - Part pulled: 10.55.10004 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,812 - INFO - Part pulled: 10.77.00003 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,812 - INFO - Part pulled: 10.77.00012 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,813 - INFO - Part pulled: 10.77.00020 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,813 - INFO - Part pulled: 10.77.00030 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,813 - INFO - Part pulled: 10.77.00035 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,814 - INFO - Part pulled: 10.77.00040 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,814 - INFO - Part pulled: 10.77.00046 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,814 - INFO - Part pulled: 10.77.00050 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,814 - INFO - Part pulled: 10.77.00056 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,815 - INFO - Part pulled: 10.77.00086 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,815 - INFO - Part pulled: 10.77.00092 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,815 - INFO - Part pulled: 10.77.00094 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,815 - INFO - Part pulled: 10.77.00096 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,816 - INFO - Part pulled: 10.77.00099 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,816 - INFO - Part pulled: 10.77.00110 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,816 - INFO - Part pulled: 10.77.00130 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,816 - INFO - Part pulled: 10.77.00136 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,817 - INFO - Part pulled: 10.77.00140 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,817 - INFO - Part pulled: 10.77.00146 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,817 - INFO - Part pulled: 10.77.00155 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,818 - INFO - Part pulled: 11.18.03109 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,818 - INFO - Part pulled: 11.18.03110 for 4101 003 - 25 by stores1
+2025-03-24 10:43:57,837 - INFO - BOM submitted for 4101 003 - 25 by stores1, moved to Assembler
+2025-03-24 10:43:57,991 - INFO - BOM printed for 4101 003 - 25
+2025-03-24 10:44:01,040 - INFO - Email sent to john.doe@example.com with subject 'Pump 4101 003 - 25 Moved to Assembly' and 0 attachments
+2025-03-24 10:44:13,704 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 10:44:13,705 - INFO - Logo loaded: 378x125
+2025-03-24 10:44:13,814 - INFO - Logo scaled: 567x187
+2025-03-24 10:44:13,912 - INFO - User logged out
+2025-03-24 10:44:28,787 - INFO - User tester1 logged in with role Testing
+2025-03-24 10:45:21,365 - INFO - Pump 4101 003 - 25 moved to Testing by tester1 (Testing role)
+2025-03-24 10:45:21,388 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_4101 003 - 25.pdf
+2025-03-24 10:45:21,389 - INFO - Saved BOM to C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_4101 003 - 25.pdf
+2025-03-24 10:45:21,403 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_4101 003 - 25.pdf
+2025-03-24 10:45:21,403 - INFO - Saved confirmation to C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_4101 003 - 25.pdf
+2025-03-24 10:45:21,426 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_4101 003 - 25.pdf
+2025-03-24 10:45:21,438 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_4101 003 - 25.pdf
+2025-03-24 10:45:26,094 - INFO - Email sent to john.doe@example.com with subject 'Pump 4101 003 - 25 Moved to Testing' and 2 attachments
+2025-03-24 10:53:01,429 - INFO - Pump 4101 003 - 25 submitted for approval by tester1 (Testing role)
+2025-03-24 10:53:01,449 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\certificates\test_certificate_4101 003 - 25.pdf
+2025-03-24 10:53:01,450 - INFO - Saved test certificate to C:\Users\travism\source\repos\GuthPumpRegistry\certificates\test_certificate_4101 003 - 25.pdf
+2025-03-24 10:53:01,450 - ERROR - Failed to generate test data table: 'list' object has no attribute 'get'
+2025-03-24 10:53:01,475 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\certificates\test_certificate_4101 003 - 25.pdf
+2025-03-24 10:53:05,561 - INFO - Email sent to john.doe@example.com with subject 'Pump 4101 003 - 25 Submitted for Approval' and 1 attachments
+2025-03-24 10:53:17,216 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 10:53:17,218 - INFO - Logo loaded: 378x125
+2025-03-24 10:53:17,360 - INFO - Logo scaled: 567x187
+2025-03-24 10:53:17,449 - INFO - User logged out
+2025-03-24 10:53:32,489 - INFO - User approver1 logged in with role Approval
+2025-03-24 10:54:24,387 - INFO - Certificate generated: C:\Users\travism\source\repos\GuthPumpRegistry\certificates/Pump_Test_Report_4101 003 - 25.pdf
+2025-03-24 10:54:24,393 - INFO - Approval email sent to john.doe@example.com for pump 4101 003 - 25
+2025-03-24 10:54:24,399 - INFO - Pump 4101 003 - 25 approved by approver1
+2025-03-24 10:54:24,425 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\certificates/Pump_Test_Report_4101 003 - 25.pdf
+2025-03-24 10:54:29,489 - INFO - Email sent to john.doe@example.com with subject 'Pump 4101 003 - 25 Approved' and 1 attachments
+2025-03-24 10:57:15,609 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 10:57:15,610 - INFO - Logo loaded: 378x125
+2025-03-24 10:57:15,712 - INFO - Logo scaled: 567x187
+2025-03-24 10:57:15,738 - INFO - User logged out
+2025-03-24 10:57:21,243 - INFO - User user1 logged in with role Pump Originator
+2025-03-24 12:05:40,827 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 12:05:40,848 - INFO - Logo loaded: 378x125
+2025-03-24 12:05:40,896 - INFO - Logo scaled: 567x187
+2025-03-24 12:05:40,908 - INFO - Application started
+2025-03-24 12:05:53,190 - INFO - User stores1 logged in with role Stores
+2025-03-24 12:06:04,141 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 12:06:04,141 - INFO - Logo loaded: 378x125
+2025-03-24 12:06:04,185 - INFO - Logo scaled: 567x187
+2025-03-24 12:06:04,194 - INFO - User logged out
+2025-03-24 12:06:12,978 - WARNING - Failed login attempt for Travis
+2025-03-24 12:06:17,378 - INFO - User Travis logged in with role Pump Originator
+2025-03-24 12:24:03,300 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 12:24:03,300 - INFO - Logo loaded: 378x125
+2025-03-24 12:24:03,346 - INFO - Logo scaled: 567x187
+2025-03-24 12:24:03,363 - INFO - User logged out
+2025-03-24 12:24:08,588 - INFO - User tester1 logged in with role Testing
+2025-03-24 12:24:10,672 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 12:24:10,673 - INFO - Logo loaded: 378x125
+2025-03-24 12:24:10,713 - INFO - Logo scaled: 567x187
+2025-03-24 12:24:10,723 - INFO - User logged out
+2025-03-24 12:24:15,550 - INFO - User approver1 logged in with role Approval
+2025-03-24 12:34:51,347 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 12:34:51,348 - INFO - Logo loaded: 378x125
+2025-03-24 12:34:51,394 - INFO - Logo scaled: 567x187
+2025-03-24 12:34:51,411 - INFO - User logged out
+2025-03-24 12:39:11,033 - INFO - User admin1 logged in with role Admin
+2025-03-24 12:39:46,579 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 12:39:46,580 - INFO - Logo loaded: 378x125
+2025-03-24 12:39:46,623 - INFO - Logo scaled: 567x187
+2025-03-24 12:39:46,632 - INFO - User logged out
+2025-03-24 12:39:57,290 - INFO - User user1 logged in with role Pump Originator
+2025-03-24 12:40:27,024 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 12:40:27,025 - INFO - Logo loaded: 378x125
+2025-03-24 12:40:27,068 - INFO - Logo scaled: 567x187
+2025-03-24 12:40:27,090 - INFO - User logged out
+2025-03-24 12:40:32,031 - INFO - User stores1 logged in with role Stores
+2025-03-24 12:40:50,579 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 12:40:50,580 - INFO - Logo loaded: 378x125
+2025-03-24 12:40:50,619 - INFO - Logo scaled: 567x187
+2025-03-24 12:40:50,630 - INFO - User logged out
+2025-03-24 12:40:56,037 - INFO - User tester1 logged in with role Testing
+2025-03-24 12:41:07,897 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 12:41:07,897 - INFO - Logo loaded: 378x125
+2025-03-24 12:41:07,941 - INFO - Logo scaled: 567x187
+2025-03-24 12:41:07,958 - INFO - User logged out
+2025-03-24 12:41:13,302 - INFO - User approver1 logged in with role Approval
+2025-03-24 12:42:01,966 - INFO - Certificate generated: C:\Users\travism\source\repos\GuthPumpRegistry\certificates/Pump_Test_Report_7101 002 - 25.pdf
+2025-03-24 12:42:01,968 - INFO - Approval email sent to john.doe@example.com for pump 7101 002 - 25
+2025-03-24 12:42:01,972 - INFO - Pump 7101 002 - 25 approved by approver1
+2025-03-24 12:42:01,997 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\certificates/Pump_Test_Report_7101 002 - 25.pdf
+2025-03-24 12:42:07,224 - INFO - Email sent to john.doe@example.com with subject 'Pump 7101 002 - 25 Approved' and 1 attachments
+2025-03-24 12:44:12,414 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 12:44:12,414 - INFO - Logo loaded: 378x125
+2025-03-24 12:44:12,457 - INFO - Logo scaled: 567x187
+2025-03-24 12:44:12,467 - INFO - User logged out
+2025-03-24 12:46:31,639 - INFO - User admin1 logged in with role Admin
+2025-03-24 12:47:07,075 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 12:47:07,075 - INFO - Logo loaded: 378x125
+2025-03-24 12:47:07,119 - INFO - Logo scaled: 567x187
+2025-03-24 12:47:07,130 - INFO - User logged out
+2025-03-24 14:38:04,939 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 14:38:04,947 - INFO - Logo loaded: 378x125
+2025-03-24 14:38:04,995 - INFO - Logo scaled: 567x187
+2025-03-24 14:38:05,013 - INFO - Application started
+2025-03-24 14:40:38,166 - INFO - User admin1 logged in with role Admin
+2025-03-24 14:41:23,486 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 14:41:23,486 - INFO - Logo loaded: 378x125
+2025-03-24 14:41:23,530 - INFO - Logo scaled: 567x187
+2025-03-24 14:41:23,545 - INFO - User logged out
+2025-03-24 14:41:30,358 - INFO - User Travis logged in with role Pump Originator
+2025-03-24 14:42:35,560 - INFO - Inserted 24 BOM items for pump 6101 004 - 25
+2025-03-24 14:42:35,561 - INFO - Pump created: 6101 004 - 25 by Travis
+2025-03-24 14:42:35,567 - INFO - New pump created by Travis: 6101 004 - 25 with BOM
+2025-03-24 14:42:35,583 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_6101 004 - 25.pdf
+2025-03-24 14:42:35,623 - INFO - PDF generated and print dialog opened for pump 6101 004 - 25 at C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_6101 004 - 25.pdf
+2025-03-24 14:42:35,633 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_6101 004 - 25.pdf
+2025-03-24 14:42:35,633 - INFO - Saved confirmation to C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_6101 004 - 25.pdf
+2025-03-24 14:42:35,648 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_6101 004 - 25.pdf
+2025-03-24 14:42:35,655 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_6101 004 - 25.pdf
+2025-03-24 14:42:39,482 - INFO - Email sent to stores@guth.co.za with subject 'New Pump Assembly Created: 6101 004 - 25' and 2 attachments
+2025-03-24 14:42:47,816 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 14:42:47,816 - INFO - Logo loaded: 378x125
+2025-03-24 14:42:47,860 - INFO - Logo scaled: 567x187
+2025-03-24 14:42:47,881 - INFO - User logged out
+2025-03-24 14:42:54,677 - INFO - User stores1 logged in with role Stores
+2025-03-24 14:43:38,684 - INFO - Part pulled: 10.55.09005 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,684 - INFO - Part pulled: 10.55.10004 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,684 - INFO - Part pulled: 10.77.00005 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,684 - INFO - Part pulled: 10.77.00014 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,684 - INFO - Part pulled: 10.77.00020 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,684 - INFO - Part pulled: 10.77.00030 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,684 - INFO - Part pulled: 10.77.00035 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,684 - INFO - Part pulled: 10.77.00040 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,685 - INFO - Part pulled: 10.77.00046 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,685 - INFO - Part pulled: 10.77.00050 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,685 - INFO - Part pulled: 10.77.00056 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,685 - INFO - Part pulled: 10.77.00087 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,685 - INFO - Part pulled: 10.77.00092 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,685 - INFO - Part pulled: 10.77.00094 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,685 - INFO - Part pulled: 10.77.00099 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,686 - INFO - Part pulled: 10.77.00110 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,686 - INFO - Part pulled: 10.77.00120 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,686 - INFO - Part pulled: 10.77.00136 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,686 - INFO - Part pulled: 10.77.00140 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,686 - INFO - Part pulled: 10.77.00150 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,686 - INFO - Part pulled: 10.77.00158 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,686 - INFO - Part pulled: 11.18.03109 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,686 - INFO - Part pulled: 11.18.03110 for 6101 004 - 25 by stores1
+2025-03-24 14:43:38,693 - INFO - BOM submitted for 6101 004 - 25 by stores1, moved to Assembler
+2025-03-24 14:43:38,798 - INFO - BOM printed for 6101 004 - 25
+2025-03-24 14:43:41,412 - INFO - Email sent to travis.m@guth.co.za with subject 'Pump 6101 004 - 25 Moved to Assembly' and 0 attachments
+2025-03-24 14:44:18,193 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 14:44:18,194 - INFO - Logo loaded: 378x125
+2025-03-24 14:44:18,242 - INFO - Logo scaled: 567x187
+2025-03-24 14:44:18,252 - INFO - User logged out
+2025-03-24 14:44:30,693 - INFO - User tester1 logged in with role Testing
+2025-03-24 14:45:05,658 - INFO - Pump 6101 004 - 25 moved to Testing by tester1 (Testing role)
+2025-03-24 14:45:05,668 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_6101 004 - 25.pdf
+2025-03-24 14:45:05,668 - INFO - Saved BOM to C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_6101 004 - 25.pdf
+2025-03-24 14:45:05,677 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_6101 004 - 25.pdf
+2025-03-24 14:45:05,677 - INFO - Saved confirmation to C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_6101 004 - 25.pdf
+2025-03-24 14:45:05,689 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_6101 004 - 25.pdf
+2025-03-24 14:45:05,695 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_6101 004 - 25.pdf
+2025-03-24 14:45:09,224 - INFO - Email sent to travis.m@guth.co.za with subject 'Pump 6101 004 - 25 Moved to Testing' and 2 attachments
+2025-03-24 14:46:06,301 - INFO - Pump 6101 004 - 25 submitted for approval by tester1 (Testing role)
+2025-03-24 14:46:06,312 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\certificates\test_certificate_6101 004 - 25.pdf
+2025-03-24 14:46:06,312 - INFO - Saved test certificate to C:\Users\travism\source\repos\GuthPumpRegistry\certificates\test_certificate_6101 004 - 25.pdf
+2025-03-24 14:46:06,312 - ERROR - Failed to generate test data table: 'list' object has no attribute 'get'
+2025-03-24 14:46:06,324 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\certificates\test_certificate_6101 004 - 25.pdf
+2025-03-24 14:46:09,576 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 14:46:09,577 - INFO - Logo loaded: 378x125
+2025-03-24 14:46:09,624 - INFO - Logo scaled: 567x187
+2025-03-24 14:46:09,632 - INFO - User logged out
+2025-03-24 14:46:09,644 - INFO - Email sent to travis.m@guth.co.za with subject 'Pump 6101 004 - 25 Submitted for Approval' and 1 attachments
+2025-03-24 14:46:16,472 - INFO - User approver1 logged in with role Approval
+2025-03-24 14:46:42,719 - INFO - Certificate generated: C:\Users\travism\source\repos\GuthPumpRegistry\certificates/Pump_Test_Report_6101 004 - 25.pdf
+2025-03-24 14:46:42,724 - INFO - Approval email sent to travis.m@guth.co.za for pump 6101 004 - 25
+2025-03-24 14:46:42,731 - INFO - Pump 6101 004 - 25 approved by approver1
+2025-03-24 14:46:42,746 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\certificates/Pump_Test_Report_6101 004 - 25.pdf
+2025-03-24 14:46:47,738 - INFO - Email sent to travis.m@guth.co.za with subject 'Pump 6101 004 - 25 Approved' and 1 attachments
+2025-03-24 14:47:59,243 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 14:47:59,243 - INFO - Logo loaded: 378x125
+2025-03-24 14:47:59,288 - INFO - Logo scaled: 567x187
+2025-03-24 14:47:59,297 - INFO - User logged out
+2025-03-24 14:48:03,204 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-24 14:48:03,204 - INFO - Logo loaded: 378x125
+2025-03-24 14:48:03,221 - INFO - Logo scaled: 396x131
+2025-03-25 12:08:00,066 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-25 12:08:00,089 - INFO - Logo loaded: 378x125
+2025-03-25 12:08:00,138 - INFO - Logo scaled: 567x187
+2025-03-25 12:08:00,155 - INFO - Application started
+2025-03-25 12:08:10,206 - ERROR - No database configuration available.
+2025-03-25 12:17:23,185 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-25 12:17:23,191 - INFO - Logo loaded: 378x125
+2025-03-25 12:17:23,242 - INFO - Logo scaled: 567x187
+2025-03-25 12:17:23,249 - INFO - Application started
+2025-03-25 12:17:29,709 - ERROR - No database configuration available.
+2025-03-25 12:18:41,112 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-25 12:18:41,120 - INFO - Logo loaded: 378x125
+2025-03-25 12:18:41,173 - INFO - Logo scaled: 567x187
+2025-03-25 12:18:41,182 - INFO - Application started
+2025-03-25 12:18:47,588 - INFO - User Travis logged in with role Pump Originator
+2025-03-25 12:23:29,744 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-25 12:23:29,752 - INFO - Logo loaded: 378x125
+2025-03-25 12:23:29,801 - INFO - Logo scaled: 567x187
+2025-03-25 12:23:29,811 - INFO - Application started
+2025-03-25 12:23:34,598 - INFO - User Travis logged in with role Pump Originator
+2025-03-25 12:27:27,475 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-25 12:27:27,482 - INFO - Logo loaded: 378x125
+2025-03-25 12:27:27,531 - INFO - Logo scaled: 567x187
+2025-03-25 12:27:27,542 - INFO - Application started
+2025-03-25 12:27:32,832 - INFO - User Travis logged in with role Pump Originator
+2025-03-25 12:28:06,473 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-25 12:28:06,481 - INFO - Logo loaded: 378x125
+2025-03-25 12:28:06,532 - INFO - Logo scaled: 567x187
+2025-03-25 12:28:06,540 - INFO - Application started
+2025-03-25 12:28:13,320 - INFO - User Travis logged in with role Pump Originator
+2025-03-25 13:03:10,689 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-25 13:03:10,697 - INFO - Logo loaded: 378x125
+2025-03-25 13:03:10,744 - INFO - Logo scaled: 567x187
+2025-03-25 13:03:10,754 - INFO - Application started
+2025-03-25 13:03:24,181 - INFO - Refreshed All Pumps table
+2025-03-25 13:03:24,181 - INFO - Refreshed Pumps in Stores table
+2025-03-25 13:03:24,182 - INFO - User Travis logged in with role Pump Originator
+2025-03-25 13:05:11,809 - INFO - Refreshed Pumps in Stores table
+2025-03-25 13:05:13,021 - INFO - Refreshed Pumps in Stores table
+2025-03-25 13:05:14,259 - INFO - Refreshed Pumps in Stores table
+2025-03-25 13:08:19,388 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-25 13:08:19,394 - INFO - Logo loaded: 378x125
+2025-03-25 13:08:19,444 - INFO - Logo scaled: 567x187
+2025-03-25 13:08:19,453 - INFO - Application started
+2025-03-25 13:08:23,741 - INFO - Refreshed All Pumps table
+2025-03-25 13:08:23,742 - INFO - Refreshed Pumps in Stores table
+2025-03-25 13:08:23,743 - INFO - User Travis logged in with role Pump Originator
+2025-03-25 13:08:55,912 - INFO - Inserted 12 BOM items for pump 1101 016 - 25
+2025-03-25 13:08:55,913 - INFO - Pump created: 1101 016 - 25 by Travis
+2025-03-25 13:08:55,916 - INFO - New pump created by Travis: 1101 016 - 25 with BOM
+2025-03-25 13:08:55,932 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_1101 016 - 25.pdf
+2025-03-25 13:08:55,993 - INFO - PDF generated and print dialog opened for pump 1101 016 - 25 at C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_1101 016 - 25.pdf
+2025-03-25 13:08:56,003 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_1101 016 - 25.pdf
+2025-03-25 13:08:56,003 - INFO - Saved confirmation to C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_1101 016 - 25.pdf
+2025-03-25 13:08:56,006 - INFO - Refreshed All Pumps table
+2025-03-25 13:08:56,008 - INFO - Refreshed Pumps in Stores table
+2025-03-25 13:08:56,017 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_1101 016 - 25.pdf
+2025-03-25 13:08:56,025 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_1101 016 - 25.pdf
+2025-03-25 13:09:00,496 - INFO - Email sent to stores@guth.co.za with subject 'New Pump Assembly Created: 1101 016 - 25' and 2 attachments
+2025-03-25 13:09:13,748 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-25 13:09:13,749 - INFO - Logo loaded: 378x125
+2025-03-25 13:09:13,796 - INFO - Logo scaled: 567x187
+2025-03-25 13:09:13,818 - INFO - User logged out
+2025-03-25 13:09:19,904 - INFO - User stores1 logged in with role Stores
+2025-03-25 13:09:34,828 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-25 13:09:34,828 - INFO - Logo loaded: 378x125
+2025-03-25 13:09:34,868 - INFO - Logo scaled: 567x187
+2025-03-25 13:09:34,876 - INFO - User logged out
+2025-03-25 13:24:37,316 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-25 13:24:37,323 - INFO - Logo loaded: 378x125
+2025-03-25 13:24:37,374 - INFO - Logo scaled: 567x187
+2025-03-25 13:24:37,383 - INFO - Application started
+2025-03-25 13:25:19,999 - WARNING - Failed login attempt for Travis
+2025-03-25 13:25:24,024 - INFO - Refreshed All Pumps table
+2025-03-25 13:25:24,024 - INFO - Refreshed Pumps in Stores table
+2025-03-25 13:25:24,025 - INFO - User Travis logged in with role Pump Originator

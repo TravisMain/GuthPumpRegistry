@@ -1,3 +1,4 @@
+# database.py
 import sqlite3
 import os
 import threading
@@ -25,7 +26,7 @@ def initialize_database():
     with DB_LOCK, connect_db() as conn:
         cursor = conn.cursor()
         try:
-            # Drop and recreate pumps table with updated status constraint
+            # Drop and recreate pumps table with updated schema
             cursor.execute("DROP TABLE IF EXISTS pumps")
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS pumps (
@@ -50,8 +51,8 @@ def initialize_database():
                     branch TEXT NOT NULL,
                     impeller_size TEXT NOT NULL,
                     connection_type TEXT NOT NULL,
-                    pressure_required TEXT,
-                    flow_rate_required TEXT,
+                    pressure_required REAL NOT NULL,  -- Changed to REAL and made NOT NULL
+                    flow_rate_required REAL NOT NULL,  -- Changed to REAL and made NOT NULL
                     custom_motor TEXT,
                     flush_seal_housing TEXT
                 )
@@ -177,9 +178,13 @@ def load_bom_from_json(pump_model, configuration):
         logger.error(f"Error loading BOM from JSON: {str(e)}")
         return []
 
-def create_pump(cursor, pump_model, configuration, customer, requested_by, branch, impeller_size, 
-                connection_type, pressure_required, flow_rate_required, custom_motor, flush_seal_housing, 
-                insert_bom=True):
+def create_pump(cursor, pump_model, configuration, customer, requested_by, branch="Main", impeller_size="Medium", 
+                connection_type="Flange", pressure_required=0.0, flow_rate_required=0.0, custom_motor="", 
+                flush_seal_housing="No", insert_bom=True):
+    # Validate that pressure_required and flow_rate_required are provided
+    if pressure_required is None or flow_rate_required is None:
+        raise ValueError("Pressure required and flow rate required are mandatory fields.")
+    
     serial = generate_serial_number(pump_model, configuration, cursor)
     cursor.execute("""
         INSERT INTO pumps (serial_number, pump_model, configuration, customer, status, created_at, requested_by,
@@ -187,7 +192,7 @@ def create_pump(cursor, pump_model, configuration, customer, requested_by, branc
                           custom_motor, flush_seal_housing)
         VALUES (?, ?, ?, ?, 'Stores', ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (serial, pump_model, configuration, customer, datetime.now(), requested_by, branch, impeller_size, 
-          connection_type, pressure_required, flow_rate_required, custom_motor, flush_seal_housing))
+          connection_type, float(pressure_required), float(flow_rate_required), custom_motor, flush_seal_housing))
     
     if insert_bom:
         bom_items = load_bom_from_json(pump_model, configuration)
@@ -256,16 +261,16 @@ def create_bom_item(cursor, serial_number, part_name, part_code, quantity):
 def insert_test_data():
     print("Inserting test data...")
     test_pumps = [
-        ("P1 3.0KW", "Standard", "Guth Pinetown", "user1", "Guth Pinetown", "Medium", "Flange", "", "", "", "No"),
-        ("P1 3.0KW", "Standard", "Guth Durban", "user1", "Guth Durban", "Small", "Threaded", "", "", "", "Yes"),
-        ("P1 3.0KW", "Standard", "Guth Cape Town", "user1", "Guth Cape Town", "Large", "Welded", "", "", "", "No"),
+        ("P1 3.0KW", "Standard", "Guth Pinetown", "user1", "Guth Pinetown", "Medium", "Flange", 2.5, 1000, "", "No"),
+        ("P1 3.0KW", "Standard", "Guth Durban", "user1", "Guth Durban", "Small", "Threaded", 3.0, 1200, "", "Yes"),
+        ("P1 3.0KW", "Standard", "Guth Cape Town", "user1", "Guth Cape Town", "Large", "Welded", 2.0, 800, "", "No"),
     ]
     test_users = [
         ("user1", "password", "Pump Originator", "John", "Doe", "john.doe@example.com"),
         ("stores1", "password", "Stores", "Jane", "Smith", "jane.smith@example.com"),
         ("assembler1", "password", "Assembler", "Bob", "Jones", "bob.jones@example.com"),
         ("tester1", "password", "Testing", "Alice", "Brown", "alice.brown@example.com"),
-        ("approver1", "password", "Approval", "Manager", "Smith", "manager.smith@example.com"),  # New approval user
+        ("approver1", "password", "Approval", "Manager", "Smith", "manager.smith@example.com"),
         ("admin1", "password", "Admin", "Admin", "User", "admin@example.com"),
     ]
     with connect_db() as conn:

@@ -1,4 +1,4 @@
-BOM for Pump 5101 001 - 25:
+BOM for Pump 6101 004 - 25:
 Part: Front cover 'O' ring (Black nitrile) (10.55.09005), Qty: 1, Pulled: Yes, Reason: 
 Part: Mechanical shaft seal VITON (10.55.10004), Qty: 1, Pulled: Yes, Reason: 
 Part: Bikon shrink disc (10.77.00005), Qty: 1, Pulled: Yes, Reason: 
@@ -7,7 +7,7 @@ Part: Leg assembly (10.77.00020), Qty: 1, Pulled: Yes, Reason:
 Part: Front cover assembly (10.77.00030), Qty: 1, Pulled: Yes, Reason: 
 Part: Front cover wing nuts (10.77.00035), Qty: 4, Pulled: Yes, Reason: 
 Part: Housing assembly (10.77.00040), Qty: 1, Pulled: Yes, Reason: 
-Part: Elect. motor = 2.2kW. (2880Rpm) (Without modifications) (10.77.00245), Qty: 1, Pulled: Yes, Reason: 
+Part: Elect. motor = 3.0kW. (2880Rpm) (Without modifications) (10.77.00240), Qty: 1, Pulled: No, Reason: FLAME PROOF MOTOR ORDERED
 Part: Impeller (10.77.00046), Qty: 1, Pulled: Yes, Reason: 
 Part: Impeller cap nut (10.77.00050), Qty: 1, Pulled: Yes, Reason: 
 Part: Label (Motor direction) (10.77.00056), Qty: 1, Pulled: Yes, Reason: 

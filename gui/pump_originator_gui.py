@@ -1,5 +1,7 @@
+# pump_originator_gui.py
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
+from ttkbootstrap.dialogs import Messagebox
 from database import connect_db, create_pump, create_bom_item
 from utils.config import get_logger
 
@@ -38,21 +40,64 @@ def show_pump_originator_gui(root, username, logout_callback):
     customer_entry.insert(0, "Guth Test")
     customer_entry.pack(pady=5)
 
+    # Add fields for pressure_required and flow_rate_required
+    ttk.Label(create_frame, text="Pressure Required (bar):").pack()
+    pressure_required_entry = ttk.Entry(create_frame)
+    pressure_required_entry.pack(pady=5)
+
+    ttk.Label(create_frame, text="Flow Rate Required (L/h):").pack()
+    flow_rate_required_entry = ttk.Entry(create_frame)
+    flow_rate_required_entry.pack(pady=5)
+
     status_label = ttk.Label(create_frame, text="", bootstyle=SUCCESS)
     status_label.pack(pady=10)
 
     def create():
-        with connect_db() as conn:
-            cursor = conn.cursor()
-            serial = create_pump(cursor, model_entry.get(), config_entry.get(), customer_entry.get(), username)
-            create_bom_item(cursor, serial, "Impeller", "IMP-001", 1)
-            create_bom_item(cursor, serial, "Motor", "MTR-3.0kW", 1)
-            conn.commit()
-        status_label.config(text=f"Created S/N: {serial}")
-        logger.info(f"GUI: Pump {serial} created by {username}")
-        # Refresh the tables in the tabs
-        refresh_stores_pumps()
-        refresh_all_pumps()
+        # Validate pressure_required and flow_rate_required
+        pressure_required = pressure_required_entry.get().strip()
+        flow_rate_required = flow_rate_required_entry.get().strip()
+
+        # Check if fields are empty
+        if not pressure_required or not flow_rate_required:
+            Messagebox.show_error("Pressure Required and Flow Rate Required are mandatory fields.", "Validation Error")
+            return
+
+        # Check if fields are numeric
+        try:
+            pressure_required = float(pressure_required)
+            flow_rate_required = float(flow_rate_required)
+        except ValueError:
+            Messagebox.show_error("Pressure Required and Flow Rate Required must be numeric values.", "Validation Error")
+            return
+
+        # Check if values are non-negative
+        if pressure_required < 0 or flow_rate_required < 0:
+            Messagebox.show_error("Pressure Required and Flow Rate Required must be non-negative values.", "Validation Error")
+            return
+
+        try:
+            with connect_db() as conn:
+                cursor = conn.cursor()
+                serial = create_pump(
+                    cursor,
+                    model_entry.get(),
+                    config_entry.get(),
+                    customer_entry.get(),
+                    username,
+                    pressure_required=pressure_required,
+                    flow_rate_required=flow_rate_required
+                )
+                create_bom_item(cursor, serial, "Impeller", "IMP-001", 1)
+                create_bom_item(cursor, serial, "Motor", "MTR-3.0kW", 1)
+                conn.commit()
+            status_label.config(text=f"Created S/N: {serial}")
+            logger.info(f"GUI: Pump {serial} created by {username}")
+            # Refresh the tables in the tabs
+            refresh_stores_pumps()
+            refresh_all_pumps()
+        except Exception as e:
+            Messagebox.show_error(f"Failed to create pump: {str(e)}", "Error")
+            logger.error(f"Failed to create pump: {str(e)}")
 
     ttk.Button(create_frame, text="Create Pump", command=create, bootstyle=SUCCESS).pack(pady=20)
 
@@ -66,7 +111,7 @@ def show_pump_originator_gui(root, username, logout_callback):
     all_pumps_frame = ttk.LabelFrame(all_pumps_tab, text="All Pumps", padding=10)
     all_pumps_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-    columns = ("Serial Number", "Customer", "Branch", "Pump Model", "Configuration", "Created At", "Status")
+    columns = ("Serial Number", "Customer", "Branch", "Pump Model", "Configuration", "Created At", "Status", "Pressure Required", "Flow Rate Required")
     all_pumps_tree = ttk.Treeview(all_pumps_frame, columns=columns, show="headings", height=15)
     for col in columns:
         all_pumps_tree.heading(col, text=col, anchor=W)
@@ -83,14 +128,15 @@ def show_pump_originator_gui(root, username, logout_callback):
         with connect_db() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT serial_number, customer, branch, pump_model, configuration, created_at, status
+                SELECT serial_number, customer, branch, pump_model, configuration, created_at, status, pressure_required, flow_rate_required
                 FROM pumps
             """)
             pumps = cursor.fetchall()
             logger.debug(f"Fetched {len(pumps)} pumps for All Pumps")
             for pump in pumps:
                 all_pumps_tree.insert("", END, values=(pump["serial_number"], pump["customer"], pump["branch"],
-                                                      pump["pump_model"], pump["configuration"], pump["created_at"], pump["status"]))
+                                                      pump["pump_model"], pump["configuration"], pump["created_at"],
+                                                      pump["status"], pump["pressure_required"], pump["flow_rate_required"]))
         logger.info("Refreshed All Pumps table")
 
     # Initial population of the table
@@ -123,14 +169,15 @@ def show_pump_originator_gui(root, username, logout_callback):
         with connect_db() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT serial_number, customer, branch, pump_model, configuration, created_at, status
+                SELECT serial_number, customer, branch, pump_model, configuration, created_at, status, pressure_required, flow_rate_required
                 FROM pumps WHERE customer = 'Stores'
             """)
             pumps = cursor.fetchall()
             logger.debug(f"Fetched {len(pumps)} pumps for Pumps in Stores")
             for pump in pumps:
                 stores_tree.insert("", END, values=(pump["serial_number"], pump["customer"], pump["branch"],
-                                                   pump["pump_model"], pump["configuration"], pump["created_at"], pump["status"]))
+                                                   pump["pump_model"], pump["configuration"], pump["created_at"],
+                                                   pump["status"], pump["pressure_required"], pump["flow_rate_required"]))
         logger.info("Refreshed Pumps in Stores table")
 
     # Initial population of the table
@@ -144,7 +191,7 @@ def show_pump_originator_gui(root, username, logout_callback):
     # Logoff Button (Below the tabs)
     ttk.Button(main_frame, text="Logoff", command=logout_callback, bootstyle="warning", style="large.TButton").pack(pady=10)
 
-    # Copyright and Build Number (Unchanged)
+    # Copyright and Build Number
     ttk.Label(main_frame, text="\u00A9 Guth South Africa", font=("Roboto", 10)).pack(pady=(5, 0))
     ttk.Label(main_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack()
 

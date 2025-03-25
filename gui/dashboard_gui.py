@@ -1,6 +1,8 @@
+# dashboard_gui.py
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs import Messagebox  # For error messages
+from ttkbootstrap import Style  # For custom styling
 from PIL import Image, ImageTk
 from database import connect_db, create_pump
 import os
@@ -113,8 +115,8 @@ def show_dashboard(root, username, role, logout_callback):
         ("Configuration", "combobox", options["configuration"], True),
         ("Impeller Size", "combobox", None, True),  # Options will be set dynamically
         ("Connection Type", "combobox", options["connection_type"], True),
-        ("Pressure Required", "entry", None, False),
-        ("Flow Rate Required", "entry", None, False),
+        ("Pressure Required", "entry", None, True),  # Now mandatory
+        ("Flow Rate Required", "entry", None, True),  # Now mandatory
         ("Custom Motor", "entry", None, False),
         ("Flush Seal Housing", "checkbutton", None, False)
     ]
@@ -209,30 +211,63 @@ def show_dashboard(root, username, role, logout_callback):
         data = {}
         for key, entry in entries.items():
             if isinstance(entry, (ttk.Entry, ttk.Combobox)):
-                data[key] = entry.get()
+                data[key] = entry.get().strip()
             elif isinstance(entry, ttk.Checkbutton):
                 data[key] = "Yes" if entry.instate(['selected']) else "No"
         if data["connection_type"] == "Other":
-            data["connection_type"] = other_entry.get()
+            data["connection_type"] = other_entry.get().strip()
+            if not data["connection_type"]:
+                error_label.config(text="Please enter a custom connection type.")
+                return
         if data["impeller_size"] == "Other":
             data["impeller_size"] = custom_impeller_entry.get().strip()
             if not data["impeller_size"]:
                 error_label.config(text="Please enter a custom impeller size.")
                 return
 
+        # Validate required fields
         required_fields = [f[0].lower().replace(" ", "_") for f in fields if f[3]]
         missing = [field.replace("_", " ").title() for field in required_fields if not data[field]]
         if missing:
             error_label.config(text=f"Missing required fields: {', '.join(missing)}")
             return
 
-        with connect_db() as conn:
-            cursor = conn.cursor()
-            serial = create_pump(cursor, data["pump_model"], data["configuration"], data["customer"], username,
-                                data["branch"], data["impeller_size"], data["connection_type"], data["pressure_required"],
-                                data["flow_rate_required"], data["custom_motor"], data["flush_seal_housing"], insert_bom=True)
-            conn.commit()
-            logger.info(f"New pump created by {username}: {serial} with BOM")
+        # Validate pressure_required and flow_rate_required are numeric and non-negative
+        try:
+            pressure_required = float(data["pressure_required"])
+            flow_rate_required = float(data["flow_rate_required"])
+        except ValueError:
+            error_label.config(text="Pressure Required and Flow Rate Required must be numeric values.")
+            return
+
+        if pressure_required < 0 or flow_rate_required < 0:
+            error_label.config(text="Pressure Required and Flow Rate Required must be non-negative values.")
+            return
+
+        try:
+            with connect_db() as conn:
+                cursor = conn.cursor()
+                serial = create_pump(
+                    cursor,
+                    data["pump_model"],
+                    data["configuration"],
+                    data["customer"],
+                    username,
+                    data["branch"],
+                    data["impeller_size"],
+                    data["connection_type"],
+                    pressure_required,
+                    flow_rate_required,
+                    data["custom_motor"],
+                    data["flush_seal_housing"],
+                    insert_bom=True
+                )
+                conn.commit()
+                logger.info(f"New pump created by {username}: {serial} with BOM")
+        except Exception as e:
+            error_label.config(text=f"Failed to create pump: {str(e)}", bootstyle="danger")
+            logger.error(f"Failed to create pump: {str(e)}")
+            return
 
         # Prepare pump data for email and PDF
         pump_data = {
@@ -292,54 +327,70 @@ def show_dashboard(root, username, role, logout_callback):
         threading.Thread(target=send_email, args=(STORES_EMAIL, subject, greeting, body_content, footer, *attachments), daemon=True).start()
 
         error_label.config(text="Pump created successfully!", bootstyle="success")
-        refresh_pump_list()
+        refresh_all_pumps()
+        refresh_stores_pumps()
 
     # Place Submit and Logoff buttons side by side
     ttk.Button(form_frame, text="Submit", command=submit_pump, bootstyle="success", style="large.TButton").grid(row=len(fields) + 1, column=0, pady=5, padx=5, sticky=W)
     ttk.Button(form_frame, text="Logoff", command=logout_callback, bootstyle="secondary", style="large.TButton").grid(row=len(fields) + 1, column=1, pady=5, padx=5, sticky=W)
 
-    # Footer
-    footer_frame = ttk.Frame(main_frame)
-    footer_frame.pack(side=BOTTOM, pady=5, fill=X)
-    ttk.Label(footer_frame, text="\u00A9 Guth South Africa", font=("Roboto", 10)).pack(expand=True)
-    ttk.Label(footer_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack(expand=True)
+    # Custom style for the Notebook tabs
+    style = Style()
+    style.configure(
+        "Custom.TNotebook.Tab",
+        background="#007bff",  # Blue color for unselected tabs
+        foreground="white",   # White text for unselected tabs
+        padding=[10, 5]       # Padding for better appearance
+    )
+    # Ensure the selected tab uses the default theme's appearance
+    style.map(
+        "Custom.TNotebook.Tab",
+        background=[("selected", style.lookup("TNotebook.Tab", "background"))],  # Default selected tab background
+        foreground=[("selected", style.lookup("TNotebook.Tab", "foreground"))]   # Default selected tab foreground
+    )
 
-    # Pump List with Search and Filter
-    pump_list_frame = ttk.LabelFrame(main_frame, text="All Pumps", padding=10)
-    pump_list_frame.pack(fill=BOTH, expand=True, padx=10, pady=5)
+    # Tabbed Section: All Pumps and Pumps in Stores
+    notebook = ttk.Notebook(main_frame, style="Custom.TNotebook")
+    notebook.pack(fill=BOTH, expand=True, pady=10)
 
-    # Search and Filter Section
-    search_filter_frame = ttk.Frame(pump_list_frame)
-    search_filter_frame.pack(fill=X, pady=(0, 5))
+    # Tab 1: All Pumps
+    all_pumps_tab = ttk.Frame(notebook)
+    notebook.add(all_pumps_tab, text="All Pumps")
+    all_pumps_frame = ttk.LabelFrame(all_pumps_tab, text="All Pumps", padding=10)
+    all_pumps_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-    ttk.Label(search_filter_frame, text="Search by Serial Number:", font=("Roboto", 10)).pack(side=LEFT, padx=5)
-    search_entry = ttk.Entry(search_filter_frame, font=("Roboto", 10), width=20)
-    search_entry.pack(side=LEFT, padx=5)
-    CustomTooltip(search_entry, "Enter a serial number to search (partial matches allowed)")
+    # Search and Filter Section for All Pumps
+    search_filter_frame_all = ttk.Frame(all_pumps_frame)
+    search_filter_frame_all.pack(fill=X, pady=(0, 5))
 
-    ttk.Label(search_filter_frame, text="Filter by Status:", font=("Roboto", 10)).pack(side=LEFT, padx=5)
-    filter_combobox = ttk.Combobox(search_filter_frame, values=["All", "Pending", "Testing", "Completed"], font=("Roboto", 10), state="readonly")
-    filter_combobox.set("All")
-    filter_combobox.pack(side=LEFT, padx=5)
-    CustomTooltip(filter_combobox, "Filter pumps by their current status")
+    ttk.Label(search_filter_frame_all, text="Search by Serial Number:", font=("Roboto", 10)).pack(side=LEFT, padx=5)
+    search_entry_all = ttk.Entry(search_filter_frame_all, font=("Roboto", 10), width=20)
+    search_entry_all.pack(side=LEFT, padx=5)
+    CustomTooltip(search_entry_all, "Enter a serial number to search (partial matches allowed)")
 
-    # Pump List Treeview
+    ttk.Label(search_filter_frame_all, text="Filter by Status:", font=("Roboto", 10)).pack(side=LEFT, padx=5)
+    filter_combobox_all = ttk.Combobox(search_filter_frame_all, values=["All", "Pending", "Testing", "Completed"], font=("Roboto", 10), state="readonly")
+    filter_combobox_all.set("All")
+    filter_combobox_all.pack(side=LEFT, padx=5)
+    CustomTooltip(filter_combobox_all, "Filter pumps by their current status")
+
+    # All Pumps Treeview
     columns = ("Serial Number", "Customer", "Branch", "Pump Model", "Configuration", "Impeller Size", "Connection Type", 
                "Pressure Required", "Flow Rate Required", "Custom Motor", "Flush Seal Housing", "Status")
-    tree = ttk.Treeview(pump_list_frame, columns=columns, show="headings", height=12)  # Increased height for more rows
+    all_pumps_tree = ttk.Treeview(all_pumps_frame, columns=columns, show="headings", height=12)
     for col in columns:
-        tree.heading(col, text=col, anchor=W)
-        tree.column(col, width=120, anchor=W)
-    tree.pack(side=LEFT, fill=BOTH, expand=True)
-    scrollbar = ttk.Scrollbar(pump_list_frame, orient=VERTICAL, command=tree.yview)
-    scrollbar.pack(side=RIGHT, fill=Y)
-    tree.configure(yscrollcommand=scrollbar.set)
+        all_pumps_tree.heading(col, text=col, anchor=W)
+        all_pumps_tree.column(col, width=120, anchor=W)
+    all_pumps_tree.pack(side=LEFT, fill=BOTH, expand=True)
+    scrollbar_all = ttk.Scrollbar(all_pumps_frame, orient=VERTICAL, command=all_pumps_tree.yview)
+    scrollbar_all.pack(side=RIGHT, fill=Y)
+    all_pumps_tree.configure(yscrollcommand=scrollbar_all.set)
 
-    def refresh_pump_list():
-        for item in tree.get_children():
-            tree.delete(item)
-        search_term = search_entry.get().lower()
-        filter_status = filter_combobox.get()
+    def refresh_all_pumps():
+        for item in all_pumps_tree.get_children():
+            all_pumps_tree.delete(item)
+        search_term = search_entry_all.get().lower()
+        filter_status = filter_combobox_all.get()
 
         with connect_db() as conn:
             cursor = conn.cursor()
@@ -355,19 +406,92 @@ def show_dashboard(root, username, role, logout_callback):
             cursor.execute(query, params)
 
             for pump in cursor.fetchall():
-                # Apply search filter on serial number
                 if search_term in pump["serial_number"].lower():
-                    tree.insert("", END, values=(pump["serial_number"], pump["customer"], pump["branch"], pump["pump_model"], 
-                                                pump["configuration"], pump["impeller_size"], pump["connection_type"], 
-                                                pump["pressure_required"], pump["flow_rate_required"], pump["custom_motor"], 
-                                                pump["flush_seal_housing"], pump["status"]))
+                    all_pumps_tree.insert("", END, values=(pump["serial_number"], pump["customer"], pump["branch"], pump["pump_model"], 
+                                                          pump["configuration"], pump["impeller_size"], pump["connection_type"], 
+                                                          pump["pressure_required"], pump["flow_rate_required"], pump["custom_motor"], 
+                                                          pump["flush_seal_housing"], pump["status"]))
+        logger.info("Refreshed All Pumps table")
 
-    # Bind search and filter updates
-    search_entry.bind("<KeyRelease>", lambda event: refresh_pump_list())
-    filter_combobox.bind("<<ComboboxSelected>>", lambda event: refresh_pump_list())
+    # Bind search and filter updates for All Pumps
+    search_entry_all.bind("<KeyRelease>", lambda event: refresh_all_pumps())
+    filter_combobox_all.bind("<<ComboboxSelected>>", lambda event: refresh_all_pumps())
 
-    refresh_pump_list()
-    tree.bind("<Double-1>", lambda event: edit_pump_window(main_frame, tree, root, username, role, logout_callback))
+    # Tab 2: Pumps in Stores
+    stores_tab = ttk.Frame(notebook)
+    notebook.add(stores_tab, text="Pumps in Stores")
+    stores_frame = ttk.LabelFrame(stores_tab, text="Pumps in Stores", padding=10)
+    stores_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
+
+    # Search and Filter Section for Pumps in Stores
+    search_filter_frame_stores = ttk.Frame(stores_frame)
+    search_filter_frame_stores.pack(fill=X, pady=(0, 5))
+
+    ttk.Label(search_filter_frame_stores, text="Search by Serial Number:", font=("Roboto", 10)).pack(side=LEFT, padx=5)
+    search_entry_stores = ttk.Entry(search_filter_frame_stores, font=("Roboto", 10), width=20)
+    search_entry_stores.pack(side=LEFT, padx=5)
+    CustomTooltip(search_entry_stores, "Enter a serial number to search (partial matches allowed)")
+
+    ttk.Label(search_filter_frame_stores, text="Filter by Branch:", font=("Roboto", 10)).pack(side=LEFT, padx=5)
+    filter_combobox_stores = ttk.Combobox(search_filter_frame_stores, values=["All"] + options["branch"], font=("Roboto", 10), state="readonly")
+    filter_combobox_stores.set("All")
+    filter_combobox_stores.pack(side=LEFT, padx=5)
+    CustomTooltip(filter_combobox_stores, "Filter pumps by branch")
+
+    # Pumps in Stores Treeview
+    stores_tree = ttk.Treeview(stores_frame, columns=columns, show="headings", height=12)
+    for col in columns:
+        stores_tree.heading(col, text=col, anchor=W)
+        stores_tree.column(col, width=120, anchor=W)
+    stores_tree.pack(side=LEFT, fill=BOTH, expand=True)
+    scrollbar_stores = ttk.Scrollbar(stores_frame, orient=VERTICAL, command=stores_tree.yview)
+    scrollbar_stores.pack(side=RIGHT, fill=Y)
+    stores_tree.configure(yscrollcommand=scrollbar_stores.set)
+
+    def refresh_stores_pumps():
+        for item in stores_tree.get_children():
+            stores_tree.delete(item)
+        search_term = search_entry_stores.get().lower()
+        filter_branch = filter_combobox_stores.get()
+
+        with connect_db() as conn:
+            cursor = conn.cursor()
+            query = """
+                SELECT serial_number, customer, branch, pump_model, configuration, impeller_size, connection_type, 
+                       pressure_required, flow_rate_required, custom_motor, flush_seal_housing, status 
+                FROM pumps WHERE customer = 'Stores'
+            """
+            params = []
+            if filter_branch != "All":
+                query += " AND branch = ?"
+                params.append(filter_branch)
+            cursor.execute(query, params)
+
+            for pump in cursor.fetchall():
+                if search_term in pump["serial_number"].lower():
+                    stores_tree.insert("", END, values=(pump["serial_number"], pump["customer"], pump["branch"], pump["pump_model"], 
+                                                       pump["configuration"], pump["impeller_size"], pump["connection_type"], 
+                                                       pump["pressure_required"], pump["flow_rate_required"], pump["custom_motor"], 
+                                                       pump["flush_seal_housing"], pump["status"]))
+        logger.info("Refreshed Pumps in Stores table")
+
+    # Bind search and filter updates for Pumps in Stores
+    search_entry_stores.bind("<KeyRelease>", lambda event: refresh_stores_pumps())
+    filter_combobox_stores.bind("<<ComboboxSelected>>", lambda event: refresh_stores_pumps())
+
+    # Initial population of both tables
+    refresh_all_pumps()
+    refresh_stores_pumps()
+
+    # Bind double-click to edit for both Treeviews
+    all_pumps_tree.bind("<Double-1>", lambda event: edit_pump_window(main_frame, all_pumps_tree, root, username, role, logout_callback))
+    stores_tree.bind("<Double-1>", lambda event: edit_pump_window(main_frame, stores_tree, root, username, role, logout_callback))
+
+    # Footer
+    footer_frame = ttk.Frame(main_frame)
+    footer_frame.pack(side=BOTTOM, pady=5, fill=X)
+    ttk.Label(footer_frame, text="\u00A9 Guth South Africa", font=("Roboto", 10)).pack(expand=True)
+    ttk.Label(footer_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack(expand=True)
 
     return main_frame
 
