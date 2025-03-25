@@ -4886,3 +4886,112 @@
 2025-03-25 13:25:24,024 - INFO - Refreshed All Pumps table
 2025-03-25 13:25:24,024 - INFO - Refreshed Pumps in Stores table
 2025-03-25 13:25:24,025 - INFO - User Travis logged in with role Pump Originator
+2025-03-25 13:34:07,490 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-25 13:34:07,496 - INFO - Logo loaded: 378x125
+2025-03-25 13:34:07,545 - INFO - Logo scaled: 567x187
+2025-03-25 13:34:07,554 - INFO - Application started
+2025-03-25 13:34:12,547 - WARNING - Failed login attempt for Travis
+2025-03-25 13:34:15,781 - INFO - Refreshed All Pumps table
+2025-03-25 13:34:15,782 - INFO - Refreshed Pumps in Stores table
+2025-03-25 13:34:15,783 - INFO - User Travis logged in with role Pump Originator
+2025-03-25 13:34:29,130 - INFO - Inserted 12 BOM items for pump 1101 017 - 25
+2025-03-25 13:34:29,130 - INFO - Pump created: 1101 017 - 25 by Travis
+2025-03-25 13:34:29,131 - ERROR - Failed to create pump: no such table: bom
+2025-03-25 13:34:33,042 - INFO - Inserted 12 BOM items for pump 1101 017 - 25
+2025-03-25 13:34:33,042 - INFO - Pump created: 1101 017 - 25 by Travis
+2025-03-25 13:34:33,043 - ERROR - Failed to create pump: no such table: bom
+2025-03-25 13:35:01,461 - INFO - Inserted 12 BOM items for pump 1101 017 - 25
+2025-03-25 13:35:01,461 - INFO - Pump created: 1101 017 - 25 by Travis
+2025-03-25 13:35:01,462 - ERROR - Failed to create pump: no such table: bom
+2025-03-25 13:40:35,237 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-25 13:40:35,244 - INFO - Logo loaded: 378x125
+2025-03-25 13:40:35,290 - INFO - Logo scaled: 567x187
+2025-03-25 13:40:35,307 - INFO - Application started
+2025-03-25 13:40:39,650 - WARNING - Failed login attempt for Travis
+2025-03-25 13:40:44,727 - INFO - Refreshed All Pumps table
+2025-03-25 13:40:44,727 - INFO - Refreshed Pumps in Stores table
+2025-03-25 13:40:44,728 - INFO - User Travis logged in with role Pump Originator
+2025-03-25 13:40:48,177 - INFO - Inserted 12 BOM items for pump 1101 017 - 25
+2025-03-25 13:40:48,177 - INFO - Pump created: 1101 017 - 25 by Travis
+2025-03-25 13:40:48,180 - INFO - New pump created by Travis: 1101 017 - 25 with BOM
+2025-03-25 13:40:48,196 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_1101 017 - 25.pdf
+2025-03-25 13:40:48,232 - INFO - PDF generated and print dialog opened for pump 1101 017 - 25 at C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_1101 017 - 25.pdf
+2025-03-25 13:40:48,246 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_checklist_1101 017 - 25.pdf
+2025-03-25 13:40:48,259 - INFO - BOM checklist PDF generated and print dialog opened for pump 1101 017 - 25 at C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_checklist_1101 017 - 25.pdf
+2025-03-25 13:40:48,268 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_1101 017 - 25.pdf
+2025-03-25 13:40:48,268 - INFO - Saved confirmation to C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_1101 017 - 25.pdf
+2025-03-25 13:40:48,272 - INFO - Refreshed All Pumps table
+2025-03-25 13:40:48,273 - INFO - Refreshed Pumps in Stores table
+2025-03-25 13:40:48,282 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_1101 017 - 25.pdf
+2025-03-25 13:40:48,288 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_1101 017 - 25.pdf
+2025-03-25 13:40:48,295 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_checklist_1101 017 - 25.pdf
+2025-03-25 13:40:52,399 - INFO - Email sent to stores@guth.co.za with subject 'New Pump Assembly Created: 1101 017 - 25' and 3 attachments
+2025-03-25 13:48:30,918 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-25 13:48:30,926 - INFO - Logo loaded: 378x125
+2025-03-25 13:48:30,975 - INFO - Logo scaled: 567x187
+2025-03-25 13:48:30,984 - INFO - Application started
+2025-03-25 13:48:39,418 - INFO - Refreshed All Pumps table
+2025-03-25 13:48:39,418 - INFO - Refreshed Pumps in Stores table
+2025-03-25 13:48:39,419 - INFO - User Travis logged in with role Pump Originator
+2025-03-25 13:48:48,438 - INFO - Inserted 12 BOM items for pump 1101 018 - 25
+2025-03-25 13:48:48,438 - INFO - Pump created: 1101 018 - 25 by Travis
+2025-03-25 13:48:48,442 - INFO - New pump created by Travis: 1101 018 - 25 with BOM
+2025-03-25 13:48:48,457 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_1101 018 - 25.pdf
+2025-03-25 13:48:48,492 - INFO - PDF generated and print dialog opened for pump 1101 018 - 25 at C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_1101 018 - 25.pdf
+2025-03-25 13:48:48,502 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_checklist_1101 018 - 25.pdf
+2025-03-25 13:48:48,502 - INFO - BOM checklist PDF generated at C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_checklist_1101 018 - 25.pdf
+2025-03-25 13:48:48,516 - INFO - BOM checklist PDF generated and print dialog opened for pump 1101 018 - 25 at C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_checklist_1101 018 - 25.pdf
+2025-03-25 13:48:48,526 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_1101 018 - 25.pdf
+2025-03-25 13:48:48,526 - INFO - Saved confirmation to C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_1101 018 - 25.pdf
+2025-03-25 13:48:48,530 - INFO - Refreshed All Pumps table
+2025-03-25 13:48:48,531 - INFO - Refreshed Pumps in Stores table
+2025-03-25 13:48:48,540 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_1101 018 - 25.pdf
+2025-03-25 13:48:48,546 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_1101 018 - 25.pdf
+2025-03-25 13:48:48,552 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_checklist_1101 018 - 25.pdf
+2025-03-25 13:48:52,812 - INFO - Email sent to stores@guth.co.za with subject 'New Pump Assembly Created: 1101 018 - 25' and 3 attachments
+2025-03-25 13:53:38,963 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-25 13:53:38,972 - INFO - Logo loaded: 378x125
+2025-03-25 13:53:39,019 - INFO - Logo scaled: 567x187
+2025-03-25 13:53:39,029 - INFO - Application started
+2025-03-25 13:53:45,082 - INFO - Refreshed All Pumps table
+2025-03-25 13:53:45,082 - INFO - Refreshed Pumps in Stores table
+2025-03-25 13:53:45,084 - INFO - User Travis logged in with role Pump Originator
+2025-03-25 13:53:51,153 - INFO - Inserted 12 BOM items for pump 1101 019 - 25
+2025-03-25 13:53:51,154 - INFO - Pump created: 1101 019 - 25 by Travis
+2025-03-25 13:53:51,158 - INFO - New pump created by Travis: 1101 019 - 25 with BOM
+2025-03-25 13:53:51,172 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_1101 019 - 25.pdf
+2025-03-25 13:53:51,209 - INFO - PDF generated and print dialog opened for pump 1101 019 - 25 at C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_1101 019 - 25.pdf
+2025-03-25 13:53:51,220 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_checklist_1101 019 - 25.pdf
+2025-03-25 13:53:51,220 - INFO - BOM checklist PDF generated at C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_checklist_1101 019 - 25.pdf
+2025-03-25 13:53:51,233 - INFO - BOM checklist PDF generated and print dialog opened for pump 1101 019 - 25 at C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_checklist_1101 019 - 25.pdf
+2025-03-25 13:53:51,243 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_1101 019 - 25.pdf
+2025-03-25 13:53:51,243 - INFO - Saved confirmation to C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_1101 019 - 25.pdf
+2025-03-25 13:53:51,248 - INFO - Refreshed All Pumps table
+2025-03-25 13:53:51,248 - INFO - Refreshed Pumps in Stores table
+2025-03-25 13:53:51,257 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_1101 019 - 25.pdf
+2025-03-25 13:53:51,264 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_1101 019 - 25.pdf
+2025-03-25 13:53:51,271 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_checklist_1101 019 - 25.pdf
+2025-03-25 13:53:55,698 - INFO - Email sent to stores@guth.co.za with subject 'New Pump Assembly Created: 1101 019 - 25' and 3 attachments
+2025-03-25 14:05:18,492 - INFO - Logo file exists at: C:\Users\travism\source\repos\GuthPumpRegistry\assets\logo.png
+2025-03-25 14:05:18,500 - INFO - Logo loaded: 378x125
+2025-03-25 14:05:18,548 - INFO - Logo scaled: 567x187
+2025-03-25 14:05:18,558 - INFO - Application started
+2025-03-25 14:05:23,208 - INFO - Refreshed All Pumps table
+2025-03-25 14:05:23,209 - INFO - Refreshed Pumps in Stores table
+2025-03-25 14:05:23,210 - INFO - User Travis logged in with role Pump Originator
+2025-03-25 14:05:27,589 - INFO - Inserted 12 BOM items for pump 1101 020 - 25
+2025-03-25 14:05:27,589 - INFO - Pump created: 1101 020 - 25 by Travis
+2025-03-25 14:05:27,591 - INFO - New pump created by Travis: 1101 020 - 25 with BOM
+2025-03-25 14:05:27,607 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_1101 020 - 25.pdf
+2025-03-25 14:05:27,641 - INFO - PDF generated and print dialog opened for pump 1101 020 - 25 at C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_1101 020 - 25.pdf
+2025-03-25 14:05:27,654 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_checklist_1101 020 - 25.pdf
+2025-03-25 14:05:27,654 - INFO - BOM checklist PDF generated at C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_checklist_1101 020 - 25.pdf
+2025-03-25 14:05:27,668 - INFO - BOM checklist PDF generated and print dialog opened for pump 1101 020 - 25 at C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_checklist_1101 020 - 25.pdf
+2025-03-25 14:05:27,678 - INFO - Generated PDF at C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_1101 020 - 25.pdf
+2025-03-25 14:05:27,678 - INFO - Saved confirmation to C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_1101 020 - 25.pdf
+2025-03-25 14:05:27,682 - INFO - Refreshed All Pumps table
+2025-03-25 14:05:27,683 - INFO - Refreshed Pumps in Stores table
+2025-03-25 14:05:27,691 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\certificates\new_pump_notification_1101 020 - 25.pdf
+2025-03-25 14:05:27,698 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\confirmations\confirmation_pump_created_1101 020 - 25.pdf
+2025-03-25 14:05:27,705 - INFO - Attached file to email: C:\Users\travism\source\repos\GuthPumpRegistry\boms\bom_checklist_1101 020 - 25.pdf
+2025-03-25 14:05:49,410 - INFO - Email sent to stores@guth.co.za with subject 'New Pump Assembly Created: 1101 020 - 25' and 3 attachments

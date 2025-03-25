@@ -1,3 +1,4 @@
+# export_utils.py
 import smtplib
 import os
 import sys
@@ -114,7 +115,9 @@ def generate_pdf_notification(serial_number, data, title, output_path=None):
     
     Args:
         serial_number (str): Serial number or identifier for the document.
-        data (dict): Dictionary of data to display in the table (key-value pairs).
+        data (dict): Dictionary of data to display in the table.
+            If 'bom_items' key exists, renders a BOM checklist table.
+            Otherwise, renders a key-value table.
         title (str): Title of the document.
         output_path (str, optional): Path to save the PDF. If None, saves to a temp file.
     
@@ -161,28 +164,62 @@ def generate_pdf_notification(serial_number, data, title, output_path=None):
         elements.append(Paragraph(title, title_style))
         elements.append(Spacer(1, 0.25*inch))
 
-        # Data table
-        table_data = [["Field", "Value"]]
-        for key, value in data.items():
-            table_data.append([key, str(value).replace("\n", "<br/>")])
-        table = Table(table_data, colWidths=[2.5*inch, 4.5*inch])
-        table.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-            ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-            ("FONTSIZE", (0, 0), (-1, -1), 12),
-            ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
-            ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
-            ("GRID", (0, 0), (-1, -1), 1, colors.black),
-            ("VALIGN", (0, 0), (-1, -1), "TOP")
-        ]))
-        elements.append(table)
-        elements.append(Spacer(1, 0.25*inch))
+        # Check if this is a BOM checklist
+        if "bom_items" in data:
+            # BOM Checklist Table
+            elements.append(Paragraph("Please use this checklist to pull the required items for the pump assembly.", normal_style))
+            elements.append(Spacer(1, 0.15*inch))
+
+            bom_items = data["bom_items"]
+            if bom_items:
+                # Create the BOM table with columns: Item, Quantity, Check
+                table_data = [["Item", "Quantity", "Check"]]
+                for item in bom_items:
+                    table_data.append([item["part_name"], str(item["quantity"]), "[ ]"])
+                table = Table(table_data, colWidths=[3*inch, 1.5*inch, 1*inch])
+                table.setStyle(TableStyle([
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                    ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("FONTSIZE", (0, 0), (-1, -1), 12),
+                    ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
+                    ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
+                    ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP")
+                ]))
+                elements.append(table)
+            else:
+                elements.append(Paragraph("No BOM items found for this pump. Please check the BOM configuration.", normal_style))
+
+            # Instructions
+            instructions = data.get("instructions", "Tick the 'Check' column as you pull each item.")
+            elements.append(Spacer(1, 0.25*inch))
+            elements.append(Paragraph(f"<b>Instructions:</b> {instructions}", normal_style))
+        else:
+            # Default Key-Value Table (for pump details, confirmation, etc.)
+            table_data = [["Field", "Value"]]
+            for key, value in data.items():
+                table_data.append([key.replace("_", " ").title(), str(value).replace("\n", "<br/>")])
+            table = Table(table_data, colWidths=[2.5*inch, 4.5*inch])
+            table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 12),
+                ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
+                ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
+                ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                ("VALIGN", (0, 0), (-1, -1), "TOP")
+            ]))
+            elements.append(table)
 
         # Footer
+        generated_on = data.get("generated_on", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        elements.append(Spacer(1, 0.25*inch))
         footer_style = ParagraphStyle(name="Footer", fontSize=10, alignment=1, textColor=colors.grey)
-        elements.append(Paragraph(f"Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", footer_style))
+        elements.append(Paragraph(f"Generated on {generated_on}", footer_style))
 
         # Build the PDF
         doc.build(elements)

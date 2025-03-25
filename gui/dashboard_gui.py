@@ -1,4 +1,4 @@
-# dashboard_gui.py
+﻿# dashboard_gui.py
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs import Messagebox  # For error messages
@@ -9,6 +9,7 @@ import os
 from datetime import datetime
 import json
 import threading
+import sqlite3
 from utils.config import get_logger
 from export_utils import send_email, generate_pdf_notification, generate_pump_details_table
 
@@ -76,6 +77,28 @@ def load_options():
         options = json.load(f)
     logger.debug(f"Loaded options from JSON: {options}")
     return options
+
+def generate_bom_checklist(serial_number, bom_items, output_path):
+    """
+    Generate a BOM checklist PDF for the given serial number and BOM items.
+    The checklist will have a table with columns: Item, Quantity, Check.
+    """
+    title = f"BOM Checklist - Pump {serial_number}"
+    logger.debug(f"Generating BOM checklist for serial_number: {serial_number}, bom_items: {bom_items}")
+
+    # Prepare data for the PDF
+    data = {
+        "bom_items": bom_items,  # Pass the raw BOM items list
+        "instructions": "Tick the 'Check' column as you pull each item.",
+        "generated_on": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+
+    try:
+        generate_pdf_notification(serial_number, data, title=title, output_path=output_path)
+        logger.info(f"BOM checklist PDF generated at {output_path}")
+    except Exception as e:
+        logger.error(f"Failed to generate BOM checklist PDF: {str(e)}")
+        raise
 
 def show_dashboard(root, username, role, logout_callback):
     for widget in root.winfo_children():
@@ -262,6 +285,14 @@ def show_dashboard(root, username, role, logout_callback):
                     data["flush_seal_housing"],
                     insert_bom=True
                 )
+                # Fetch the BOM for the newly created pump (use bom_items table)
+                try:
+                    cursor.execute("SELECT part_name, quantity FROM bom_items WHERE serial_number = ?", (serial,))
+                    bom_items = cursor.fetchall()
+                    logger.debug(f"Fetched BOM items for serial {serial}: {bom_items}")
+                except sqlite3.OperationalError as e:
+                    logger.warning(f"Failed to fetch BOM items: {str(e)}. Proceeding with empty BOM.")
+                    bom_items = []
                 conn.commit()
                 logger.info(f"New pump created by {username}: {serial} with BOM")
         except Exception as e:
@@ -289,10 +320,13 @@ def show_dashboard(root, username, role, logout_callback):
         config = load_config()
         certificate_dir = config["document_dirs"]["certificate"]
         confirmation_dir = config["document_dirs"]["confirmation"]
+        bom_dir = config["document_dirs"]["bom"]
         if not os.path.exists(certificate_dir):
             os.makedirs(certificate_dir)
         if not os.path.exists(confirmation_dir):
             os.makedirs(confirmation_dir)
+        if not os.path.exists(bom_dir):
+            os.makedirs(bom_dir)
 
         # Generate PDF for new pump assembly notification and save to certificate directory
         pdf_path = os.path.join(certificate_dir, f"new_pump_notification_{serial}.pdf")
@@ -302,6 +336,15 @@ def show_dashboard(root, username, role, logout_callback):
             logger.info(f"PDF generated and print dialog opened for pump {serial} at {pdf_path}")
         except Exception as e:
             logger.error(f"Failed to generate PDF or open print dialog for {serial}: {str(e)}")
+
+        # Generate BOM checklist PDF and save to bom directory
+        bom_pdf_path = os.path.join(bom_dir, f"bom_checklist_{serial}.pdf")
+        try:
+            generate_bom_checklist(serial, bom_items, output_path=bom_pdf_path)
+            os.startfile(bom_pdf_path, "print")
+            logger.info(f"BOM checklist PDF generated and print dialog opened for pump {serial} at {bom_pdf_path}")
+        except Exception as e:
+            logger.error(f"Failed to generate BOM checklist PDF or open print dialog for {serial}: {str(e)}")
 
         # Generate confirmation document for pump creation
         confirmation_path = os.path.join(confirmation_dir, f"confirmation_pump_created_{serial}.pdf")
@@ -314,16 +357,17 @@ def show_dashboard(root, username, role, logout_callback):
         generate_pdf_notification(serial, confirmation_data, title=f"Confirmation - Pump Created {serial}", output_path=confirmation_path)
         logger.info(f"Saved confirmation to {confirmation_path}")
 
-        # Send email to stores with both PDFs attached
+        # Send email to stores with all PDFs attached
         subject = f"New Pump Assembly Created: {serial}"
         greeting = "Dear Stores Team,"
         body_content = f"""
             <p>A new pump assembly has been created and requires stock to be booked out of Sage and pulled. Please open the Guth Pump Assembly Program to start the process.</p>
             <h3 style="color: #34495e;">Pump Details</h3>
             {generate_pump_details_table(pump_data)}
+            <p>The Bill of Materials (BOM) checklist is attached for your reference. Please use it to pull the required items.</p>
         """
         footer = "Regards,<br>Guth Pump Registry"
-        attachments = [pdf_path, confirmation_path]
+        attachments = [pdf_path, confirmation_path, bom_pdf_path]
         threading.Thread(target=send_email, args=(STORES_EMAIL, subject, greeting, body_content, footer, *attachments), daemon=True).start()
 
         error_label.config(text="Pump created successfully!", bootstyle="success")
@@ -369,7 +413,7 @@ def show_dashboard(root, username, role, logout_callback):
     CustomTooltip(search_entry_all, "Enter a serial number to search (partial matches allowed)")
 
     ttk.Label(search_filter_frame_all, text="Filter by Status:", font=("Roboto", 10)).pack(side=LEFT, padx=5)
-    filter_combobox_all = ttk.Combobox(search_filter_frame_all, values=["All", "Pending", "Testing", "Completed"], font=("Roboto", 10), state="readonly")
+    filter_combobox_all = ttk.Combobox(search_filter_frame_all, values=["All", "Stores", "Assembler", "Testing", "Pending Approval", "Completed"], font=("Roboto", 10), state="readonly")
     filter_combobox_all.set("All")
     filter_combobox_all.pack(side=LEFT, padx=5)
     CustomTooltip(filter_combobox_all, "Filter pumps by their current status")
@@ -552,7 +596,7 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
     entries = {}
     custom_impeller_entry = ttk.Entry(frame, font=("Roboto", 12))
     custom_impeller_entry.grid(row=fields.index(("impeller_size", "combobox", None)), column=2, pady=5, padx=5, sticky=EW)
-    if pump_dict.get("impeller_size") not in options["impeller_size"][pump_dict.get("pump_model", "PT 0.55KW")]:
+    if pump_dict.get("impeller_size") not in options["impeller_size"][pump_dict.get("pump_model", "P1 3.0KW")]:
         custom_impeller_entry.insert(0, pump_dict.get("impeller_size", ""))
     custom_impeller_entry.grid_remove()  # Hide if not "Other"
 
@@ -571,7 +615,7 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
                 entry = pump_model_combobox
             elif field == "impeller_size":
                 impeller_combobox = ttk.Combobox(frame, font=("Roboto", 12), state="readonly")
-                initial_pump_model = pump_dict.get("pump_model", "PT 0.55KW")
+                initial_pump_model = pump_dict.get("pump_model", "P1 3.0KW")
                 impeller_opts = options["impeller_size"].get(initial_pump_model, []) + ["Other"]
                 impeller_combobox["values"] = impeller_opts
                 if value in impeller_opts:
