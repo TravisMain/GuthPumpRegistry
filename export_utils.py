@@ -14,6 +14,7 @@ from utils.config import get_logger
 import tempfile
 from datetime import datetime
 import json
+from PIL import Image as PILImage  # Import PIL to handle image dimensions
 
 logger = get_logger("export_utils")
 
@@ -140,12 +141,34 @@ def generate_pdf_notification(serial_number, data, title, output_path=None):
         title_style.fontSize = 16
         normal_style = styles["Normal"]
         normal_style.fontSize = 12
+        cell_style = ParagraphStyle(
+            name="CellStyle",
+            fontSize=10,
+            leading=12,  # Line spacing
+            wordWrap="CJK",  # Enable wrapping for long text
+            alignment=0  # Left align
+        )
 
         # Header with logo (if available)
         header_table_data = []
         if os.path.exists(LOGO_PATH):
             try:
-                logo = Image(LOGO_PATH, width=1.5*inch, height=1.5*inch)
+                # Load the image to get its dimensions
+                with PILImage.open(LOGO_PATH) as img:
+                    orig_width, orig_height = img.size
+                    # Calculate dimensions to maintain aspect ratio
+                    max_width = 1.5 * inch
+                    max_height = 1.5 * inch
+                    aspect_ratio = orig_width / orig_height
+                    if orig_width > orig_height:
+                        # Wider than tall: constrain by width
+                        logo_width = max_width
+                        logo_height = max_width / aspect_ratio
+                    else:
+                        # Taller than wide: constrain by height
+                        logo_height = max_height
+                        logo_width = max_height * aspect_ratio
+                    logo = Image(LOGO_PATH, width=logo_width, height=logo_height)
                 header_table_data.append([logo, Paragraph("Guth Pump Registry", styles["Heading2"])])
             except Exception as e:
                 logger.warning(f"Failed to load logo for PDF: {str(e)}")
@@ -175,7 +198,24 @@ def generate_pdf_notification(serial_number, data, title, output_path=None):
                 # Create the BOM table with columns: Item, Quantity, Check
                 table_data = [["Item", "Quantity", "Check"]]
                 for item in bom_items:
-                    table_data.append([item["part_name"], str(item["quantity"]), "[ ]"])
+                    # Handle different types of items
+                    if isinstance(item, dict):
+                        # Item is a dictionary (e.g., from dashboard_gui.py)
+                        part_name = item.get("part_name", "N/A") or "Unknown Item"
+                        quantity = item.get("quantity", "N/A") or "1"
+                    elif isinstance(item, str):
+                        # Item is a string (e.g., from combined_assembler_tester_gui.py)
+                        part_name = item if item else "Unknown Item"
+                        quantity = "1"  # Default quantity if not specified
+                    else:
+                        # Handle unexpected types
+                        logger.warning(f"Unexpected BOM item type: {type(item)} - {item}")
+                        part_name = str(item) if item else "Unknown Item"
+                        quantity = "1"
+
+                    # Wrap the "Item" column text using Paragraph to prevent spilling
+                    item_paragraph = Paragraph(part_name, cell_style)
+                    table_data.append([item_paragraph, str(quantity), "[ ]"])
                 table = Table(table_data, colWidths=[3*inch, 1.5*inch, 1*inch])
                 table.setStyle(TableStyle([
                     ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
@@ -200,7 +240,9 @@ def generate_pdf_notification(serial_number, data, title, output_path=None):
             # Default Key-Value Table (for pump details, confirmation, etc.)
             table_data = [["Field", "Value"]]
             for key, value in data.items():
-                table_data.append([key.replace("_", " ").title(), str(value).replace("\n", "<br/>")])
+                # Wrap the "Value" column text using Paragraph to prevent spilling
+                value_paragraph = Paragraph(str(value).replace("\n", "<br/>"), cell_style)
+                table_data.append([key.replace("_", " ").title(), value_paragraph])
             table = Table(table_data, colWidths=[2.5*inch, 4.5*inch])
             table.setStyle(TableStyle([
                 ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
@@ -268,7 +310,7 @@ def generate_bom_table(bom_data):
     
     Args:
         bom_data (list of dict): List of dictionaries containing BOM items.
-            Each dict should have keys like 'part_number', 'description', 'quantity', etc.
+            Each dict should have keys like 'part_name', 'part_code', 'quantity', etc.
     
     Returns:
         str: HTML string of the table.
@@ -278,7 +320,7 @@ def generate_bom_table(bom_data):
             return "<p>No BOM data available.</p>"
 
         # Define the columns to display
-        headers = ["Part Number", "Description", "Quantity"]
+        headers = ["Part Name", "Part Code", "Quantity"]
         table_rows = ""
         
         # Generate header row
@@ -290,13 +332,13 @@ def generate_bom_table(bom_data):
 
         # Generate data rows
         for item in bom_data:
-            part_number = item.get("part_number", "N/A")
-            description = item.get("description", "N/A")
+            part_name = item.get("part_name", "N/A")
+            part_code = item.get("part_code", "N/A")
             quantity = item.get("quantity", "N/A")
             table_rows += f"""
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #ddd;">{part_number}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd;">{description}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">{part_name}</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">{part_code}</td>
                     <td style="padding: 8px; border: 1px solid #ddd;">{quantity}</td>
                 </tr>
             """
