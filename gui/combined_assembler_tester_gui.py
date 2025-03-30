@@ -1,8 +1,8 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from ttkbootstrap.dialogs import Messagebox  # For error messages
+from ttkbootstrap.dialogs import Messagebox
 from PIL import Image, ImageTk
-from database import connect_db
+from database import get_db_connection
 import os
 from datetime import datetime
 import json
@@ -17,7 +17,6 @@ OPTIONS_PATH = os.path.join(BASE_DIR, "assets", "pump_options.json")
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 BUILD_NUMBER = "1.0.0"
 
-# Default directories if not specified in config
 DEFAULT_DIRS = {
     "certificate": os.path.join(BASE_DIR, "certificates"),
     "bom": os.path.join(BASE_DIR, "boms"),
@@ -27,9 +26,8 @@ DEFAULT_DIRS = {
 }
 
 def load_config():
-    """Load configuration from config.json, or create it with defaults if it doesn't exist."""
+    """Load configuration from config.json, creating defaults if missing."""
     if not os.path.exists(CONFIG_PATH):
-        # Create default config
         config = {"document_dirs": DEFAULT_DIRS}
         with open(CONFIG_PATH, "w") as f:
             json.dump(config, f, indent=4)
@@ -37,16 +35,13 @@ def load_config():
         return config
     with open(CONFIG_PATH, "r") as f:
         config = json.load(f)
-    # Ensure all required keys exist
-    if "document_dirs" not in config:
-        config["document_dirs"] = DEFAULT_DIRS
-    for key, default_path in DEFAULT_DIRS.items():
-        if key not in config["document_dirs"]:
-            config["document_dirs"][key] = default_path
+    config.setdefault("document_dirs", DEFAULT_DIRS)
+    for key, default in DEFAULT_DIRS.items():
+        config["document_dirs"].setdefault(key, default)
     return config
 
-# Custom Tooltip class (reused from dashboard_gui)
 class CustomTooltip:
+    """Custom tooltip class for widgets."""
     def __init__(self, widget, text):
         self.widget = widget
         self.text = text
@@ -60,8 +55,7 @@ class CustomTooltip:
         self.tooltip_window = ttk.Toplevel(self.widget)
         self.tooltip_window.wm_overrideredirect(True)
         self.tooltip_window.wm_geometry(f"+{x}+{y}")
-        label = ttk.Label(self.tooltip_window, text=self.text, background="lightyellow", relief="solid", borderwidth=1, font=("Roboto", 10))
-        label.pack()
+        ttk.Label(self.tooltip_window, text=self.text, background="lightyellow", relief="solid", borderwidth=1, font=("Roboto", 10)).pack()
 
     def hide_tooltip(self, event=None):
         if self.tooltip_window:
@@ -69,51 +63,51 @@ class CustomTooltip:
             self.tooltip_window = None
 
 def load_options():
-    with open(OPTIONS_PATH, "r") as f:
-        options = json.load(f)
-    logger.debug(f"Loaded options from JSON: {options}")
-    return options
+    """Load pump options from JSON file."""
+    try:
+        with open(OPTIONS_PATH, "r") as f:
+            options = json.load(f)
+            logger.debug(f"Loaded options from JSON: {options}")
+            return options
+    except Exception as e:
+        logger.error(f"Failed to load options: {str(e)}")
+        return {}
 
 def show_combined_assembler_tester_dashboard(root, username, role, logout_callback):
-    # Validate role
-    if role != "Testing":
-        logger.error(f"User {username} with role {role} attempted to access Testing Dashboard")
-        Messagebox.show_error("Access Denied", "This dashboard is only accessible to users with the Testing role.")
+    """Display the combined assembler and tester dashboard."""
+    if role not in ["Assembler", "Testing"]:
+        logger.error(f"User {username} with role {role} attempted to access Assembler/Tester Dashboard")
+        Messagebox.show_error("Access Denied", "This dashboard is only accessible to Assembler or Testing roles.")
         logout_callback()
         return
 
+    root.state('zoomed')
     for widget in root.winfo_children():
         widget.destroy()
 
-    root.state('zoomed')
     options = load_options()
     main_frame = ttk.Frame(root)
     main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-    # Header
     header_frame = ttk.Frame(main_frame, style="white.TFrame")
     header_frame.pack(fill=X, pady=(0, 20), ipady=20)
     if os.path.exists(LOGO_PATH):
         try:
-            img = Image.open(LOGO_PATH)
-            img_resized = img.resize((int(img.width * 1.0), int(img.height * 1.0)), Image.Resampling.LANCZOS)
-            logo = ImageTk.PhotoImage(img_resized)
-            logo_label = ttk.Label(header_frame, image=logo)
-            logo_label.image = logo
-            logo_label.pack(side=RIGHT, padx=10)
+            img = Image.open(LOGO_PATH).resize((int(Image.open(LOGO_PATH).width * 1.0), int(Image.open(LOGO_PATH).height * 1.0)), Image.Resampling.LANCZOS)
+            logo = ImageTk.PhotoImage(img)
+            ttk.Label(header_frame, image=logo).pack(side=RIGHT, padx=10)
+            header_frame.image = logo
         except Exception as e:
             logger.error(f"Logo load failed: {str(e)}")
     ttk.Label(header_frame, text=f"Welcome, {username}", font=("Roboto", 18, "bold")).pack(anchor=W, padx=10)
-    ttk.Label(header_frame, text="Testing Dashboard", font=("Roboto", 12)).pack(anchor=W, padx=10)
+    ttk.Label(header_frame, text=f"{role} Dashboard", font=("Roboto", 12)).pack(anchor=W, padx=10)
 
-    # Assembly Section (on top)
     assembler_frame = ttk.LabelFrame(main_frame, text="Assembly Tasks", padding=20, bootstyle="default")
     assembler_frame.pack(fill=X, padx=10, pady=10)
 
-    # Assembly Pump Inventory
     assembler_list_frame = ttk.LabelFrame(assembler_frame, text="Pumps in Assembly", padding=10)
     assembler_list_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
-    assembler_columns = ("Serial Number", "Customer", "Branch", "Pump Model", "Configuration")
+    assembler_columns = ("Serial Number", "Assembly Part Number", "Customer", "Branch", "Pump Model", "Configuration")
     assembler_tree = ttk.Treeview(assembler_list_frame, columns=assembler_columns, show="headings", height=10)
     for col in assembler_columns:
         assembler_tree.heading(col, text=col, anchor=W)
@@ -124,32 +118,36 @@ def show_combined_assembler_tester_dashboard(root, username, role, logout_callba
     assembler_tree.configure(yscrollcommand=assembler_scrollbar.set)
 
     def refresh_assembler_pump_list():
-        for item in assembler_tree.get_children():
-            assembler_tree.delete(item)
-        with connect_db() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT p.serial_number, p.customer, p.branch, p.pump_model, p.configuration
-                FROM pumps p
-                LEFT JOIN bom_items b ON p.serial_number = b.serial_number
-                WHERE p.status = 'Assembler'
-                GROUP BY p.serial_number, p.customer, p.branch, p.pump_model, p.configuration
-            """)
-            for pump in cursor.fetchall():
-                assembler_tree.insert("", END, values=(pump["serial_number"], pump["customer"], pump["branch"],
-                                                      pump["pump_model"], pump["configuration"]))
+        """Refresh the list of pumps in assembly."""
+        assembler_tree.delete(*assembler_tree.get_children())
+        try:
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT p.serial_number, p.assembly_part_number, p.customer, p.branch, p.pump_model, p.configuration
+                    FROM pumps p
+                    LEFT JOIN bom_items b ON p.serial_number = b.serial_number
+                    WHERE p.status = 'Assembler'
+                    GROUP BY p.serial_number, p.assembly_part_number, p.customer, p.branch, p.pump_model, p.configuration
+                """)
+                for pump in cursor.fetchall():
+                    assembler_tree.insert("", END, values=(pump["serial_number"], pump["assembly_part_number"] or "N/A",
+                                                          pump["customer"], pump["branch"], pump["pump_model"],
+                                                          pump["configuration"]))
+            logger.info("Refreshed assembler pump list")
+        except Exception as e:
+            logger.error(f"Failed to refresh assembler pump list: {str(e)}")
+            Messagebox.show_error("Error", f"Failed to load assembly pumps: {str(e)}")
 
     refresh_assembler_pump_list()
-    assembler_tree.bind("<Double-1>", lambda event: show_bom_window(main_frame, assembler_tree, username, refresh_assembler_pump_list))
+    assembler_tree.bind("<Double-1>", lambda event: show_bom_window(main_frame, assembler_tree, username, refresh_assembler_pump_list, role))
 
-    # Testing Section (below assembly)
     testing_frame = ttk.LabelFrame(main_frame, text="Testing Tasks", padding=20, bootstyle="default")
     testing_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-    # Testing Pump Inventory
     testing_list_frame = ttk.LabelFrame(testing_frame, text="Pumps in Testing", padding=10)
     testing_list_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
-    testing_columns = ("Serial Number", "Customer", "Branch", "Pump Model", "Configuration")
+    testing_columns = ("Serial Number", "Assembly Part Number", "Customer", "Branch", "Pump Model", "Configuration")
     testing_tree = ttk.Treeview(testing_list_frame, columns=testing_columns, show="headings", height=10)
     for col in testing_columns:
         testing_tree.heading(col, text=col, anchor=W)
@@ -160,25 +158,30 @@ def show_combined_assembler_tester_dashboard(root, username, role, logout_callba
     testing_tree.configure(yscrollcommand=testing_scrollbar.set)
 
     def refresh_testing_pump_list():
-        for item in testing_tree.get_children():
-            testing_tree.delete(item)
-        with connect_db() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT serial_number, customer, branch, pump_model, configuration
-                FROM pumps WHERE status = 'Testing'
-            """)
-            for pump in cursor.fetchall():
-                testing_tree.insert("", END, values=(pump["serial_number"], pump["customer"], pump["branch"],
-                                                    pump["pump_model"], pump["configuration"]))
+        """Refresh the list of pumps in testing."""
+        testing_tree.delete(*testing_tree.get_children())
+        try:
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT serial_number, assembly_part_number, customer, branch, pump_model, configuration
+                    FROM pumps WHERE status = 'Testing'
+                """)
+                for pump in cursor.fetchall():
+                    testing_tree.insert("", END, values=(pump["serial_number"], pump["assembly_part_number"] or "N/A",
+                                                        pump["customer"], pump["branch"], pump["pump_model"],
+                                                        pump["configuration"]))
+            logger.info("Refreshed testing pump list")
+        except Exception as e:
+            logger.error(f"Failed to refresh testing pump list: {str(e)}")
+            Messagebox.show_error("Error", f"Failed to load testing pumps: {str(e)}")
 
     refresh_testing_pump_list()
-    testing_tree.bind("<Double-1>", lambda event: show_test_report(main_frame, testing_tree, username, refresh_testing_pump_list))
+    testing_tree.bind("<Double-1>", lambda event: show_test_report(main_frame, testing_tree, username, refresh_testing_pump_list, role))
 
-    # Footer
     footer_frame = ttk.Frame(main_frame)
     footer_frame.pack(side=BOTTOM, pady=10)
-    refresh_btn = ttk.Button(footer_frame, text="Refresh", command=lambda: [refresh_assembler_pump_list(), refresh_testing_pump_list()], 
+    refresh_btn = ttk.Button(footer_frame, text="Refresh", command=lambda: [refresh_assembler_pump_list(), refresh_testing_pump_list()],
                             bootstyle="info", style="large.TButton")
     refresh_btn.pack(side=LEFT, padx=5)
     CustomTooltip(refresh_btn, text="Refresh the assembly and testing pump lists")
@@ -188,27 +191,35 @@ def show_combined_assembler_tester_dashboard(root, username, role, logout_callba
 
     return main_frame
 
-# From assembler_gui.py
-def show_bom_window(parent_frame, tree, username, refresh_callback):
+def show_bom_window(parent_frame, tree, username, refresh_callback, role):
+    """Display BOM for verification by Assembler role."""
+    if role != "Assembler":
+        logger.error(f"User {username} with role {role} attempted to access BOM window")
+        Messagebox.show_error("Access Denied", "BOM verification is only accessible to Assembler role.")
+        return
+
     selected = tree.selection()
     if not selected:
         logger.debug("No pump selected in Treeview")
         return
 
     serial_number = tree.item(selected[0])["values"][0]
-    with connect_db() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM pumps WHERE serial_number = ?", (serial_number,))
-        pump = cursor.fetchone()
-        if not pump:
-            logger.warning(f"No pump found for serial_number: {serial_number}")
-            return
-        pump = dict(pump)  # Convert to dictionary for easier access
-        cursor.execute("SELECT part_name, part_code, quantity, pulled_at FROM bom_items WHERE serial_number = ? AND pulled_at IS NOT NULL", (serial_number,))
-        bom_items = cursor.fetchall()
-        logger.debug(f"Fetched {len(bom_items)} received BOM items for {serial_number}: {[(item['part_name'], item['part_code']) for item in bom_items]}")
-        cursor.execute("SELECT username, email FROM users WHERE username = ?", (pump["requested_by"],))
-        originator = cursor.fetchone()
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM pumps WHERE serial_number = ?", (serial_number,))
+            pump = dict(cursor.fetchone() or {})
+            if not pump:
+                logger.warning(f"No pump found for serial_number: {serial_number}")
+                return
+            cursor.execute("SELECT part_name, part_code, quantity, pulled_at FROM bom_items WHERE serial_number = ? AND pulled_at IS NOT NULL", (serial_number,))
+            bom_items = cursor.fetchall()
+            cursor.execute("SELECT username, email FROM users WHERE username = ?", (pump["requested_by"],))
+            originator = cursor.fetchone()
+    except Exception as e:
+        logger.error(f"Failed to load BOM data: {str(e)}")
+        Messagebox.show_error("Error", f"Failed to load BOM: {str(e)}")
+        return
 
     bom_window = ttk.Toplevel(parent_frame)
     bom_window.title(f"BOM for Pump {serial_number}")
@@ -218,12 +229,10 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
     header_frame.pack(fill=X, pady=(0, 10), ipady=10)
     if os.path.exists(LOGO_PATH):
         try:
-            img = Image.open(LOGO_PATH)
-            img_resized = img.resize((int(img.width * 0.5), int(img.height * 0.5)), Image.Resampling.LANCZOS)
-            logo = ImageTk.PhotoImage(img_resized)
-            logo_label = ttk.Label(header_frame, image=logo)
-            logo_label.image = logo
-            logo_label.pack(side=RIGHT, padx=10)
+            img = Image.open(LOGO_PATH).resize((int(Image.open(LOGO_PATH).width * 0.5), int(Image.open(LOGO_PATH).height * 0.5)), Image.Resampling.LANCZOS)
+            logo = ImageTk.PhotoImage(img)
+            ttk.Label(header_frame, image=logo).pack(side=RIGHT, padx=10)
+            header_frame.image = logo
         except Exception as e:
             logger.error(f"BOM window logo load failed: {str(e)}")
     ttk.Label(header_frame, text=f"Pump {serial_number}", font=("Roboto", 14, "bold")).pack(anchor=W, padx=10)
@@ -234,27 +243,22 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
     canvas = ttk.Canvas(bom_frame)
     scrollbar = ttk.Scrollbar(bom_frame, orient=VERTICAL, command=canvas.yview)
     scrollable_frame = ttk.Frame(canvas)
-
     scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
     canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
     canvas.configure(yscrollcommand=scrollbar.set)
-
     canvas.pack(side=LEFT, fill=BOTH, expand=True)
     scrollbar.pack(side=RIGHT, fill=Y)
 
-    # BOM Headers
     ttk.Label(scrollable_frame, text="Part Number", font=("Roboto", 10, "bold")).grid(row=0, column=0, padx=5, pady=5, sticky=W)
     ttk.Label(scrollable_frame, text="Part Name", font=("Roboto", 10, "bold")).grid(row=0, column=1, padx=5, pady=5, sticky=W)
     ttk.Label(scrollable_frame, text="Quantity", font=("Roboto", 10, "bold")).grid(row=0, column=2, padx=5, pady=5, sticky=W)
     ttk.Label(scrollable_frame, text="Confirmed", font=("Roboto", 10, "bold")).grid(row=0, column=3, padx=5, pady=5, sticky=W)
 
-    # BOM Items
     confirm_vars = []
     for i, item in enumerate(bom_items, start=1):
         ttk.Label(scrollable_frame, text=item["part_code"]).grid(row=i, column=0, padx=5, pady=5, sticky=W)
         ttk.Label(scrollable_frame, text=item["part_name"]).grid(row=i, column=1, padx=5, pady=5, sticky=W)
         ttk.Label(scrollable_frame, text=str(item["quantity"])).grid(row=i, column=2, padx=5, pady=5, sticky=W)
-
         confirm_var = ttk.BooleanVar(value=False)
         confirm_check = ttk.Checkbutton(scrollable_frame, variable=confirm_var)
         confirm_check.grid(row=i, column=3, padx=5, pady=5)
@@ -273,22 +277,26 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
     unpulled_tree.configure(yscrollcommand=unpulled_scrollbar.set)
 
     def refresh_unpulled_list():
-        for item in unpulled_tree.get_children():
-            unpulled_tree.delete(item)
-        with connect_db() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT b.part_code, b.part_name, COALESCE((
-                    SELECT action FROM audit_log 
-                    WHERE action LIKE '%Reason for not pulling ' || b.part_code || ' on ' || b.serial_number || '%'
-                    ORDER BY timestamp DESC LIMIT 1
-                ), 'No reason provided') AS reason
-                FROM bom_items b
-                WHERE b.serial_number = ? AND b.pulled_at IS NULL
-            """, (serial_number,))
-            for item in cursor.fetchall():
-                reason = item["reason"].replace(f"Reason for not pulling {item['part_code']} on {serial_number}: ", "") if item["reason"].startswith("Reason") else item["reason"]
-                unpulled_tree.insert("", END, values=(item["part_code"], item["part_name"], reason))
+        """Refresh the list of unpulled BOM items."""
+        unpulled_tree.delete(*unpulled_tree.get_children())
+        try:
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT b.part_code, b.part_name, COALESCE((
+                        SELECT TOP 1 action FROM audit_log 
+                        WHERE action LIKE '%' + 'Reason for not pulling ' + b.part_code + ' on ' + b.serial_number + '%'
+                        ORDER BY timestamp DESC
+                    ), 'No reason provided') AS reason
+                    FROM bom_items b
+                    WHERE b.serial_number = ? AND b.pulled_at IS NULL
+                """, (serial_number,))
+                for item in cursor.fetchall():
+                    reason = item["reason"].replace(f"Reason for not pulling {item['part_code']} on {serial_number}: ", "") if item["reason"].startswith("Reason") else item["reason"]
+                    unpulled_tree.insert("", END, values=(item["part_code"], item["part_name"], reason))
+        except Exception as e:
+            logger.error(f"Failed to refresh unpulled list: {str(e)}")
+            Messagebox.show_error("Error", f"Failed to load unpulled items: {str(e)}")
 
     refresh_unpulled_list()
 
@@ -300,122 +308,118 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
     ttk.Label(footer_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack()
 
     def check_submit_state():
+        """Enable submit button if all items are confirmed."""
         all_confirmed = all(var.get() for var in confirm_vars)
-        logger.debug(f"All confirmed: {all_confirmed}")
         submit_btn.configure(state=NORMAL if all_confirmed else DISABLED)
 
     def submit_bom():
-        with connect_db() as conn:
-            cursor = conn.cursor()
-            cursor.execute("UPDATE pumps SET status = 'Testing' WHERE serial_number = ?", (serial_number,))
-            conn.commit()
-            logger.info(f"Pump {serial_number} moved to Testing by {username} (Testing role)")
-            cursor.execute("SELECT status FROM pumps WHERE serial_number = ?", (serial_number,))
-            new_status = cursor.fetchone()["status"]
-            logger.debug(f"Post-submit status for {serial_number}: {new_status}")
+        """Submit BOM verification and move pump to Testing."""
+        try:
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("UPDATE pumps SET status = 'Testing' WHERE serial_number = ?", (serial_number,))
+                conn.commit()
+                logger.info(f"Pump {serial_number} moved to Testing by {username} (Assembler role)")
 
-            # Load configuration
-            config = load_config()
-            bom_dir = config["document_dirs"]["bom"]
-            confirmation_dir = config["document_dirs"]["confirmation"]
-            if not os.path.exists(bom_dir):
-                os.makedirs(bom_dir)
-            if not os.path.exists(confirmation_dir):
-                os.makedirs(confirmation_dir)
+                config = load_config()
+                bom_dir = config["document_dirs"]["bom"]
+                confirmation_dir = config["document_dirs"]["confirmation"]
+                os.makedirs(bom_dir, exist_ok=True)
+                os.makedirs(confirmation_dir, exist_ok=True)
 
-            # Generate BOM document as a PDF
-            bom_path = os.path.join(bom_dir, f"bom_{serial_number}.pdf")
-            bom_data = {
-                "serial_number": serial_number,
-                "customer": pump["customer"],
-                "branch": pump["branch"] if "branch" in pump else "",
-                "pump_model": pump["pump_model"],
-                "configuration": pump["configuration"],
-            }
-            # Add BOM items to the data
-            bom_items_str = "\n".join([f"{item['part_code']}: {item['part_name']} (Qty: {item['quantity']})" for item in bom_items])
-            bom_data["bom_items"] = bom_items_str
-            generate_pdf_notification(serial_number, bom_data, title=f"BOM - {serial_number}", output_path=bom_path)
-            logger.info(f"Saved BOM to {bom_path}")
-
-            # Generate Confirmation document as a PDF
-            confirmation_path = os.path.join(confirmation_dir, f"confirmation_{serial_number}.pdf")
-            confirmation_data = {
-                "serial_number": serial_number,
-                "status": "Moved to Testing",
-                "assembled_by": username,
-                "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            }
-            generate_pdf_notification(serial_number, confirmation_data, title=f"Confirmation - {serial_number}", output_path=confirmation_path)
-            logger.info(f"Saved confirmation to {confirmation_path}")
-
-            if originator:
-                pump_data = {
-                    "serial_number": pump["serial_number"],
+                bom_path = os.path.join(bom_dir, f"bom_{serial_number}.pdf")
+                bom_data = {
+                    "serial_number": serial_number,
+                    "assembly_part_number": pump.get("assembly_part_number", "N/A"),
                     "customer": pump["customer"],
-                    "branch": pump["branch"] if "branch" in pump else "",
+                    "branch": pump.get("branch", ""),
                     "pump_model": pump["pump_model"],
                     "configuration": pump["configuration"],
-                    "impeller_size": pump["impeller_size"] if "impeller_size" in pump else "",
-                    "connection_type": pump["connection_type"] if "connection_type" in pump else "",
-                    "pressure_required": pump["pressure_required"] if "pressure_required" in pump else "",
-                    "flow_rate_required": pump["flow_rate_required"] if "flow_rate_required" in pump else "",
-                    "custom_motor": pump["custom_motor"] if "custom_motor" in pump else "",
-                    "flush_seal_housing": pump["flush_seal_housing"] if "flush_seal_housing" in pump else "",
                 }
+                bom_items_str = "\n".join([f"{item['part_code']}: {item['part_name']} (Qty: {item['quantity']})" for item in bom_items])
+                bom_data["bom_items"] = bom_items_str
+                generate_pdf_notification(serial_number, bom_data, title=f"BOM - {serial_number}", output_path=bom_path)
 
-                subject = f"Pump {serial_number} Moved to Testing"
-                greeting = f"Dear {originator['username']},"
-                body_content = f"""
-                    <p>The assembly of pump {serial_number} is complete, and it has been moved to the Testing stage.</p>
-                    <h3 style="color: #34495e;">Pump Details</h3>
-                    {generate_pump_details_table(pump_data)}
-                """
-                footer = "Regards,<br>Testing Team"
-                # Attach both BOM and confirmation PDFs to the email
-                attachments = [bom_path, confirmation_path]
-                threading.Thread(target=send_email, args=(originator["email"], subject, greeting, body_content, footer, *attachments), daemon=True).start()
-            else:
-                logger.warning(f"No originator found for pump {serial_number}")
+                confirmation_path = os.path.join(confirmation_dir, f"confirmation_{serial_number}.pdf")
+                confirmation_data = {
+                    "serial_number": serial_number,
+                    "assembly_part_number": pump.get("assembly_part_number", "N/A"),
+                    "status": "Moved to Testing",
+                    "assembled_by": username,
+                    "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                }
+                generate_pdf_notification(serial_number, confirmation_data, title=f"Confirmation - {serial_number}", output_path=confirmation_path)
 
-        refresh_callback()
-        bom_window.destroy()
+                if originator:
+                    pump_data = {
+                        "serial_number": pump["serial_number"],
+                        "assembly_part_number": pump.get("assembly_part_number", "N/A"),
+                        "customer": pump["customer"],
+                        "branch": pump.get("branch", ""),
+                        "pump_model": pump["pump_model"],
+                        "configuration": pump["configuration"],
+                        "impeller_size": pump.get("impeller_size", ""),
+                        "connection_type": pump.get("connection_type", ""),
+                        "pressure_required": pump.get("pressure_required", ""),
+                        "flow_rate_required": pump.get("flow_rate_required", ""),
+                        "custom_motor": pump.get("custom_motor", ""),
+                        "flush_seal_housing": pump.get("flush_seal_housing", ""),
+                    }
+                    subject = f"Pump {serial_number} Moved to Testing"
+                    greeting = f"Dear {originator['username']},"
+                    body_content = f"""
+                        <p>The assembly of pump {serial_number} is complete and has been moved to the Testing stage.</p>
+                        <h3 style="color: #34495e;">Pump Details</h3>
+                        {generate_pump_details_table(pump_data)}
+                    """
+                    footer = "Regards,<br>Assembler Team"
+                    threading.Thread(target=send_email, args=(originator["email"], subject, greeting, body_content, footer, bom_path, confirmation_path), daemon=True).start()
+                else:
+                    logger.warning(f"No originator found for pump {serial_number}")
+
+            refresh_callback()
+            bom_window.destroy()
+        except Exception as e:
+            logger.error(f"Failed to submit BOM: {str(e)}")
+            Messagebox.show_error("Error", f"Failed to submit BOM: {str(e)}")
 
     submit_btn.configure(command=submit_bom)
-
     for var in confirm_vars:
         var.trace("w", lambda *args: check_submit_state())
-
     check_submit_state()
 
-# From testing_gui.py
-def show_test_report(parent_frame, tree, username, refresh_callback):
+def show_test_report(parent_frame, tree, username, refresh_callback, role):
+    """Display test report for Tester role."""
+    if role != "Testing":
+        logger.error(f"User {username} with role {role} attempted to access Test Report window")
+        Messagebox.show_error("Access Denied", "Test reporting is only accessible to Testing role.")
+        return
+
     selected = tree.selection()
     if not selected:
         logger.debug("No pump selected in Treeview")
         return
 
     serial_number = tree.item(selected[0])["values"][0]
-    with connect_db() as conn:
-        cursor = conn.cursor()
-        # Updated query to include requested_by and other relevant columns
-        cursor.execute("""
-            SELECT serial_number, customer, pump_model, configuration, requested_by, branch, impeller_size,
-                   connection_type, pressure_required, flow_rate_required, custom_motor, flush_seal_housing
-            FROM pumps WHERE serial_number = ?
-        """, (serial_number,))
-        pump = cursor.fetchone()
-        if not pump:
-            logger.warning(f"No pump found for serial_number: {serial_number}")
-            return
-        pump = dict(pump)  # Convert to dictionary for easier access
-
-        # Fetch originator's details
-        cursor.execute("SELECT username, email FROM users WHERE username = ?", (pump["requested_by"],))
-        originator = cursor.fetchone()
-        if not originator or not originator["email"]:
-            logger.warning(f"No email found for requested_by {pump['requested_by']} of pump {serial_number}")
-            originator = None  # Proceed without email if not found
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT serial_number, customer, pump_model, configuration, requested_by, branch, impeller_size,
+                       connection_type, pressure_required, flow_rate_required, custom_motor, flush_seal_housing,
+                       assembly_part_number
+                FROM pumps WHERE serial_number = ?
+            """, (serial_number,))
+            pump = dict(cursor.fetchone() or {})
+            if not pump:
+                logger.warning(f"No pump found for serial_number: {serial_number}")
+                return
+            cursor.execute("SELECT username, email FROM users WHERE username = ?", (pump["requested_by"],))
+            originator = cursor.fetchone()
+    except Exception as e:
+        logger.error(f"Failed to load pump data: {str(e)}")
+        Messagebox.show_error("Error", f"Failed to load pump data: {str(e)}")
+        return
 
     test_window = ttk.Toplevel(parent_frame)
     test_window.title(f"Test Report for Pump {serial_number}")
@@ -425,12 +429,10 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
     header_frame.pack(fill=X, pady=(0, 10), ipady=10)
     if os.path.exists(LOGO_PATH):
         try:
-            img = Image.open(LOGO_PATH)
-            img_resized = img.resize((int(img.width * 0.5), int(img.height * 0.5)), Image.Resampling.LANCZOS)
-            logo = ImageTk.PhotoImage(img_resized)
-            logo_label = ttk.Label(header_frame, image=logo)
-            logo_label.image = logo
-            logo_label.pack(side=RIGHT, padx=10)
+            img = Image.open(LOGO_PATH).resize((int(Image.open(LOGO_PATH).width * 0.5), int(Image.open(LOGO_PATH).height * 0.5)), Image.Resampling.LANCZOS)
+            logo = ImageTk.PhotoImage(img)
+            ttk.Label(header_frame, image=logo).pack(side=RIGHT, padx=10)
+            header_frame.image = logo
         except Exception as e:
             logger.error(f"Test report logo load failed: {str(e)}")
     ttk.Label(header_frame, text="Pump Test Report", font=("Roboto", 14, "bold")).pack(anchor=W, padx=10)
@@ -438,26 +440,17 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
     canvas = ttk.Canvas(test_window)
     scrollbar = ttk.Scrollbar(test_window, orient=VERTICAL, command=canvas.yview)
     main_frame = ttk.Frame(canvas)
-
     main_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
     canvas.create_window((0, 0), window=main_frame, anchor="nw")
     canvas.configure(yscrollcommand=scrollbar.set)
-
     canvas.pack(side=LEFT, fill=BOTH, expand=True, padx=10, pady=10)
     scrollbar.pack(side=RIGHT, fill=Y)
 
     def on_mouse_wheel(event):
         canvas.yview_scroll(-1 * (event.delta // 120), "units")
 
-    # Bind the mouse wheel event to the canvas only
     canvas.bind("<MouseWheel>", on_mouse_wheel)
-
-    # Clean up binding when the window is closed
-    def on_close():
-        canvas.unbind("<MouseWheel>")
-        test_window.destroy()
-
-    test_window.protocol("WM_DELETE_WINDOW", on_close)
+    test_window.protocol("WM_DELETE_WINDOW", lambda: (canvas.unbind("<MouseWheel>"), test_window.destroy()))
 
     top_frame = ttk.Frame(main_frame)
     top_frame.grid(row=0, column=0, pady=(0, 15), sticky=W)
@@ -479,24 +472,27 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
     left_frame = ttk.Frame(main_layout)
     left_frame.pack(side=LEFT, padx=15, fill=Y)
 
-    fab_frame = ttk.LabelFrame(left_frame, text="Fabrication", padding=10, labelwidget=ttk.Label(left_frame, text="Fabrication", font=("Roboto", 12, "bold")))
+    fab_frame = ttk.LabelFrame(left_frame, text="Fabrication", padding=10)
     fab_frame.pack(pady=(0, 10), fill=X)
 
-    ttk.Label(fab_frame, text="Pump Model:", font=("Roboto", 10)).grid(row=0, column=0, padx=5, pady=5, sticky=W)
-    ttk.Label(fab_frame, text=pump["pump_model"], font=("Roboto", 10)).grid(row=0, column=1, padx=5, pady=5, sticky=W)
+    ttk.Label(fab_frame, text="Assembly Part Number:", font=("Roboto", 10)).grid(row=0, column=0, padx=5, pady=5, sticky=W)
+    ttk.Label(fab_frame, text=pump.get("assembly_part_number", "N/A"), font=("Roboto", 10)).grid(row=0, column=1, padx=5, pady=5, sticky=W)
 
-    ttk.Label(fab_frame, text="Serial Number:", font=("Roboto", 10)).grid(row=1, column=0, padx=5, pady=5, sticky=W)
-    ttk.Label(fab_frame, text=serial_number, font=("Roboto", 10)).grid(row=1, column=1, padx=5, pady=5, sticky=W)
+    ttk.Label(fab_frame, text="Pump Model:", font=("Roboto", 10)).grid(row=1, column=0, padx=5, pady=5, sticky=W)
+    ttk.Label(fab_frame, text=pump["pump_model"], font=("Roboto", 10)).grid(row=1, column=1, padx=5, pady=5, sticky=W)
 
-    ttk.Label(fab_frame, text="Impeller Diameter:", font=("Roboto", 10)).grid(row=2, column=0, padx=5, pady=5, sticky=W)
+    ttk.Label(fab_frame, text="Serial Number:", font=("Roboto", 10)).grid(row=2, column=0, padx=5, pady=5, sticky=W)
+    ttk.Label(fab_frame, text=serial_number, font=("Roboto", 10)).grid(row=2, column=1, padx=5, pady=5, sticky=W)
+
+    ttk.Label(fab_frame, text="Impeller Diameter:", font=("Roboto", 10)).grid(row=3, column=0, padx=5, pady=5, sticky=W)
     impeller_entry = ttk.Entry(fab_frame, width=20)
-    impeller_entry.insert(0, pump["impeller_size"] if "impeller_size" in pump else "")  # Safe access
-    impeller_entry.grid(row=2, column=1, padx=5, pady=5, sticky=W)
+    impeller_entry.insert(0, pump.get("impeller_size", ""))
+    impeller_entry.grid(row=3, column=1, padx=5, pady=5, sticky=W)
 
-    ttk.Label(fab_frame, text="Assembled By:", font=("Roboto", 10)).grid(row=3, column=0, padx=5, pady=5, sticky=W)
-    ttk.Label(fab_frame, text=username, font=("Roboto", 10)).grid(row=3, column=1, padx=5, pady=5, sticky=W)
+    ttk.Label(fab_frame, text="Assembled By:", font=("Roboto", 10)).grid(row=4, column=0, padx=5, pady=5, sticky=W)
+    ttk.Label(fab_frame, text=username, font=("Roboto", 10)).grid(row=4, column=1, padx=5, pady=5, sticky=W)
 
-    details_frame = ttk.LabelFrame(left_frame, text="Details", padding=10, labelwidget=ttk.Label(left_frame, text="Details", font=("Roboto", 12, "bold")))
+    details_frame = ttk.LabelFrame(left_frame, text="Details", padding=10)
     details_frame.pack(fill=X)
 
     fields_left = [
@@ -524,7 +520,7 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
     right_frame = ttk.Frame(main_layout)
     right_frame.pack(side=LEFT, padx=15, fill=BOTH, expand=True)
 
-    table_frame = ttk.LabelFrame(right_frame, text="Test Data", padding=10, labelwidget=ttk.Label(right_frame, text="Test Data", font=("Roboto", 12, "bold")))
+    table_frame = ttk.LabelFrame(right_frame, text="Test Data", padding=10)
     table_frame.pack(pady=(0, 10), fill=BOTH, expand=True)
 
     ttk.Label(table_frame, text="Flowrate (l/h)", font=("Roboto", 10)).grid(row=0, column=1, padx=5, pady=5)
@@ -546,7 +542,7 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
         pressure_entries.append(pressure_entry)
         amp_entries.append(amp_entry)
 
-    hydro_frame = ttk.LabelFrame(right_frame, text="Hydraulic Test", padding=10, labelwidget=ttk.Label(right_frame, text="Hydraulic Test", font=("Roboto", 12, "bold")))
+    hydro_frame = ttk.LabelFrame(right_frame, text="Hydraulic Test", padding=10)
     hydro_frame.pack(fill=X)
 
     ttk.Label(hydro_frame, text="Date of Test:", font=("Roboto", 10)).grid(row=0, column=0, padx=5, pady=5, sticky=W)
@@ -576,10 +572,12 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
     ttk.Label(footer_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack()
 
     def complete_test():
+        """Submit test report for approval."""
         test_data = {
             "invoice_number": invoice_entry.get(),
             "customer": pump["customer"],
             "job_number": job_entry.get(),
+            "assembly_part_number": pump.get("assembly_part_number", "N/A"),
             "pump_model": pump["pump_model"],
             "serial_number": serial_number,
             "impeller_diameter": impeller_entry.get(),
@@ -605,34 +603,46 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
             "approval_date": datetime.now().strftime("%Y-%m-%d"),
         }
 
-        # Validate test data
         if not all(test_data["flowrate"]) or not all(test_data["pressure"]) or not all(test_data["amperage"]):
             Messagebox.show_error("Error", "All test data fields must be filled.")
             return
 
-        with connect_db() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                UPDATE pumps 
-                SET status = 'Pending Approval', 
-                    originator = ?, 
-                    test_data = ? 
-                WHERE serial_number = ?
-            """, (username, json.dumps(test_data), serial_number))
-            conn.commit()
-            logger.info(f"Pump {serial_number} submitted for approval by {username} (Testing role)")
+        try:
+            for field in ["flowrate", "pressure", "amperage"]:
+                for value in test_data[field]:
+                    float(value)  # Validate numeric values
+        except ValueError:
+            Messagebox.show_error("Error", "Flowrate, Pressure, and Amperage must be numeric values.")
+            return
 
-            if originator:
+        try:
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    UPDATE pumps 
+                    SET status = 'Pending Approval', 
+                        test_data = ? 
+                    WHERE serial_number = ?
+                """, (json.dumps(test_data), serial_number))
+                conn.commit()
+                logger.info(f"Pump {serial_number} submitted for approval by {username} (Testing role)")
+
+                config = load_config()
+                certificate_dir = config["document_dirs"]["certificate"]
+                os.makedirs(certificate_dir, exist_ok=True)
+
+                pdf_path = os.path.join(certificate_dir, f"test_certificate_{serial_number}.pdf")
                 pump_data = {
                     "serial_number": test_data["serial_number"],
+                    "assembly_part_number": test_data["assembly_part_number"],
                     "customer": test_data["customer"],
-                    "branch": pump["branch"] if "branch" in pump else "",
+                    "branch": pump.get("branch", ""),
                     "pump_model": test_data["pump_model"],
                     "configuration": pump["configuration"],
                     "impeller_size": test_data["impeller_diameter"],
                     "connection_type": test_data["pump_connection"],
-                    "pressure_required": pump["pressure_required"] if "pressure_required" in pump else "",
-                    "flow_rate_required": pump["flow_rate_required"] if "flow_rate_required" in pump else "",
+                    "pressure_required": pump.get("pressure_required", ""),
+                    "flow_rate_required": pump.get("flow_rate_required", ""),
                     "custom_motor": test_data["motor_size"],
                     "flush_seal_housing": test_data["flush_arrangement"],
                     "date_of_test": test_data["date_of_test"],
@@ -643,38 +653,32 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
                     "pressure": ", ".join(test_data["pressure"]),
                     "amperage": ", ".join(test_data["amperage"]),
                 }
-
-                # Load configuration
-                config = load_config()
-                certificate_dir = config["document_dirs"]["certificate"]
-                if not os.path.exists(certificate_dir):
-                    os.makedirs(certificate_dir)
-
-                # Generate PDF certificate in the configured directory
-                pdf_path = os.path.join(certificate_dir, f"test_certificate_{serial_number}.pdf")
                 generate_pdf_notification(serial_number, pump_data, title=f"Test Certificate - {serial_number}", output_path=pdf_path)
-                logger.info(f"Saved test certificate to {pdf_path}")
 
-                subject = f"Pump {serial_number} Submitted for Approval"
-                greeting = f"Dear {originator['username']},"
-                body_content = f"""
-                    <p>The testing of pump {serial_number} is complete, and it has been submitted for approval.</p>
-                    <h3 style="color: #34495e;">Pump Details</h3>
-                    {generate_pump_details_table(pump_data)}
-                    <h3 style="color: #34495e;">Test Data</h3>
-                    {generate_test_data_table({
-                        "flowrate": test_data["flowrate"],
-                        "pressure": test_data["pressure"],
-                        "amperage": test_data["amperage"]
-                    })}
-                """
-                footer = "Regards,<br>Testing Team"
-                threading.Thread(target=send_email, args=(originator["email"], subject, greeting, body_content, footer, pdf_path), daemon=True).start()
-            else:
-                logger.warning(f"No originator found for pump {serial_number}")
+                if originator:
+                    subject = f"Pump {serial_number} Submitted for Approval"
+                    greeting = f"Dear {originator['username']},"
+                    body_content = f"""
+                        <p>The testing of pump {serial_number} is complete and has been submitted for approval.</p>
+                        <h3 style="color: #34495e;">Pump Details</h3>
+                        {generate_pump_details_table(pump_data)}
+                        <h3 style="color: #34495e;">Test Data</h3>
+                        {generate_test_data_table({
+                            "flowrate": test_data["flowrate"],
+                            "pressure": test_data["pressure"],
+                            "amperage": test_data["amperage"]
+                        })}
+                    """
+                    footer = "Regards,<br>Testing Team"
+                    threading.Thread(target=send_email, args=(originator["email"], subject, greeting, body_content, footer, pdf_path), daemon=True).start()
+                else:
+                    logger.warning(f"No originator found for pump {serial_number}")
 
-        refresh_callback()
-        test_window.destroy()
+            refresh_callback()
+            test_window.destroy()
+        except Exception as e:
+            logger.error(f"Failed to submit test report: {str(e)}")
+            Messagebox.show_error("Error", f"Failed to submit test report: {str(e)}")
 
     complete_btn.configure(command=complete_test)
 

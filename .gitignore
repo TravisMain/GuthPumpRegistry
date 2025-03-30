@@ -9,3 +9,4 @@ data/guth_pump_registry.db
 /certificates
 /docs
 /bom_print.txt
+/logs

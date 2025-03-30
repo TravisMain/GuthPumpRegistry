@@ -1,407 +1,268 @@
-# export_utils.py
-import smtplib
-import os
-import sys
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.application import MIMEApplication
-from reportlab.lib.pagesizes import letter
-from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+﻿import os
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
+from reportlab.lib import colors
+from reportlab.lib.units import inch  # Added this import
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
 from utils.config import get_logger
-import tempfile
-from datetime import datetime
 import json
-from PIL import Image as PILImage  # Import PIL to handle image dimensions
+from datetime import datetime
+from PIL import Image as PILImage
 
 logger = get_logger("export_utils")
-
-# Paths
+EXPORT_UTILS_VERSION = "2025-03-30_v5"
 BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo.png")
 
 def load_config():
     """Load configuration from config.json."""
-    if not os.path.exists(CONFIG_PATH):
-        raise FileNotFoundError(f"Config file not found at {CONFIG_PATH}")
-    with open(CONFIG_PATH, "r") as f:
-        config = json.load(f)
-    return config
+    try:
+        with open(CONFIG_PATH, "r") as f:
+            return json.load(f)
+    except Exception as e:
+        logger.error(f"Failed to load config from {CONFIG_PATH}: {str(e)}")
+        raise FileNotFoundError(f"Config file not found or invalid at {CONFIG_PATH}")
 
-def resource_path(relative_path):
-    """Get the absolute path to a resource, works for dev and PyInstaller."""
-    if hasattr(sys, '_MEIPASS'):
-        return os.path.join(sys._MEIPASS, relative_path)
-    return os.path.join(os.path.abspath("."), relative_path)
-
-LOGO_PATH = resource_path(os.path.join("assets", "logo.png"))
-
-def send_email(to_email, subject, greeting, body_content, footer, *attachments):
-    """
-    Send an email using the SMTP settings from config.json.
-    
-    Args:
-        to_email (str): Recipient's email address.
-        subject (str): Email subject.
-        greeting (str): Greeting line (e.g., "Dear Stores Team,").
-        body_content (str): Main body content (HTML supported).
-        footer (str): Footer text (e.g., "Regards,<br>Guth Pump Registry").
-        *attachments (str): Paths to files to attach.
-    """
-    # Load email settings from config
+def send_email(to_email, subject, greeting, body_content, footer="", *attachment_paths):
+    """Send an email with multiple optional attachments using SMTP settings from config.json."""
     config = load_config()
     email_settings = config.get("email_settings", {})
-    
-    SMTP_SERVER = email_settings.get("smtp_host", "")
-    SMTP_PORT = int(email_settings.get("smtp_port", 587))
-    SENDER_EMAIL = email_settings.get("sender_email", "")
-    SMTP_USERNAME = email_settings.get("smtp_username", "")
-    SMTP_PASSWORD = email_settings.get("smtp_password", "")
-    USE_TLS = email_settings.get("use_tls", True)
+    smtp_server = email_settings.get("smtp_host", "")
+    smtp_port = int(email_settings.get("smtp_port", 587))
+    sender_email = email_settings.get("sender_email", "")
+    smtp_username = email_settings.get("smtp_username", "")
+    smtp_password = email_settings.get("smtp_password", "")
+    use_tls = email_settings.get("use_tls", True)
 
-    # Validate required settings
-    if not all([SMTP_SERVER, SMTP_PORT, SENDER_EMAIL]):
+    if not all([smtp_server, smtp_port, sender_email]):
         logger.error("Required email settings (smtp_host, smtp_port, sender_email) not found in config.json")
         raise ValueError("Required email settings not set in config.json")
 
-    try:
-        # Create the email message
-        msg = MIMEMultipart()
-        msg["From"] = SENDER_EMAIL
-        msg["To"] = to_email
-        msg["Subject"] = subject
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = to_email
+    msg['Subject'] = subject
 
-        # Construct the email body
-        body = f"""
-        <html>
-            <body style="font-family: Arial, sans-serif; color: #333;">
+    body = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                <div style="text-align: center;">
+                    <img src="file://{LOGO_PATH}" alt="Guth Logo" style="max-width: 150px; height: auto;" />
+                </div>
+                <h2 style="color: #2c3e50; text-align: center;">{subject}</h2>
                 <p>{greeting}</p>
                 {body_content}
-                <br>
-                {footer}
-            </body>
-        </html>
-        """
-        msg.attach(MIMEText(body, "html"))
+                <p style="margin-top: 20px;">{footer}</p>
+                <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
+                <p style="font-size: 12px; color: #777; text-align: center;">© Guth South Africa | Version {EXPORT_UTILS_VERSION}</p>
+            </div>
+        </body>
+    </html>
+    """
+    msg.attach(MIMEText(body, 'html'))
 
-        # Attach files
-        for attachment_path in attachments:
-            if not os.path.exists(attachment_path):
-                logger.warning(f"Attachment not found: {attachment_path}")
-                continue
-            with open(attachment_path, "rb") as f:
-                part = MIMEApplication(f.read(), Name=os.path.basename(attachment_path))
-                part["Content-Disposition"] = f'attachment; filename="{os.path.basename(attachment_path)}"'
-                msg.attach(part)
-            logger.info(f"Attached file to email: {attachment_path}")
+    for attachment_path in attachment_paths:
+        if os.path.exists(attachment_path):
+            try:
+                with open(attachment_path, 'rb') as f:
+                    attachment = MIMEApplication(f.read(), _subtype="pdf")
+                    attachment.add_header('Content-Disposition', 'attachment', filename=os.path.basename(attachment_path))
+                    msg.attach(attachment)
+                logger.info(f"Attached file to email: {attachment_path}")
+            except Exception as e:
+                logger.error(f"Failed to attach {attachment_path}: {str(e)}")
+        else:
+            logger.warning(f"Attachment not found: {attachment_path}")
 
-        # Send the email using the configured SMTP server
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-            if USE_TLS:
-                server.starttls()  # Enable TLS
-            if SMTP_USERNAME and SMTP_PASSWORD:
-                server.login(SMTP_USERNAME, SMTP_PASSWORD)
-            server.sendmail(SENDER_EMAIL, to_email, msg.as_string())
-            logger.info(f"Email sent to {to_email} with subject '{subject}' and {len(attachments)} attachments")
-
+    try:
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            if use_tls:
+                server.starttls()
+            if smtp_username and smtp_password:
+                server.login(smtp_username, smtp_password)
+            server.sendmail(sender_email, to_email, msg.as_string())
+        logger.info(f"Email sent to {to_email} with subject '{subject}' and {len(attachment_paths)} attachments")
     except Exception as e:
         logger.error(f"Failed to send email to {to_email}: {str(e)}")
         raise
 
-def generate_pdf_notification(serial_number, data, title, output_path=None):
-    """
-    Generate a PDF document with a header, title, and data table.
-    
-    Args:
-        serial_number (str): Serial number or identifier for the document.
-        data (dict): Dictionary of data to display in the table.
-            If 'bom_items' key exists, renders a BOM checklist table.
-            Otherwise, renders a key-value table.
-        title (str): Title of the document.
-        output_path (str, optional): Path to save the PDF. If None, saves to a temp file.
-    
-    Returns:
-        str: Path to the generated PDF file.
-    """
-    try:
-        # Determine the output path
-        if output_path is None:
-            output_path = os.path.join(tempfile.gettempdir(), f"{serial_number}_{title.replace(' ', '_')}.pdf")
+def generate_pdf_notification(serial_number, data, title="Pump Assembly Notification", output_path=None):
+    """Generate a PDF document with pump details and optional BOM items."""
+    if output_path is None:
+        config = load_config()
+        output_dir = config["document_dirs"].get("certificate", os.path.join(BASE_DIR, "certificates"))
+        os.makedirs(output_dir, exist_ok=True)
+        output_path = os.path.join(output_dir, f"{serial_number}_{title.replace(' ', '_')}.pdf")
 
-        # Create the PDF document
-        doc = SimpleDocTemplate(output_path, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
-        elements = []
+    doc = SimpleDocTemplate(output_path, pagesize=A4, rightMargin=36, leftMargin=36, topMargin=36, bottomMargin=36)
+    styles = getSampleStyleSheet()
+    title_style = styles["Heading1"]
+    title_style.alignment = 1
+    normal_style = styles["Normal"]
+    cell_style = ParagraphStyle(name="CellStyle", fontSize=10, leading=12, wordWrap="CJK", alignment=0)
+    elements = []
 
-        # Styles
-        styles = getSampleStyleSheet()
-        title_style = styles["Heading1"]
-        title_style.alignment = 1  # Center
-        title_style.fontSize = 16
-        normal_style = styles["Normal"]
-        normal_style.fontSize = 12
-        cell_style = ParagraphStyle(
-            name="CellStyle",
-            fontSize=10,
-            leading=12,  # Line spacing
-            wordWrap="CJK",  # Enable wrapping for long text
-            alignment=0  # Left align
-        )
+    if os.path.exists(LOGO_PATH):
+        try:
+            with PILImage.open(LOGO_PATH) as img:
+                orig_width, orig_height = img.size
+                logo_width = min(orig_width * 0.5, 120)
+                logo_height = min(orig_height * 0.5, 60)
+                logo = Image(LOGO_PATH, width=logo_width, height=logo_height)
+            logo.hAlign = 'RIGHT'
+            elements.append(logo)
+            elements.append(Spacer(1, 12))
+        except Exception as e:
+            logger.warning(f"Failed to load logo for PDF: {str(e)}")
 
-        # Header with logo (if available)
-        header_table_data = []
-        if os.path.exists(LOGO_PATH):
-            try:
-                # Load the image to get its dimensions
-                with PILImage.open(LOGO_PATH) as img:
-                    orig_width, orig_height = img.size
-                    # Calculate dimensions to maintain aspect ratio
-                    max_width = 1.5 * inch
-                    max_height = 1.5 * inch
-                    aspect_ratio = orig_width / orig_height
-                    if orig_width > orig_height:
-                        # Wider than tall: constrain by width
-                        logo_width = max_width
-                        logo_height = max_width / aspect_ratio
-                    else:
-                        # Taller than wide: constrain by height
-                        logo_height = max_height
-                        logo_width = max_height * aspect_ratio
-                    logo = Image(LOGO_PATH, width=logo_width, height=logo_height)
-                header_table_data.append([logo, Paragraph("Guth Pump Registry", styles["Heading2"])])
-            except Exception as e:
-                logger.warning(f"Failed to load logo for PDF: {str(e)}")
-                header_table_data.append(["", Paragraph("Guth Pump Registry", styles["Heading2"])])
+    elements.append(Paragraph(title, title_style))
+    elements.append(Spacer(1, 12))
+
+    if "bom_items" in data:
+        elements.append(Paragraph("Please use this checklist to pull the required items for the pump assembly.", normal_style))
+        elements.append(Spacer(1, 12))
+        bom_items = data["bom_items"]
+        if not isinstance(bom_items, (list, tuple)) or not bom_items:
+            elements.append(Paragraph("Invalid BOM data received. Please check the pump configuration.", normal_style))
         else:
-            header_table_data.append(["", Paragraph("Guth Pump Registry", styles["Heading2"])])
-        header_table = Table(header_table_data, colWidths=[2*inch, 5*inch])
-        header_table.setStyle(TableStyle([
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ("ALIGN", (1, 0), (1, 0), "CENTER")
-        ]))
-        elements.append(header_table)
-        elements.append(Spacer(1, 0.25*inch))
-
-        # Title
-        elements.append(Paragraph(title, title_style))
-        elements.append(Spacer(1, 0.25*inch))
-
-        # Check if this is a BOM checklist
-        if "bom_items" in data:
-            # BOM Checklist Table
-            elements.append(Paragraph("Please use this checklist to pull the required items for the pump assembly.", normal_style))
-            elements.append(Spacer(1, 0.15*inch))
-
-            bom_items = data["bom_items"]
-            if bom_items:
-                # Create the BOM table with columns: Item, Quantity, Check
-                table_data = [["Item", "Quantity", "Check"]]
-                for item in bom_items:
-                    # Handle different types of items
-                    if isinstance(item, dict):
-                        # Item is a dictionary (e.g., from dashboard_gui.py)
-                        part_name = item.get("part_name", "N/A") or "Unknown Item"
-                        quantity = item.get("quantity", "N/A") or "1"
-                    elif isinstance(item, str):
-                        # Item is a string (e.g., from combined_assembler_tester_gui.py)
-                        part_name = item if item else "Unknown Item"
-                        quantity = "1"  # Default quantity if not specified
-                    else:
-                        # Handle unexpected types
-                        logger.warning(f"Unexpected BOM item type: {type(item)} - {item}")
-                        part_name = str(item) if item else "Unknown Item"
-                        quantity = "1"
-
-                    # Wrap the "Item" column text using Paragraph to prevent spilling
-                    item_paragraph = Paragraph(part_name, cell_style)
-                    table_data.append([item_paragraph, str(quantity), "[ ]"])
-                table = Table(table_data, colWidths=[3*inch, 1.5*inch, 1*inch])
-                table.setStyle(TableStyle([
-                    ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
-                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-                    ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                    ("FONTSIZE", (0, 0), (-1, -1), 12),
-                    ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
-                    ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
-                    ("GRID", (0, 0), (-1, -1), 1, colors.black),
-                    ("VALIGN", (0, 0), (-1, -1), "TOP")
-                ]))
-                elements.append(table)
-            else:
-                elements.append(Paragraph("No BOM items found for this pump. Please check the BOM configuration.", normal_style))
-
-            # Instructions
-            instructions = data.get("instructions", "Tick the 'Check' column as you pull each item.")
-            elements.append(Spacer(1, 0.25*inch))
-            elements.append(Paragraph(f"<b>Instructions:</b> {instructions}", normal_style))
-        else:
-            # Default Key-Value Table (for pump details, confirmation, etc.)
-            table_data = [["Field", "Value"]]
-            for key, value in data.items():
-                # Wrap the "Value" column text using Paragraph to prevent spilling
-                value_paragraph = Paragraph(str(value).replace("\n", "<br/>"), cell_style)
-                table_data.append([key.replace("_", " ").title(), value_paragraph])
-            table = Table(table_data, colWidths=[2.5*inch, 4.5*inch])
+            table_data = [["Part Code", "Item", "Quantity", "Check"]]
+            for item in bom_items:
+                part_name = item.get("part_name", "N/A") if isinstance(item, dict) else str(item)
+                part_code = item.get("part_code", "N/A") if isinstance(item, dict) else "N/A"
+                quantity = str(item.get("quantity", "1")) if isinstance(item, dict) else "1"
+                table_data.append([Paragraph(part_code, cell_style), Paragraph(part_name, cell_style), quantity, "[ ]"])
+            table = Table(table_data, colWidths=[2.5*inch, 2*inch, 1*inch, 1*inch])
             table.setStyle(TableStyle([
                 ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
                 ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
                 ("ALIGN", (0, 0), (-1, -1), "LEFT"),
                 ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("FONTSIZE", (0, 0), (-1, -1), 12),
+                ("FONTSIZE", (0, 0), (-1, -1), 10),
                 ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
                 ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
                 ("GRID", (0, 0), (-1, -1), 1, colors.black),
                 ("VALIGN", (0, 0), (-1, -1), "TOP")
             ]))
             elements.append(table)
+    else:
+        table_data = [["Field", "Value"]]
+        for key, value in data.items():
+            if key != "bom_items" and value:
+                value_paragraph = Paragraph(str(value).replace("\n", "<br/>"), cell_style)
+                table_data.append([key.replace("_", " ").title(), value_paragraph])
+        table = Table(table_data, colWidths=[2.5*inch, 4.5*inch])
+        table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+            ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("FONTSIZE", (0, 0), (-1, -1), 10),
+            ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
+            ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
+            ("GRID", (0, 0), (-1, -1), 1, colors.black),
+            ("VALIGN", (0, 0), (-1, -1), "TOP")
+        ]))
+        elements.append(table)
 
-        # Footer
-        generated_on = data.get("generated_on", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        elements.append(Spacer(1, 0.25*inch))
-        footer_style = ParagraphStyle(name="Footer", fontSize=10, alignment=1, textColor=colors.grey)
-        elements.append(Paragraph(f"Generated on {generated_on}", footer_style))
+    elements.append(Spacer(1, 12))
+    footer_style = ParagraphStyle(name="Footer", fontSize=10, alignment=1, textColor=colors.grey)
+    generated_on = data.get("generated_on", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    elements.append(Paragraph(f"Generated on {generated_on} | Version {EXPORT_UTILS_VERSION}", footer_style))
 
-        # Build the PDF
+    try:
         doc.build(elements)
         logger.info(f"Generated PDF at {output_path}")
         return output_path
-
     except Exception as e:
         logger.error(f"Failed to generate PDF for {serial_number}: {str(e)}")
-        raise
+        elements.append(Paragraph(f"Error generating PDF: {str(e)}", normal_style))
+        doc.build(elements)
+        return output_path
 
 def generate_pump_details_table(data):
-    """
-    Generate an HTML table string for pump details to be used in email bodies.
-    
-    Args:
-        data (dict): Dictionary containing pump details.
-    
-    Returns:
-        str: HTML string of the table.
-    """
+    """Generate an HTML table for pump details."""
     try:
-        table_rows = ""
-        for key, value in data.items():
-            if value:  # Only include non-empty values
-                table_rows += f"""
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9; font-weight: bold;">{key.replace('_', ' ').title()}</td>
-                        <td style="padding: 8px; border: 1px solid #ddd;">{value}</td>
-                    </tr>
-                """
-        table_html = f"""
-        <table style="border-collapse: collapse; width: 100%; max-width: 600px; margin: 10px 0; font-family: Arial, sans-serif;">
-            {table_rows}
-        </table>
+        rows = "".join(f"""
+            <tr>
+                <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9; font-weight: bold;">{key.replace('_', ' ').title()}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{value}</td>
+            </tr>
+        """ for key, value in data.items() if value)
+        return f"""
+            <table style="border-collapse: collapse; width: 100%; max-width: 600px; margin: 10px 0; font-family: Arial, sans-serif;">
+                <tbody>{rows}</tbody>
+            </table>
         """
-        logger.debug("Generated pump details table for email")
-        return table_html
-
     except Exception as e:
         logger.error(f"Failed to generate pump details table: {str(e)}")
         return "<p>Error generating pump details table.</p>"
 
-def generate_bom_table(bom_data):
-    """
-    Generate an HTML table string for BOM (Bill of Materials) data to be used in email bodies or documents.
-    
-    Args:
-        bom_data (list of dict): List of dictionaries containing BOM items.
-            Each dict should have keys like 'part_name', 'part_code', 'quantity', etc.
-    
-    Returns:
-        str: HTML string of the table.
-    """
+def generate_bom_table(bom_items):
+    """Generate an HTML table for BOM items."""
+    if not bom_items:
+        return "<p>No BOM items available.</p>"
     try:
-        if not bom_data:
-            return "<p>No BOM data available.</p>"
-
-        # Define the columns to display
-        headers = ["Part Name", "Part Code", "Quantity"]
-        table_rows = ""
-        
-        # Generate header row
-        header_row = "".join(
-            f'<th style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9; font-weight: bold;">{header}</th>'
-            for header in headers
-        )
-        table_rows += f"<tr>{header_row}</tr>"
-
-        # Generate data rows
-        for item in bom_data:
-            part_name = item.get("part_name", "N/A")
-            part_code = item.get("part_code", "N/A")
-            quantity = item.get("quantity", "N/A")
-            table_rows += f"""
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #ddd;">{part_name}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd;">{part_code}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd;">{quantity}</td>
-                </tr>
-            """
-
-        table_html = f"""
-        <table style="border-collapse: collapse; width: 100%; max-width: 600px; margin: 10px 0; font-family: Arial, sans-serif;">
-            {table_rows}
-        </table>
+        rows = "".join(f"""
+            <tr>
+                <td style="padding: 8px; border: 1px solid #ddd;">{item.get('part_name', 'N/A')}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{item.get('part_code', 'N/A')}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{item.get('quantity', 'N/A')}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{item.get('pulled', 'N/A')}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{item.get('reason', 'N/A')}</td>
+            </tr>
+        """ for item in bom_items)
+        return f"""
+            <h3 style="color: #34495e;">Bill of Materials</h3>
+            <table style="border-collapse: collapse; width: 100%; max-width: 600px; margin-bottom: 20px;">
+                <thead>
+                    <tr style="background-color: #f4f4f4;">
+                        <th style="padding: 8px; border: 1px solid #ddd;">Part Name</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Part Code</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Quantity</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Pulled</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Reason</th>
+                    </tr>
+                </thead>
+                <tbody>{rows}</tbody>
+            </table>
         """
-        logger.debug("Generated BOM table for email/document")
-        return table_html
-
     except Exception as e:
         logger.error(f"Failed to generate BOM table: {str(e)}")
         return "<p>Error generating BOM table.</p>"
 
 def generate_test_data_table(test_data):
-    """
-    Generate an HTML table string for test data to be used in email bodies or documents.
-    
-    Args:
-        test_data (dict): Dictionary containing test data.
-            Expected keys might include 'test_name', 'value', 'status', etc.
-    
-    Returns:
-        str: HTML string of the table.
-    """
+    """Generate an HTML table for test data."""
+    if not test_data or not all(key in test_data for key in ["flowrate", "pressure", "amperage"]):
+        return "<p>No valid test data available.</p>"
     try:
-        if not test_data:
-            return "<p>No test data available.</p>"
-
-        # Define the columns to display
-        headers = ["Test Parameter", "Value", "Status"]
-        table_rows = ""
-        
-        # Generate header row
-        header_row = "".join(
-            f'<th style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9; font-weight: bold;">{header}</th>'
-            for header in headers
-        )
-        table_rows += f"<tr>{header_row}</tr>"
-
-        # Generate data rows
-        # Assuming test_data is a dictionary where keys are test parameters and values are dicts with 'value' and 'status'
-        for test_name, details in test_data.items():
-            value = details.get("value", "N/A")
-            status = details.get("status", "N/A")
-            table_rows += f"""
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #ddd;">{test_name.replace('_', ' ').title()}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd;">{value}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd;">{status}</td>
-                </tr>
-            """
-
-        table_html = f"""
-        <table style="border-collapse: collapse; width: 100%; max-width: 600px; margin: 10px 0; font-family: Arial, sans-serif;">
-            {table_rows}
-        </table>
+        rows = "".join(f"""
+            <tr>
+                <td style="padding: 8px; border: 1px solid #ddd;">Test {i+1}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{test_data['flowrate'][i] if i < len(test_data['flowrate']) else ''}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{test_data['pressure'][i] if i < len(test_data['pressure']) else ''}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{test_data['amperage'][i] if i < len(test_data['amperage']) else ''}</td>
+            </tr>
+        """ for i in range(5))
+        return f"""
+            <h3 style="color: #34495e;">Test Summary</h3>
+            <table style="border-collapse: collapse; width: 100%; max-width: 600px; margin-bottom: 20px;">
+                <thead>
+                    <tr style="background-color: #f4f4f4;">
+                        <th style="padding: 8px; border: 1px solid #ddd;">Test</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Flowrate (l/h)</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Pressure (bar)</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">Amperage (A)</th>
+                    </tr>
+                </thead>
+                <tbody>{rows}</tbody>
+            </table>
         """
-        logger.debug("Generated test data table for email/document")
-        return table_html
-
     except Exception as e:
         logger.error(f"Failed to generate test data table: {str(e)}")
         return "<p>Error generating test data table.</p>"
