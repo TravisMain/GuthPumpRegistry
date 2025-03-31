@@ -1,0 +1,2 @@
+('C:\\Users\\travism\\source\\repos\\GuthPumpRegistry\\build\\base_gui\\PYZ-00.pyz',
+ [])

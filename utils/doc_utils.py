@@ -41,7 +41,7 @@ def generate_html_email(subject, greeting, body_content, footer=""):
             {body_content}
             <p style="margin-top: 20px;">{footer}</p>
             <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
-            <p style="font-size: 12px; color: #777; text-align: center;">© Guth South Africa | Build {BUILD_NUMBER}</p>
+            <p style="font-size: 12px; color: #777; text-align: center;">ï¿½ Guth South Africa | Build {BUILD_NUMBER}</p>
         </div>
     </body>
     </html>
@@ -167,7 +167,7 @@ def generate_pdf_notification(serial_number, data, title="Pump Assembly Notifica
     story.append(table)
     story.append(Spacer(1, 12))
 
-    story.append(Paragraph(f"© Guth South Africa | Build {BUILD_NUMBER}", styles['Normal']))
+    story.append(Paragraph(f"ï¿½ Guth South Africa | Build {BUILD_NUMBER}", styles['Normal']))
     try:
         doc.build(story)
         logger.info(f"PDF notification generated: {output_path}")

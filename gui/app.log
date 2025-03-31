@@ -1,0 +1,2 @@
+2025-03-31 16:22:48,858 - base_gui - INFO - Starting app with BASE_DIR: C:\Users\travism\source\repos\GuthPumpRegistry\gui\
+2025-03-31 16:22:48,965 - base_gui - ERROR - Import error: leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers (dashboard_gui.py, line 20)
