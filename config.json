@@ -1,7 +1,7 @@
 {
     "connection_string": "DRIVER={SQL Server};SERVER=localhost\\SQLEXPRESS;DATABASE=GuthPumpRegistry;UID=sa;PWD=passwordnano14;Encrypt=no",
     "document_dirs": {
-        "certificate": "C:/Users/travism/source/repos/GuthPumpRegistry/docs/certificates",
+        "certificate": "C:/Users/travism/OneDrive - Guth South Africa (Pty) Ltd/Desktop",
         "bom": "C:/Users/travism/source/repos/GuthPumpRegistry/docs/boms",
         "confirmation": "C:/Users/travism/source/repos/GuthPumpRegistry/docs/confirmations",
         "reports": "C:/Users/travism/source/repos/GuthPumpRegistry/reports",

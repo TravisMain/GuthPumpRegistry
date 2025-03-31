@@ -117,18 +117,16 @@ def show_combined_assembler_tester_dashboard(root, username, role, logout_callba
     assembler_scrollbar.pack(side=RIGHT, fill=Y)
     assembler_tree.configure(yscrollcommand=assembler_scrollbar.set)
 
-    # Enable mouse wheel scrolling for assembler_tree
     def on_mouse_wheel(event):
-        if assembler_tree.winfo_exists():  # Safety check
-            # Windows uses delta (positive = up, negative = down), Linux/macOS use Button-4 (up) and Button-5 (down)
-            if event.delta > 0 or event.num == 4:  # Scroll up
+        if assembler_tree.winfo_exists():
+            if event.delta > 0 or event.num == 4:
                 assembler_tree.yview_scroll(-1, "units")
-            elif event.delta < 0 or event.num == 5:  # Scroll down
+            elif event.delta < 0 or event.num == 5:
                 assembler_tree.yview_scroll(1, "units")
 
-    assembler_tree.bind("<MouseWheel>", on_mouse_wheel)  # Windows
-    assembler_tree.bind("<Button-4>", on_mouse_wheel)    # Linux/macOS scroll up
-    assembler_tree.bind("<Button-5>", on_mouse_wheel)    # Linux/macOS scroll down
+    assembler_tree.bind("<MouseWheel>", on_mouse_wheel)
+    assembler_tree.bind("<Button-4>", on_mouse_wheel)
+    assembler_tree.bind("<Button-5>", on_mouse_wheel)
 
     def refresh_assembler_pump_list():
         """Refresh the list of pumps in assembly."""
@@ -144,7 +142,6 @@ def show_combined_assembler_tester_dashboard(root, username, role, logout_callba
                     GROUP BY p.serial_number, p.assembly_part_number, p.customer, p.branch, p.pump_model, p.configuration
                 """)
                 for pump in cursor.fetchall():
-                    # pump is a tuple: (serial_number, assembly_part_number, customer, branch, pump_model, configuration)
                     assembler_tree.insert("", END, values=(pump[0], pump[1] or "N/A", pump[2], pump[3], pump[4], pump[5]))
             logger.info("Refreshed assembler pump list")
         except Exception as e:
@@ -180,7 +177,6 @@ def show_combined_assembler_tester_dashboard(root, username, role, logout_callba
                     FROM pumps WHERE status = 'Testing'
                 """)
                 for pump in cursor.fetchall():
-                    # pump is a tuple: (serial_number, assembly_part_number, customer, branch, pump_model, configuration)
                     testing_tree.insert("", END, values=(pump[0], pump[1] or "N/A", pump[2], pump[3], pump[4], pump[5]))
             logger.info("Refreshed testing pump list")
         except Exception as e:
@@ -214,7 +210,6 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM pumps WHERE serial_number = ?", (serial_number,))
-            # Convert tuple to dict using column names
             columns = [desc[0] for desc in cursor.description]
             pump_tuple = cursor.fetchone()
             if not pump_tuple:
@@ -224,7 +219,6 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
             cursor.execute("SELECT part_name, part_code, quantity, pulled_at FROM bom_items WHERE serial_number = ? AND pulled_at IS NOT NULL", (serial_number,))
             bom_items = cursor.fetchall()
             cursor.execute("SELECT username, email FROM users WHERE username = ?", (pump["requested_by"],))
-            # originator is a tuple: (username, email)
             originator = cursor.fetchone()
     except Exception as e:
         logger.error(f"Failed to load BOM data: {str(e)}")
@@ -266,12 +260,11 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
 
     confirm_vars = []
     for i, item in enumerate(bom_items, start=1):
-        # item is a tuple: (part_name, part_code, quantity, pulled_at)
-        ttk.Label(scrollable_frame, text=item[1]).grid(row=i, column=0, padx=5, pady=5, sticky=W)  # part_code
-        ttk.Label(scrollable_frame, text=item[0]).grid(row=i, column=1, padx=5, pady=5, sticky=W)  # part_name
-        ttk.Label(scrollable_frame, text=str(item[2])).grid(row=i, column=2, padx=5, pady=5, sticky=W)  # quantity
+        ttk.Label(scrollable_frame, text=item[1]).grid(row=i, column=0, padx=5, pady=5, sticky=W)
+        ttk.Label(scrollable_frame, text=item[0]).grid(row=i, column=1, padx=5, pady=5, sticky=W)
+        ttk.Label(scrollable_frame, text=str(item[2])).grid(row=i, column=2, padx=5, pady=5, sticky=W)
         confirm_var = ttk.BooleanVar(value=False)
-        confirm_check = ttk.Checkbutton(scrollable_frame, variable=confirm_var, state=NORMAL)  # Always editable
+        confirm_check = ttk.Checkbutton(scrollable_frame, variable=confirm_var, state=NORMAL)
         confirm_check.grid(row=i, column=3, padx=5, pady=5)
         confirm_vars.append(confirm_var)
 
@@ -303,7 +296,6 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
                     WHERE b.serial_number = ? AND b.pulled_at IS NULL
                 """, (serial_number,))
                 for item in cursor.fetchall():
-                    # item is a tuple: (part_code, part_name, reason)
                     reason = item[2].replace(f"Reason for not pulling {item[0]} on {serial_number}: ", "") if item[2].startswith("Reason") else item[2]
                     unpulled_tree.insert("", END, values=(item[0], item[1], reason))
         except Exception as e:
@@ -320,12 +312,10 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
     ttk.Label(footer_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack()
 
     def check_submit_state():
-        """Enable submit button if all items are confirmed."""
         all_confirmed = all(var.get() for var in confirm_vars)
         submit_btn.configure(state=NORMAL if all_confirmed else DISABLED)
 
     def submit_bom():
-        """Submit BOM verification and move pump to Testing."""
         try:
             with get_db_connection() as conn:
                 cursor = conn.cursor()
@@ -348,7 +338,7 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
                     "pump_model": pump["pump_model"],
                     "configuration": pump["configuration"],
                 }
-                bom_items_str = "\n".join([f"{item[1]}: {item[0]} (Qty: {item[2]})" for item in bom_items])  # part_code, part_name, quantity
+                bom_items_str = "\n".join([f"{item[1]}: {item[0]} (Qty: {item[2]})" for item in bom_items])
                 bom_data["bom_items"] = bom_items_str
                 generate_pdf_notification(serial_number, bom_data, title=f"BOM - {serial_number}", output_path=bom_path)
 
@@ -417,7 +407,6 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
                        assembly_part_number
                 FROM pumps WHERE serial_number = ?
             """, (serial_number,))
-            # Convert tuple to dict using column names
             columns = [desc[0] for desc in cursor.description]
             pump_tuple = cursor.fetchone()
             if not pump_tuple:
@@ -425,7 +414,6 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
                 return
             pump = dict(zip(columns, pump_tuple))
             cursor.execute("SELECT username, email FROM users WHERE username = ?", (pump["requested_by"],))
-            # originator is a tuple: (username, email)
             originator = cursor.fetchone()
     except Exception as e:
         logger.error(f"Failed to load pump data: {str(e)}")
@@ -458,11 +446,10 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
     scrollbar.pack(side=RIGHT, fill=Y)
 
     def on_mouse_wheel(event):
-        if canvas.winfo_exists():  # Safety check
+        if canvas.winfo_exists():
             canvas.yview_scroll(-1 * (event.delta // 120), "units")
 
     canvas.bind("<MouseWheel>", on_mouse_wheel)
-    # Clean up binding and destroy window safely
     def on_close():
         try:
             if canvas.winfo_exists():
@@ -593,7 +580,7 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
     ttk.Label(footer_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack()
 
     def complete_test():
-        """Submit test report for approval with all fields optional."""
+        """Submit test report for approval with all fields optional, preparing data for graph."""
         test_data = {
             "invoice_number": invoice_entry.get(),
             "customer": pump["customer"],
@@ -624,10 +611,9 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
             "approval_date": datetime.now().strftime("%Y-%m-%d"),
         }
 
-        # Validate only non-empty test data fields as numeric
         for field in ["flowrate", "pressure", "amperage"]:
             for i, value in enumerate(test_data[field]):
-                if value.strip():  # Only check if the field has content
+                if value.strip():
                     try:
                         float(value)
                     except ValueError:
@@ -668,10 +654,13 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
                     "duration_of_test": test_data["duration_of_test"],
                     "test_medium": test_data["test_medium"],
                     "tested_by": test_data["tested_by"],
-                    # Filter out empty entries for PDF display
-                    "flowrate": ", ".join([v for v in test_data["flowrate"] if v.strip()]) or "Not provided",
-                    "pressure": ", ".join([v for v in test_data["pressure"] if v.strip()]) or "Not provided",
-                    "amperage": ", ".join([v for v in test_data["amperage"] if v.strip()]) or "Not provided",
+                    "flowrate": test_data["flowrate"],  # Pass raw list for graph
+                    "pressure": test_data["pressure"],   # Pass raw list for graph
+                    "amperage": test_data["amperage"],   # Pass raw list for graph
+                    # For table display in PDF/email
+                    "flowrate_display": ", ".join([v for v in test_data["flowrate"] if v.strip()]) or "Not provided",
+                    "pressure_display": ", ".join([v for v in test_data["pressure"] if v.strip()]) or "Not provided",
+                    "amperage_display": ", ".join([v for v in test_data["amperage"] if v.strip()]) or "Not provided",
                 }
                 generate_pdf_notification(serial_number, pump_data, title=f"Test Certificate - {serial_number}", output_path=pdf_path)
 

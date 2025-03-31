@@ -1,38 +1,77 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+from PyInstaller.utils.hooks import collect_submodules
+
+block_cipher = None
 
 a = Analysis(
-    ['gui\\base_gui.py'],
-    pathex=[],
-    binaries=[],
-    datas=[('assets', 'assets'), ('gui', 'gui'), ('utils', 'utils'), ('database.py', '.'), ('export_utils.py', '.'), ('config.json', '.')],
-    hiddenimports=['reportlab', 'reportlab.lib.pagesizes', 'reportlab.lib.units', 'reportlab.lib.styles', 'reportlab.lib.colors', 'reportlab.platypus', 'reportlab.graphics', 'smtplib'],
+    ['gui/base_gui.py'],
+    pathex=['C:\\Users\\travism\\source\\repos\\GuthPumpRegistry'],
+    binaries=[('C:\\Program Files\\Python311\\python311.dll', '.')],
+    datas=[
+        ('assets', 'assets'),
+        ('gui', 'gui'),
+        ('utils', 'utils'),
+        ('database.py', '.'),
+        ('export_utils.py', '.'),
+        ('config.json', '.')
+    ],
+    hiddenimports=[
+        'reportlab',
+        'reportlab.lib.pagesizes',
+        'reportlab.lib.units',
+        'reportlab.lib.styles',
+        'reportlab.lib.colors',
+        'reportlab.platypus',
+        'reportlab.graphics',
+        'ttkbootstrap',
+        'pyodbc',
+        'smtplib',
+        'email.mime.multipart',
+        'email.mime.text',
+        'email.mime.application',
+        'PIL',
+        'os',
+        'json',
+        'datetime',
+        'sys',
+        'traceback',
+        'logging',
+        'bcrypt',
+        'pandas',
+        'tkinter.filedialog'
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[],
-    noarchive=True,
-    optimize=0,
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
+    noarchive=False,
+    optimize=0
 )
-pyz = PYZ(a.pure)
+
+a.hiddenimports.extend(collect_submodules('reportlab'))
+
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(
     pyz,
     a.scripts,
     a.binaries,
+    a.zipfiles,
     a.datas,
-    [('v', None, 'OPTION')],
     name='base_gui',
-    debug=True,
+    debug=False,  # Disable debug since no console
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    upx_exclude=[],
-    runtime_tmpdir=None,
-    console=True,
+    console=False,  # Changed to False for no console
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon='app_icon.ico'
 )

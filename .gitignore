@@ -10,3 +10,8 @@ data/guth_pump_registry.db
 /docs
 /bom_print.txt
 /logs
+/info after.txt
+/info before.txt
+/license.txt
+/output
+/dist/base_gui.exe

@@ -3,7 +3,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
-from reportlab.lib.units import inch  # Added this import
+from reportlab.lib.units import inch
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -12,6 +12,7 @@ from utils.config import get_logger
 import json
 from datetime import datetime
 from PIL import Image as PILImage
+import matplotlib.pyplot as plt
 
 logger = get_logger("export_utils")
 EXPORT_UTILS_VERSION = "2025-03-30_v5"
@@ -27,6 +28,32 @@ def load_config():
     except Exception as e:
         logger.error(f"Failed to load config from {CONFIG_PATH}: {str(e)}")
         raise FileNotFoundError(f"Config file not found or invalid at {CONFIG_PATH}")
+
+def generate_test_graph(test_data, output_path="temp_graph.png"):
+    """Generate a graph of test data (amperage and pressure)."""
+    try:
+        plt.figure(figsize=(6, 3))
+        # Filter out empty entries and convert to float, using test numbers as x-axis
+        time = [i + 1 for i, x in enumerate(test_data["amperage"]) if x.strip()]
+        amperage = [float(x) for x in test_data["amperage"] if x.strip()]
+        pressure = [float(x) for x in test_data["pressure"] if x.strip()]
+
+        if amperage:
+            plt.plot(time, amperage, label="Amperage (A)", color="blue", marker="o")
+        if pressure:
+            plt.plot(time, pressure, label="Pressure (bar)", color="red", marker="o")
+        plt.xlabel("Test Number")
+        plt.ylabel("Value")
+        plt.title("Pump Test Results")
+        plt.legend()
+        plt.grid(True)
+        plt.savefig(output_path, dpi=100, bbox_inches="tight")
+        plt.close()
+        logger.info(f"Generated test graph at {output_path}")
+        return output_path
+    except Exception as e:
+        logger.error(f"Failed to generate test graph: {str(e)}")
+        return None
 
 def send_email(to_email, subject, greeting, body_content, footer="", *attachment_paths):
     """Send an email with multiple optional attachments using SMTP settings from config.json."""
@@ -93,7 +120,7 @@ def send_email(to_email, subject, greeting, body_content, footer="", *attachment
         raise
 
 def generate_pdf_notification(serial_number, data, title="Pump Assembly Notification", output_path=None):
-    """Generate a PDF document with pump details and optional BOM items."""
+    """Generate a PDF document with pump details, BOM items, and test data graph if applicable."""
     if output_path is None:
         config = load_config()
         output_dir = config["document_dirs"].get("certificate", os.path.join(BASE_DIR, "certificates"))
@@ -104,6 +131,7 @@ def generate_pdf_notification(serial_number, data, title="Pump Assembly Notifica
     styles = getSampleStyleSheet()
     title_style = styles["Heading1"]
     title_style.alignment = 1
+    heading2_style = styles["Heading2"]
     normal_style = styles["Normal"]
     cell_style = ParagraphStyle(name="CellStyle", fontSize=10, leading=12, wordWrap="CJK", alignment=0)
     elements = []
@@ -123,6 +151,19 @@ def generate_pdf_notification(serial_number, data, title="Pump Assembly Notifica
 
     elements.append(Paragraph(title, title_style))
     elements.append(Spacer(1, 12))
+
+    # Add test data graph if present
+    if "flowrate" in data and "pressure" in data and "amperage" in data:
+        test_data = {
+            "flowrate": data["flowrate"],
+            "pressure": data["pressure"],
+            "amperage": data["amperage"]
+        }
+        graph_path = generate_test_graph(test_data)
+        if graph_path and os.path.exists(graph_path):
+            elements.append(Paragraph("Test Data Graph", heading2_style))
+            elements.append(Image(graph_path, width=6*inch, height=3*inch))
+            elements.append(Spacer(1, 12))
 
     if "bom_items" in data:
         elements.append(Paragraph("Please use this checklist to pull the required items for the pump assembly.", normal_style))
@@ -153,7 +194,12 @@ def generate_pdf_notification(serial_number, data, title="Pump Assembly Notifica
     else:
         table_data = [["Field", "Value"]]
         for key, value in data.items():
-            if key != "bom_items" and value:
+            # Use display versions for table if available, otherwise raw value
+            if key in ["flowrate", "pressure", "amperage"] and f"{key}_display" in data:
+                display_key = f"{key}_display"
+                value_paragraph = Paragraph(str(data[display_key]).replace("\n", "<br/>"), cell_style)
+                table_data.append([key.replace("_", " ").title(), value_paragraph])
+            elif key != "bom_items" and value and not key.endswith("_display"):
                 value_paragraph = Paragraph(str(value).replace("\n", "<br/>"), cell_style)
                 table_data.append([key.replace("_", " ").title(), value_paragraph])
         table = Table(table_data, colWidths=[2.5*inch, 4.5*inch])
@@ -193,7 +239,7 @@ def generate_pump_details_table(data):
                 <td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9; font-weight: bold;">{key.replace('_', ' ').title()}</td>
                 <td style="padding: 8px; border: 1px solid #ddd;">{value}</td>
             </tr>
-        """ for key, value in data.items() if value)
+        """ for key, value in data.items() if value and not key.endswith("_display"))
         return f"""
             <table style="border-collapse: collapse; width: 100%; max-width: 600px; margin: 10px 0; font-family: Arial, sans-serif;">
                 <tbody>{rows}</tbody>

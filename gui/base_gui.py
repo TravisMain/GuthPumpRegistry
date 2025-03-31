@@ -1,8 +1,10 @@
-# gui/base_gui.py
 import sys
 import os
 import traceback
 import logging
+
+# Print immediately to confirm execution starts
+print("BaseGUI: Execution started")
 
 # Path handling for PyInstaller
 def resource_path(relative_path):
@@ -10,19 +12,24 @@ def resource_path(relative_path):
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
 
-# Early logging setup
 BASE_DIR = resource_path("")
-log_file = os.path.join(BASE_DIR, "app.log")
-logging.basicConfig(filename=log_file, level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-logger = logging.getLogger("base_gui")
-logger.info(f"Starting app with BASE_DIR: {BASE_DIR}")
+print(f"BaseGUI: BASE_DIR set to {BASE_DIR}")
 
 try:
+    # Logging setup inside try block
+    log_file = os.path.join(BASE_DIR, "app.log")
+    logging.basicConfig(filename=log_file, level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    from utils.config import get_logger
+    logger = get_logger("base_gui")
+    logger.info("Logger initialized")
+    print("BaseGUI: Logger initialized")
+
+    # Import all modules
+    logger.info("Attempting to load all imports")
+    print("BaseGUI: Attempting to load all imports")
     import ttkbootstrap as ttk
-    from ttkbootstrap.constants import *
-    from ttkbootstrap.dialogs import Messagebox
     import pyodbc
-    from gui.styles import configure_styles  # Absolute import
+    from gui.styles import configure_styles
     from gui.login_gui import show_login_screen
     from gui.register_gui import show_register_window
     from gui.dashboard_gui import show_dashboard
@@ -30,17 +37,23 @@ try:
     from gui.stores_gui import show_stores_dashboard
     from gui.combined_assembler_tester_gui import show_combined_assembler_tester_dashboard
     from gui.approval_gui import show_approval_dashboard
-    from gui.pump_originator_gui import show_dashboard as show_pump_originator_dashboard
     from database import get_db_connection, check_user, insert_user
-    from utils.config import get_logger
 except Exception as e:
-    print(f"Import error: {str(e)}\n{traceback.format_exc()}")
-    logger.error(f"Import error: {str(e)}")
+    error_msg = f"BaseGUI: Import error: {str(e)}\n{traceback.format_exc()}"
+    print(error_msg)  # Print to console for .exe
+    try:
+        logging.basicConfig(filename="app.log", level=logging.DEBUG)  # Fallback logging
+        logger = logging.getLogger("base_gui")
+        logger.error(error_msg)
+    except:
+        print("BaseGUI: Failed to initialize logging")
     sys.stdin.read(1)
     sys.exit(1)
 
 class BaseGUI:
     def __init__(self, root):
+        logger.info("Initializing BaseGUI")
+        print("BaseGUI: Initializing BaseGUI")
         self.root = root
         self.root.title("Guth Pump Registry")
         self.root.geometry("800x900")
@@ -49,12 +62,12 @@ class BaseGUI:
         self.login_frame = None
         self.error_label = None
         self.main_frame = None
-        logger.info("BaseGUI initialized")
         self.show_login()
 
     def show_login(self):
         """Display the login screen, clearing any existing main frame."""
         logger.info("Showing login screen")
+        print("BaseGUI: Showing login screen")
         if self.main_frame:
             self.main_frame.destroy()
             self.main_frame = None
@@ -65,6 +78,7 @@ class BaseGUI:
     def login(self, username, password):
         """Handle login attempt and route to appropriate dashboard."""
         logger.info(f"Login attempt for {username}")
+        print(f"BaseGUI: Login attempt for {username}")
         if not self.error_label:
             self.error_label = ttk.Label(self.login_frame, text="", bootstyle="danger")
             self.error_label.pack(pady=5)
@@ -90,26 +104,30 @@ class BaseGUI:
                     self.main_frame = show_combined_assembler_tester_dashboard(self.root, self.username, self.role, self.logout)
                 elif role == "Approval":
                     self.main_frame = show_approval_dashboard(self.root, self.username, self.role, self.logout)
-                elif role == "Pump Originator":
-                    self.main_frame = show_pump_originator_dashboard(self.root, self.username, self.role, self.logout)
                 else:
                     self.main_frame = show_dashboard(self.root, self.username, self.role, self.logout)
                 logger.info(f"User {username} logged in with role {role}")
+                print(f"BaseGUI: User {username} logged in with role {role}")
             else:
                 self.error_label.config(text="Incorrect username or password", bootstyle="danger")
                 logger.warning(f"Failed login attempt for {username}")
+                print(f"BaseGUI: Failed login attempt for {username}")
         except Exception as e:
+            error_msg = f"BaseGUI: Login failed: {str(e)}\n{traceback.format_exc()}"
+            logger.error(error_msg)
+            print(error_msg)
             self.error_label.config(text=f"Login failed: {str(e)}", bootstyle="danger")
-            logger.error(f"Login error for {username}: {str(e)}")
 
     def show_register(self):
         """Show the registration window."""
         logger.info("Showing register window")
+        print("BaseGUI: Showing register window")
         show_register_window(self.root, self.register)
 
     def register(self, username, password, name, surname, email, error_label):
         """Handle user registration (default to Pump Originator)."""
         logger.info(f"Register attempt for {username}")
+        print(f"BaseGUI: Register attempt for {username}")
         if not all([username, password, name, surname, email]):
             error_label.config(text="All fields are required", bootstyle="danger")
             return
@@ -120,16 +138,21 @@ class BaseGUI:
                 conn.commit()
                 error_label.config(text="Registration successful! You can now login.", bootstyle="success")
                 logger.info(f"Registered new Pump Originator: {username}")
+                print(f"BaseGUI: Registered new Pump Originator: {username}")
         except pyodbc.IntegrityError:
             error_label.config(text="Username already exists", bootstyle="danger")
             logger.warning(f"Failed registration: {username} already exists")
+            print(f"BaseGUI: Failed registration: {username} already exists")
         except Exception as e:
+            error_msg = f"BaseGUI: Registration failed: {str(e)}\n{traceback.format_exc()}"
+            logger.error(error_msg)
+            print(error_msg)
             error_label.config(text=f"Registration failed: {str(e)}", bootstyle="danger")
-            logger.error(f"Registration error for {username}: {str(e)}")
 
     def logout(self):
         """Handle logout and return to login screen."""
         logger.info(f"Logging out user {self.username}")
+        print(f"BaseGUI: Logging out user {self.username}")
         if self.role == "Admin":
             for widget in self.root.winfo_children():
                 widget.destroy()
@@ -142,19 +165,21 @@ class BaseGUI:
         self.root.geometry("800x900")
         self.show_login()
         logger.info("User logged out")
+        print("BaseGUI: User logged out")
 
 if __name__ == "__main__":
     try:
         logger.info("Application starting")
+        print("BaseGUI: Application starting")
         root = ttk.Window(themename="flatly")
         configure_styles()
         app = BaseGUI(root)
         logger.info("Main loop starting")
+        print("BaseGUI: Main loop starting")
         root.mainloop()
     except Exception as e:
-        error_msg = f"Error occurred: {str(e)}\n{traceback.format_exc()}"
-        print(error_msg)
+        error_msg = f"BaseGUI: Main error: {str(e)}\n{traceback.format_exc()}"
         logger.error(error_msg)
-        sys.stdout.flush()
-        print("Press Enter to exit...")
+        print(error_msg)
         sys.stdin.read(1)
+        sys.exit(1)

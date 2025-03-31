@@ -1,2 +1,524 @@
 2025-03-31 16:22:48,858 - base_gui - INFO - Starting app with BASE_DIR: C:\Users\travism\source\repos\GuthPumpRegistry\gui\
 2025-03-31 16:22:48,965 - base_gui - ERROR - Import error: leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers (dashboard_gui.py, line 20)
+2025-03-31 16:33:21,626 - base_gui - INFO - Starting app with BASE_DIR: C:\Users\travism\source\repos\GuthPumpRegistry\gui\
+2025-03-31 16:33:22,395 - matplotlib - DEBUG - matplotlib data path: C:\Users\travism\AppData\Roaming\Python\Python311\site-packages\matplotlib\mpl-data
+2025-03-31 16:33:22,401 - matplotlib - DEBUG - CONFIGDIR=C:\Users\travism\.matplotlib
+2025-03-31 16:33:22,403 - matplotlib - DEBUG - interactive is False
+2025-03-31 16:33:22,404 - matplotlib - DEBUG - platform is win32
+2025-03-31 16:33:22,462 - matplotlib - DEBUG - CACHEDIR=C:\Users\travism\.matplotlib
+2025-03-31 16:33:22,466 - matplotlib.font_manager - DEBUG - Using fontManager instance from C:\Users\travism\.matplotlib\fontlist-v330.json
+2025-03-31 16:33:22,724 - base_gui - ERROR - Import error: cannot import name 'show_dashboard' from 'gui.pump_originator_gui' (C:\Users\travism\source\repos\GuthPumpRegistry\gui\pump_originator_gui.py)
+2025-03-31 16:37:04,294 - base_gui - INFO - Starting app with BASE_DIR: C:\Users\travism\source\repos\GuthPumpRegistry\gui\
+2025-03-31 16:37:05,018 - matplotlib - DEBUG - matplotlib data path: C:\Users\travism\AppData\Roaming\Python\Python311\site-packages\matplotlib\mpl-data
+2025-03-31 16:37:05,024 - matplotlib - DEBUG - CONFIGDIR=C:\Users\travism\.matplotlib
+2025-03-31 16:37:05,026 - matplotlib - DEBUG - interactive is False
+2025-03-31 16:37:05,026 - matplotlib - DEBUG - platform is win32
+2025-03-31 16:37:05,090 - matplotlib - DEBUG - CACHEDIR=C:\Users\travism\.matplotlib
+2025-03-31 16:37:05,094 - matplotlib.font_manager - DEBUG - Using fontManager instance from C:\Users\travism\.matplotlib\fontlist-v330.json
+2025-03-31 16:37:05,340 - base_gui - ERROR - Import error: cannot import name 'show_dashboard' from 'gui.pump_originator_gui' (C:\Users\travism\source\repos\GuthPumpRegistry\gui\pump_originator_gui.py)
+2025-03-31 16:45:45,184 - base_gui - INFO - Starting app with BASE_DIR: C:\Users\travism\source\repos\GuthPumpRegistry\gui\
+2025-03-31 16:45:45,895 - matplotlib - DEBUG - matplotlib data path: C:\Users\travism\AppData\Roaming\Python\Python311\site-packages\matplotlib\mpl-data
+2025-03-31 16:45:45,901 - matplotlib - DEBUG - CONFIGDIR=C:\Users\travism\.matplotlib
+2025-03-31 16:45:45,904 - matplotlib - DEBUG - interactive is False
+2025-03-31 16:45:45,904 - matplotlib - DEBUG - platform is win32
+2025-03-31 16:45:45,962 - matplotlib - DEBUG - CACHEDIR=C:\Users\travism\.matplotlib
+2025-03-31 16:45:45,966 - matplotlib.font_manager - DEBUG - Using fontManager instance from C:\Users\travism\.matplotlib\fontlist-v330.json
+2025-03-31 16:45:46,205 - base_gui - ERROR - Import error: cannot import name 'show_dashboard' from 'gui.pump_originator_gui' (C:\Users\travism\source\repos\GuthPumpRegistry\gui\pump_originator_gui.py)
+2025-03-31 16:46:44,234 - base_gui - INFO - Starting app with BASE_DIR: C:\Users\travism\source\repos\GuthPumpRegistry\gui\
+2025-03-31 16:46:44,962 - matplotlib - DEBUG - matplotlib data path: C:\Users\travism\AppData\Roaming\Python\Python311\site-packages\matplotlib\mpl-data
+2025-03-31 16:46:44,969 - matplotlib - DEBUG - CONFIGDIR=C:\Users\travism\.matplotlib
+2025-03-31 16:46:44,971 - matplotlib - DEBUG - interactive is False
+2025-03-31 16:46:44,971 - matplotlib - DEBUG - platform is win32
+2025-03-31 16:46:45,030 - matplotlib - DEBUG - CACHEDIR=C:\Users\travism\.matplotlib
+2025-03-31 16:46:45,034 - matplotlib.font_manager - DEBUG - Using fontManager instance from C:\Users\travism\.matplotlib\fontlist-v330.json
+2025-03-31 16:46:45,301 - base_gui - INFO - Application starting
+2025-03-31 16:46:45,365 - base_gui - INFO - BaseGUI initialized
+2025-03-31 16:46:45,365 - base_gui - INFO - Showing login screen
+2025-03-31 16:46:45,373 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:46:45,373 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:46:45,374 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:46:45,374 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:46:45,424 - login_gui - INFO - Logo loaded and scaled to 567x187
+2025-03-31 16:46:45,437 - base_gui - INFO - Main loop starting
+2025-03-31 16:46:49,453 - base_gui - INFO - Login attempt for admin1
+2025-03-31 16:46:49,794 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:46:49,794 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:46:49,794 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:46:49,795 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:46:49,795 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:46:49,795 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:46:49,795 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:46:49,795 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:46:49,795 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:46:49,795 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:46:49,795 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:46:49,795 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:46:49,930 - base_gui - INFO - User admin1 logged in with role Admin
+2025-03-31 16:46:53,874 - base_gui - INFO - Logging out user admin1
+2025-03-31 16:46:53,929 - base_gui - INFO - Showing login screen
+2025-03-31 16:46:53,930 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:46:53,930 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:46:53,930 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:46:53,930 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:46:53,976 - login_gui - INFO - Logo loaded and scaled to 567x187
+2025-03-31 16:46:53,985 - base_gui - INFO - User logged out
+2025-03-31 16:46:58,476 - base_gui - INFO - Login attempt for user1
+2025-03-31 16:46:58,664 - matplotlib.pyplot - DEBUG - Loaded backend tkagg version 8.6.
+2025-03-31 16:47:40,548 - base_gui - INFO - Starting app with BASE_DIR: C:\Users\travism\source\repos\GuthPumpRegistry\gui\
+2025-03-31 16:47:41,281 - matplotlib - DEBUG - matplotlib data path: C:\Users\travism\AppData\Roaming\Python\Python311\site-packages\matplotlib\mpl-data
+2025-03-31 16:47:41,288 - matplotlib - DEBUG - CONFIGDIR=C:\Users\travism\.matplotlib
+2025-03-31 16:47:41,290 - matplotlib - DEBUG - interactive is False
+2025-03-31 16:47:41,290 - matplotlib - DEBUG - platform is win32
+2025-03-31 16:47:41,349 - matplotlib - DEBUG - CACHEDIR=C:\Users\travism\.matplotlib
+2025-03-31 16:47:41,352 - matplotlib.font_manager - DEBUG - Using fontManager instance from C:\Users\travism\.matplotlib\fontlist-v330.json
+2025-03-31 16:47:41,601 - base_gui - INFO - Application starting
+2025-03-31 16:47:41,657 - base_gui - INFO - BaseGUI initialized
+2025-03-31 16:47:41,657 - base_gui - INFO - Showing login screen
+2025-03-31 16:47:41,665 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:47:41,665 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:47:41,665 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:47:41,665 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:47:41,720 - login_gui - INFO - Logo loaded and scaled to 567x187
+2025-03-31 16:47:41,728 - base_gui - INFO - Main loop starting
+2025-03-31 16:47:46,429 - base_gui - INFO - Login attempt for user1
+2025-03-31 16:47:46,757 - matplotlib.pyplot - DEBUG - Loaded backend tkagg version 8.6.
+2025-03-31 16:49:33,574 - base_gui - INFO - Starting app with BASE_DIR: C:\Users\travism\source\repos\GuthPumpRegistry\gui\
+2025-03-31 16:49:34,322 - matplotlib - DEBUG - matplotlib data path: C:\Users\travism\AppData\Roaming\Python\Python311\site-packages\matplotlib\mpl-data
+2025-03-31 16:49:34,329 - matplotlib - DEBUG - CONFIGDIR=C:\Users\travism\.matplotlib
+2025-03-31 16:49:34,331 - matplotlib - DEBUG - interactive is False
+2025-03-31 16:49:34,331 - matplotlib - DEBUG - platform is win32
+2025-03-31 16:49:34,391 - matplotlib - DEBUG - CACHEDIR=C:\Users\travism\.matplotlib
+2025-03-31 16:49:34,394 - matplotlib.font_manager - DEBUG - Using fontManager instance from C:\Users\travism\.matplotlib\fontlist-v330.json
+2025-03-31 16:49:34,648 - base_gui - INFO - Application starting
+2025-03-31 16:49:34,703 - base_gui - INFO - BaseGUI initialized
+2025-03-31 16:49:34,703 - base_gui - INFO - Showing login screen
+2025-03-31 16:49:34,710 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:49:34,711 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:49:34,711 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:49:34,711 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:49:34,765 - login_gui - INFO - Logo loaded and scaled to 567x187
+2025-03-31 16:49:34,777 - base_gui - INFO - Main loop starting
+2025-03-31 16:49:38,797 - base_gui - INFO - Login attempt for stores1
+2025-03-31 16:49:39,119 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:49:39,119 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:49:39,119 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:49:39,119 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:49:39,119 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:49:39,120 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:49:39,120 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:49:39,120 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:49:39,120 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:49:39,120 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:49:39,120 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:49:39,120 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:49:39,143 - stores_gui - INFO - Refreshed Pumps in Stores table
+2025-03-31 16:49:39,144 - base_gui - INFO - User stores1 logged in with role Stores
+2025-03-31 16:49:40,630 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:49:40,630 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:49:40,630 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:49:40,630 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:49:40,630 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:49:40,630 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:49:40,630 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:49:40,630 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:49:40,630 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:49:40,631 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:49:40,631 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:49:40,631 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:49:42,887 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:49:42,887 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:49:42,887 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:49:42,887 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:49:42,887 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:49:42,887 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:49:42,887 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:49:42,887 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:49:42,887 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:49:42,887 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:49:42,887 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:49:42,887 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:49:45,916 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:49:45,916 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:49:45,916 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:49:45,916 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:49:45,916 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:49:45,916 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:49:45,916 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:49:45,916 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:49:45,917 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:49:45,917 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:49:45,917 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:49:45,917 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:49:47,563 - base_gui - INFO - Logging out user stores1
+2025-03-31 16:49:47,584 - base_gui - INFO - Showing login screen
+2025-03-31 16:49:47,586 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:49:47,586 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:49:47,586 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:49:47,586 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:49:47,633 - login_gui - INFO - Logo loaded and scaled to 567x187
+2025-03-31 16:49:47,643 - base_gui - INFO - User logged out
+2025-03-31 16:49:55,821 - base_gui - INFO - Login attempt for tester1
+2025-03-31 16:49:55,823 - base_gui - WARNING - Failed login attempt for tester1
+2025-03-31 16:49:58,793 - base_gui - INFO - Login attempt for tester1
+2025-03-31 16:49:58,794 - base_gui - WARNING - Failed login attempt for tester1
+2025-03-31 16:49:59,836 - base_gui - INFO - Login attempt for tester1
+2025-03-31 16:49:59,838 - base_gui - WARNING - Failed login attempt for tester1
+2025-03-31 16:49:59,956 - base_gui - INFO - Login attempt for tester1
+2025-03-31 16:49:59,957 - base_gui - WARNING - Failed login attempt for tester1
+2025-03-31 16:50:02,534 - base_gui - INFO - Login attempt for tester1
+2025-03-31 16:50:02,535 - base_gui - WARNING - Failed login attempt for tester1
+2025-03-31 16:50:03,938 - base_gui - INFO - Login attempt for tester1
+2025-03-31 16:50:03,940 - base_gui - WARNING - Failed login attempt for tester1
+2025-03-31 16:50:04,358 - base_gui - INFO - Login attempt for tester1
+2025-03-31 16:50:04,360 - base_gui - WARNING - Failed login attempt for tester1
+2025-03-31 16:50:04,537 - base_gui - INFO - Login attempt for tester1
+2025-03-31 16:50:04,540 - base_gui - WARNING - Failed login attempt for tester1
+2025-03-31 16:50:13,157 - base_gui - INFO - Login attempt for approver1
+2025-03-31 16:50:13,341 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:50:13,341 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:50:13,341 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:50:13,341 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:50:13,341 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:50:13,341 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:50:13,341 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:50:13,341 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:50:13,341 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:50:13,341 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:50:13,341 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:50:13,342 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:50:13,355 - approval_gui - INFO - Refreshed approval list
+2025-03-31 16:50:13,361 - base_gui - INFO - User approver1 logged in with role Approval
+2025-03-31 16:50:14,825 - base_gui - INFO - Logging out user approver1
+2025-03-31 16:50:14,843 - base_gui - INFO - Showing login screen
+2025-03-31 16:50:14,846 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:50:14,847 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:50:14,847 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:50:14,847 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:50:14,899 - login_gui - INFO - Logo loaded and scaled to 567x187
+2025-03-31 16:50:14,907 - base_gui - INFO - User logged out
+2025-03-31 16:50:19,374 - base_gui - INFO - Login attempt for tester1
+2025-03-31 16:50:19,379 - base_gui - WARNING - Failed login attempt for tester1
+2025-03-31 16:50:37,398 - base_gui - INFO - Starting app with BASE_DIR: C:\Users\travism\source\repos\GuthPumpRegistry\gui\
+2025-03-31 16:50:38,151 - matplotlib - DEBUG - matplotlib data path: C:\Users\travism\AppData\Roaming\Python\Python311\site-packages\matplotlib\mpl-data
+2025-03-31 16:50:38,158 - matplotlib - DEBUG - CONFIGDIR=C:\Users\travism\.matplotlib
+2025-03-31 16:50:38,160 - matplotlib - DEBUG - interactive is False
+2025-03-31 16:50:38,161 - matplotlib - DEBUG - platform is win32
+2025-03-31 16:50:38,221 - matplotlib - DEBUG - CACHEDIR=C:\Users\travism\.matplotlib
+2025-03-31 16:50:38,225 - matplotlib.font_manager - DEBUG - Using fontManager instance from C:\Users\travism\.matplotlib\fontlist-v330.json
+2025-03-31 16:50:38,517 - base_gui - INFO - Application starting
+2025-03-31 16:50:38,568 - base_gui - INFO - BaseGUI initialized
+2025-03-31 16:50:38,569 - base_gui - INFO - Showing login screen
+2025-03-31 16:50:38,576 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 16:50:38,576 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 16:50:38,577 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 16:50:38,577 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 16:50:38,630 - login_gui - INFO - Logo loaded and scaled to 567x187
+2025-03-31 16:50:38,640 - base_gui - INFO - Main loop starting
+2025-03-31 16:50:41,999 - base_gui - INFO - Login attempt for user1
+2025-03-31 16:50:42,378 - pump_originator - INFO - Refreshed All Pumps table
+2025-03-31 16:50:42,383 - pump_originator - INFO - Refreshed Pumps in Stores table
+2025-03-31 16:50:42,385 - base_gui - INFO - User user1 logged in with role Pump Originator
+2025-03-31 16:51:15,344 - pump_originator - INFO - Refreshed All Pumps table
+2025-03-31 17:17:25,390 - base_gui - INFO - Logger initialized
+2025-03-31 17:17:25,391 - base_gui - INFO - Attempting to load all imports
+2025-03-31 17:17:26,126 - matplotlib - DEBUG - matplotlib data path: C:\Users\travism\AppData\Roaming\Python\Python311\site-packages\matplotlib\mpl-data
+2025-03-31 17:17:26,132 - matplotlib - DEBUG - CONFIGDIR=C:\Users\travism\.matplotlib
+2025-03-31 17:17:26,134 - matplotlib - DEBUG - interactive is False
+2025-03-31 17:17:26,134 - matplotlib - DEBUG - platform is win32
+2025-03-31 17:17:26,192 - matplotlib - DEBUG - CACHEDIR=C:\Users\travism\.matplotlib
+2025-03-31 17:17:26,196 - matplotlib.font_manager - DEBUG - Using fontManager instance from C:\Users\travism\.matplotlib\fontlist-v330.json
+2025-03-31 17:17:26,434 - base_gui - INFO - Application starting
+2025-03-31 17:17:26,486 - base_gui - INFO - Initializing BaseGUI
+2025-03-31 17:17:26,487 - base_gui - INFO - Showing login screen
+2025-03-31 17:17:26,496 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 17:17:26,496 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 17:17:26,496 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 17:17:26,496 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 17:17:26,549 - login_gui - INFO - Logo loaded and scaled to 567x187
+2025-03-31 17:17:26,557 - base_gui - INFO - Main loop starting
+2025-03-31 17:17:33,541 - base_gui - INFO - Login attempt for user1
+2025-03-31 17:17:33,882 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 17:17:33,882 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 17:17:33,882 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 17:17:33,882 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 17:17:33,882 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 17:17:33,882 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 17:17:33,882 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 17:17:33,882 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 17:17:33,882 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 17:17:33,883 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 17:17:33,883 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 17:17:33,883 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 17:17:33,943 - dashboard_gui - INFO - Refreshed All Pumps table
+2025-03-31 17:17:33,946 - dashboard_gui - INFO - Refreshed Pumps in Stores table
+2025-03-31 17:17:33,946 - dashboard_gui - DEBUG - check_stores_minimum_quantity called (placeholder)
+2025-03-31 17:17:33,948 - base_gui - INFO - User user1 logged in with role Pump Originator
+2025-03-31 17:17:35,608 - base_gui - INFO - Logging out user user1
+2025-03-31 17:17:35,652 - base_gui - INFO - Showing login screen
+2025-03-31 17:17:35,654 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 17:17:35,654 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 17:17:35,654 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 17:17:35,655 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 17:17:35,708 - login_gui - INFO - Logo loaded and scaled to 567x187
+2025-03-31 17:17:35,719 - base_gui - INFO - User logged out
+2025-03-31 17:17:39,629 - base_gui - INFO - Login attempt for stores1
+2025-03-31 17:17:39,822 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 17:17:39,822 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 17:17:39,822 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 17:17:39,822 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 17:17:39,822 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 17:17:39,822 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 17:17:39,822 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 17:17:39,822 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 17:17:39,822 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 17:17:39,822 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 17:17:39,822 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 17:17:39,822 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 17:17:39,841 - stores_gui - INFO - Refreshed Pumps in Stores table
+2025-03-31 17:17:39,842 - base_gui - INFO - User stores1 logged in with role Stores
+2025-03-31 17:17:41,028 - base_gui - INFO - Logging out user stores1
+2025-03-31 17:17:41,040 - base_gui - INFO - Showing login screen
+2025-03-31 17:17:41,041 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 17:17:41,041 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 17:17:41,041 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 17:17:41,041 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 17:17:41,087 - login_gui - INFO - Logo loaded and scaled to 567x187
+2025-03-31 17:17:41,096 - base_gui - INFO - User logged out
+2025-03-31 17:17:44,358 - base_gui - INFO - Login attempt for admin1
+2025-03-31 17:17:44,541 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 17:17:44,541 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 17:17:44,541 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 17:17:44,541 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 17:17:44,541 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 17:17:44,541 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 17:17:44,541 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 17:17:44,541 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 17:17:44,541 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 17:17:44,541 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 17:17:44,541 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 17:17:44,541 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 17:17:44,651 - base_gui - INFO - User admin1 logged in with role Admin
+2025-03-31 17:27:27,989 - base_gui - INFO - Logger initialized
+2025-03-31 17:27:27,990 - base_gui - INFO - Attempting to load all imports
+2025-03-31 17:27:28,727 - matplotlib - DEBUG - matplotlib data path: C:\Users\travism\AppData\Roaming\Python\Python311\site-packages\matplotlib\mpl-data
+2025-03-31 17:27:28,734 - matplotlib - DEBUG - CONFIGDIR=C:\Users\travism\.matplotlib
+2025-03-31 17:27:28,736 - matplotlib - DEBUG - interactive is False
+2025-03-31 17:27:28,736 - matplotlib - DEBUG - platform is win32
+2025-03-31 17:27:28,796 - matplotlib - DEBUG - CACHEDIR=C:\Users\travism\.matplotlib
+2025-03-31 17:27:28,799 - matplotlib.font_manager - DEBUG - Using fontManager instance from C:\Users\travism\.matplotlib\fontlist-v330.json
+2025-03-31 17:27:29,049 - base_gui - INFO - Application starting
+2025-03-31 17:27:29,103 - base_gui - INFO - Initializing BaseGUI
+2025-03-31 17:27:29,103 - base_gui - INFO - Showing login screen
+2025-03-31 17:27:29,112 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 17:27:29,112 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 17:27:29,112 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 17:27:29,112 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 17:27:29,163 - login_gui - INFO - Logo loaded and scaled to 567x187
+2025-03-31 17:27:29,171 - base_gui - INFO - Main loop starting
+2025-03-31 17:27:42,967 - base_gui - INFO - Login attempt for admin1
+2025-03-31 17:27:43,304 - base_gui - WARNING - Failed login attempt for admin1
+2025-03-31 17:27:46,376 - base_gui - INFO - Login attempt for admin1
+2025-03-31 17:27:46,565 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 17:27:46,566 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 17:27:46,566 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 17:27:46,566 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 17:27:46,566 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 17:27:46,566 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 17:27:46,566 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 17:27:46,566 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 17:27:46,566 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 17:27:46,566 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 17:27:46,567 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 17:27:46,567 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 17:27:46,688 - base_gui - INFO - User admin1 logged in with role Admin
+2025-03-31 19:12:30,017 - base_gui - INFO - Logger initialized
+2025-03-31 19:12:30,018 - base_gui - INFO - Attempting to load all imports
+2025-03-31 19:12:31,373 - matplotlib - DEBUG - matplotlib data path: C:\Users\travism\AppData\Roaming\Python\Python311\site-packages\matplotlib\mpl-data
+2025-03-31 19:12:31,381 - matplotlib - DEBUG - CONFIGDIR=C:\Users\travism\.matplotlib
+2025-03-31 19:12:31,383 - matplotlib - DEBUG - interactive is False
+2025-03-31 19:12:31,383 - matplotlib - DEBUG - platform is win32
+2025-03-31 19:12:31,462 - matplotlib - DEBUG - CACHEDIR=C:\Users\travism\.matplotlib
+2025-03-31 19:12:31,472 - matplotlib.font_manager - DEBUG - Using fontManager instance from C:\Users\travism\.matplotlib\fontlist-v330.json
+2025-03-31 19:12:31,750 - base_gui - INFO - Application starting
+2025-03-31 19:12:31,874 - base_gui - INFO - Initializing BaseGUI
+2025-03-31 19:12:31,874 - base_gui - INFO - Showing login screen
+2025-03-31 19:12:31,885 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 19:12:31,885 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 19:12:31,885 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 19:12:31,886 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 19:12:31,939 - login_gui - INFO - Logo loaded and scaled to 567x187
+2025-03-31 19:12:31,951 - base_gui - INFO - Main loop starting
+2025-03-31 19:13:04,542 - base_gui - INFO - Login attempt for admin1
+2025-03-31 19:13:04,818 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 19:13:04,818 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 19:13:04,818 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 19:13:04,818 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 19:13:04,818 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 19:13:04,818 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 19:13:04,818 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 19:13:04,818 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 19:13:04,819 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 19:13:04,819 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 19:13:04,819 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 19:13:04,819 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 19:13:04,908 - base_gui - INFO - User admin1 logged in with role Admin
+2025-03-31 19:13:06,700 - base_gui - INFO - Logging out user admin1
+2025-03-31 19:13:06,730 - base_gui - INFO - Showing login screen
+2025-03-31 19:13:06,733 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 19:13:06,733 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 19:13:06,733 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 19:13:06,733 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 19:13:06,777 - login_gui - INFO - Logo loaded and scaled to 567x187
+2025-03-31 19:13:06,785 - base_gui - INFO - User logged out
+2025-03-31 19:13:11,247 - base_gui - INFO - Login attempt for user1
+2025-03-31 19:13:11,427 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 19:13:11,427 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 19:13:11,427 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 19:13:11,427 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 19:13:11,427 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 19:13:11,427 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 19:13:11,427 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 19:13:11,427 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 19:13:11,427 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 19:13:11,428 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 19:13:11,428 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 19:13:11,428 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 19:13:11,468 - dashboard_gui - INFO - Refreshed All Pumps table
+2025-03-31 19:13:11,471 - dashboard_gui - INFO - Refreshed Pumps in Stores table
+2025-03-31 19:13:11,471 - dashboard_gui - DEBUG - check_stores_minimum_quantity called (placeholder)
+2025-03-31 19:13:11,472 - base_gui - INFO - User user1 logged in with role Pump Originator
+2025-03-31 20:23:00,084 - base_gui - INFO - Logger initialized
+2025-03-31 20:23:00,084 - base_gui - INFO - Attempting to load all imports
+2025-03-31 20:23:00,786 - matplotlib - DEBUG - matplotlib data path: C:\Users\travism\AppData\Roaming\Python\Python311\site-packages\matplotlib\mpl-data
+2025-03-31 20:23:00,793 - matplotlib - DEBUG - CONFIGDIR=C:\Users\travism\.matplotlib
+2025-03-31 20:23:00,795 - matplotlib - DEBUG - interactive is False
+2025-03-31 20:23:00,795 - matplotlib - DEBUG - platform is win32
+2025-03-31 20:23:00,852 - matplotlib - DEBUG - CACHEDIR=C:\Users\travism\.matplotlib
+2025-03-31 20:23:00,855 - matplotlib.font_manager - DEBUG - Using fontManager instance from C:\Users\travism\.matplotlib\fontlist-v330.json
+2025-03-31 20:23:01,095 - base_gui - INFO - Application starting
+2025-03-31 20:23:01,145 - base_gui - INFO - Initializing BaseGUI
+2025-03-31 20:23:01,146 - base_gui - INFO - Showing login screen
+2025-03-31 20:23:01,155 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:23:01,155 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:23:01,155 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:23:01,155 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 20:23:01,201 - login_gui - INFO - Logo loaded and scaled to 567x187
+2025-03-31 20:23:01,208 - base_gui - INFO - Main loop starting
+2025-03-31 20:23:05,489 - base_gui - INFO - Login attempt for admin1
+2025-03-31 20:23:05,818 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:23:05,818 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:23:05,818 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:23:05,818 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 20:23:05,819 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:23:05,819 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:23:05,819 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:23:05,819 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 20:23:05,819 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:23:05,819 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:23:05,819 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:23:05,819 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 20:23:05,927 - base_gui - INFO - User admin1 logged in with role Admin
+2025-03-31 20:23:13,309 - base_gui - INFO - Logging out user admin1
+2025-03-31 20:23:13,337 - base_gui - INFO - Showing login screen
+2025-03-31 20:23:13,340 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:23:13,341 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:23:13,341 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:23:13,341 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 20:23:13,388 - login_gui - INFO - Logo loaded and scaled to 567x187
+2025-03-31 20:23:13,395 - base_gui - INFO - User logged out
+2025-03-31 20:27:49,391 - base_gui - INFO - Logger initialized
+2025-03-31 20:27:49,392 - base_gui - INFO - Attempting to load all imports
+2025-03-31 20:27:50,134 - matplotlib - DEBUG - matplotlib data path: C:\Users\travism\AppData\Roaming\Python\Python311\site-packages\matplotlib\mpl-data
+2025-03-31 20:27:50,141 - matplotlib - DEBUG - CONFIGDIR=C:\Users\travism\.matplotlib
+2025-03-31 20:27:50,142 - matplotlib - DEBUG - interactive is False
+2025-03-31 20:27:50,142 - matplotlib - DEBUG - platform is win32
+2025-03-31 20:27:50,200 - matplotlib - DEBUG - CACHEDIR=C:\Users\travism\.matplotlib
+2025-03-31 20:27:50,203 - matplotlib.font_manager - DEBUG - Using fontManager instance from C:\Users\travism\.matplotlib\fontlist-v330.json
+2025-03-31 20:27:50,450 - base_gui - INFO - Application starting
+2025-03-31 20:27:50,500 - base_gui - INFO - Initializing BaseGUI
+2025-03-31 20:27:50,500 - base_gui - INFO - Showing login screen
+2025-03-31 20:27:50,507 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:27:50,508 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:27:50,508 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:27:50,508 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 20:27:50,555 - login_gui - INFO - Logo loaded and scaled to 567x187
+2025-03-31 20:27:50,561 - base_gui - INFO - Main loop starting
+2025-03-31 20:27:55,900 - base_gui - INFO - Login attempt for user1
+2025-03-31 20:27:56,270 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:27:56,270 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:27:56,270 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:27:56,270 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 20:27:56,270 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:27:56,270 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:27:56,272 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:27:56,272 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 20:27:56,272 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:27:56,272 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:27:56,272 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:27:56,272 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 20:27:56,329 - dashboard_gui - INFO - Refreshed All Pumps table
+2025-03-31 20:27:56,331 - dashboard_gui - INFO - Refreshed Pumps in Stores table
+2025-03-31 20:27:56,332 - dashboard_gui - DEBUG - check_stores_minimum_quantity called (placeholder)
+2025-03-31 20:27:56,333 - base_gui - INFO - User user1 logged in with role Pump Originator
+2025-03-31 20:28:00,353 - base_gui - INFO - Logging out user user1
+2025-03-31 20:28:00,401 - base_gui - INFO - Showing login screen
+2025-03-31 20:28:00,402 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:28:00,402 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:28:00,402 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:28:00,402 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 20:28:00,449 - login_gui - INFO - Logo loaded and scaled to 567x187
+2025-03-31 20:28:00,456 - base_gui - INFO - User logged out
+2025-03-31 20:28:05,785 - base_gui - INFO - Login attempt for stores1
+2025-03-31 20:28:05,962 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:28:05,962 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:28:05,963 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:28:05,963 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 20:28:05,963 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:28:05,963 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:28:05,963 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:28:05,963 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 20:28:05,963 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:28:05,963 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:28:05,963 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:28:05,963 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 20:28:05,981 - stores_gui - INFO - Refreshed Pumps in Stores table
+2025-03-31 20:28:05,982 - base_gui - INFO - User stores1 logged in with role Stores
+2025-03-31 20:28:08,277 - base_gui - INFO - Logging out user stores1
+2025-03-31 20:28:08,304 - base_gui - INFO - Showing login screen
+2025-03-31 20:28:08,306 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:28:08,306 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:28:08,306 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:28:08,306 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 20:28:08,353 - login_gui - INFO - Logo loaded and scaled to 567x187
+2025-03-31 20:28:08,362 - base_gui - INFO - User logged out
+2025-03-31 20:28:14,060 - base_gui - INFO - Login attempt for tester1
+2025-03-31 20:28:14,237 - combined_assembler_tester_gui - DEBUG - Loaded options from JSON: {'branch': ['Johannesburg', 'Cape Town', 'Pinetown', 'Port Elizabeth'], 'pump_model': ['PT 0.55KW', 'PS 0.75KW', 'PS 1.1KW', 'P1 1.1KW', 'P1 2.2KW', 'P1 3.0KW', 'P1 4.0KW', 'P1 5.5KW', 'P2 5.5KW', 'P2 7.5KW'], 'configuration': ['Standard', 'Economical'], 'impeller_size': {'PT 0.55KW': ['92mm'], 'PS 0.75KW': ['110mm', '115mm'], 'PS 1.1KW': ['110mm', '115mm'], 'P1 1.1KW': ['110mm', '120mm', '130mm', '140mm', '150mm', '160mm', '171mm'], 'P1 2.2KW': ['110mm', '120mm', '130mm', '140mm', '150mm', '160mm', '171mm'], 'P1 3.0KW': ['110mm', '120mm', '130mm', '140mm', '150mm', '160mm', '171mm'], 'P1 4.0KW': ['110mm', '120mm', '130mm', '140mm', '150mm', '160mm', '171mm'], 'P1 5.5KW': ['140mm', '150mm', '160mm', '171mm'], 'P2 5.5KW': ['170mm', '190mm', '200mm', '210mm', '220mm', '230mm', '240mm', '250mm'], 'P2 7.5KW': ['120mm', '130mm', '140mm', '150mm', '160mm', '170mm', '180mm', '190mm']}, 'connection_type': ['DIN', 'Tri-Clover', 'Other']}
+2025-03-31 20:28:14,238 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:28:14,238 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:28:14,238 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:28:14,238 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 20:28:14,238 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:28:14,238 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:28:14,238 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:28:14,239 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 20:28:14,239 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:28:14,239 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:28:14,239 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:28:14,239 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 20:28:14,252 - combined_assembler_tester_gui - INFO - Refreshed assembler pump list
+2025-03-31 20:28:14,257 - combined_assembler_tester_gui - INFO - Refreshed testing pump list
+2025-03-31 20:28:14,263 - base_gui - INFO - User tester1 logged in with role Assembler_Tester
+2025-03-31 20:28:16,280 - combined_assembler_tester_gui - INFO - Refreshed assembler pump list
+2025-03-31 20:28:16,282 - combined_assembler_tester_gui - INFO - Refreshed testing pump list
+2025-03-31 20:28:17,421 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:28:17,422 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:28:17,422 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:28:17,422 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 20:28:17,422 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:28:17,422 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:28:17,422 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:28:17,422 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
+2025-03-31 20:28:17,422 - PIL.PngImagePlugin - DEBUG - STREAM b'IHDR' 16 13
+2025-03-31 20:28:17,422 - PIL.PngImagePlugin - DEBUG - STREAM b'pHYs' 41 9
+2025-03-31 20:28:17,422 - PIL.PngImagePlugin - DEBUG - STREAM b'iTXt' 62 1302
+2025-03-31 20:28:17,422 - PIL.PngImagePlugin - DEBUG - STREAM b'IDAT' 1376 7763
