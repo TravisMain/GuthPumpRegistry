@@ -60,9 +60,8 @@ def show_stores_dashboard(root, username, role, logout_callback):
                     FROM pumps WHERE status = 'Stores'
                 """)
                 for pump in cursor.fetchall():
-                    tree.insert("", END, values=(pump["serial_number"], pump["assembly_part_number"] or "N/A",
-                                                 pump["customer"], pump["branch"], pump["pump_model"],
-                                                 pump["configuration"], pump["created_at"]))
+                    # pump is a tuple: (serial_number, assembly_part_number, customer, branch, pump_model, configuration, created_at)
+                    tree.insert("", END, values=(pump[0], pump[1] or "N/A", pump[2], pump[3], pump[4], pump[5], pump[6]))
             logger.info("Refreshed Pumps in Stores table")
         except Exception as e:
             logger.error(f"Failed to refresh pump list: {str(e)}")
@@ -78,7 +77,7 @@ def show_stores_dashboard(root, username, role, logout_callback):
     return main_frame
 
 def show_bom_window(parent_frame, tree, username, refresh_callback):
-    """Display and manage BOM for a selected pump."""
+    """Display and manage BOM for a selected pump with mouse wheel scrolling."""
     selected = tree.selection()
     if not selected:
         logger.debug("No pump selected in Treeview")
@@ -89,14 +88,18 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM pumps WHERE serial_number = ?", (serial_number,))
-            pump = dict(cursor.fetchone() or {})
-            if not pump:
+            # Convert tuple to dict using column names
+            columns = [desc[0] for desc in cursor.description]
+            pump_tuple = cursor.fetchone()
+            if not pump_tuple:
                 logger.warning(f"No pump found for serial_number: {serial_number}")
                 Messagebox.show_error("Error", f"Pump {serial_number} not found")
                 return
+            pump = dict(zip(columns, pump_tuple))
             cursor.execute("SELECT part_name, part_code, quantity, pulled_at FROM bom_items WHERE serial_number = ?", (serial_number,))
             bom_items = cursor.fetchall()
             cursor.execute("SELECT username, email FROM users WHERE username = ?", (pump["requested_by"],))
+            # originator is a tuple: (username, email)
             originator = cursor.fetchone()
     except Exception as e:
         logger.error(f"Failed to load BOM data: {str(e)}")
@@ -131,23 +134,51 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
     canvas.pack(side=LEFT, fill=BOTH, expand=True)
     scrollbar.pack(side=RIGHT, fill=Y)
 
-    headers = ["Part Number", "Part Name", "Quantity", "Pulled", "Reason"]  # Line ~134
+    # Enable mouse wheel scrolling, bound only to the canvas
+    def on_mouse_wheel(event):
+        if canvas.winfo_exists():  # Prevent scroll if canvas is destroyed
+            # Windows uses delta (positive = up, negative = down), Linux/macOS use Button-4 (up) and Button-5 (down)
+            if event.delta > 0 or event.num == 4:  # Scroll up
+                canvas.yview_scroll(-1, "units")
+            elif event.delta < 0 or event.num == 5:  # Scroll down
+                canvas.yview_scroll(1, "units")
+
+    # Bind mouse wheel events to the canvas only (not globally)
+    canvas.bind("<MouseWheel>", on_mouse_wheel)  # Windows
+    canvas.bind("<Button-4>", on_mouse_wheel)    # Linux/macOS scroll up
+    canvas.bind("<Button-5>", on_mouse_wheel)    # Linux/macOS scroll down
+
+    # Clean up bindings on window close
+    def on_close():
+        try:
+            if canvas.winfo_exists():
+                canvas.unbind("<MouseWheel>")
+                canvas.unbind("<Button-4>")
+                canvas.unbind("<Button-5>")
+            bom_window.destroy()
+        except Exception as e:
+            logger.debug(f"Minor error during BOM window close: {str(e)}")
+
+    bom_window.protocol("WM_DELETE_WINDOW", on_close)
+
+    headers = ["Part Number", "Part Name", "Quantity", "Pulled", "Reason"]
     for col, header in enumerate(headers):
         ttk.Label(scrollable_frame, text=header, font=("Roboto", 10, "bold")).grid(row=0, column=col, padx=5, pady=5, sticky=W)
 
     check_vars = []
     reason_entries = []
     for i, item in enumerate(bom_items, start=1):
-        ttk.Label(scrollable_frame, text=item["part_code"]).grid(row=i, column=0, padx=5, pady=5, sticky=W)
-        ttk.Label(scrollable_frame, text=item["part_name"]).grid(row=i, column=1, padx=5, pady=5, sticky=W)
-        ttk.Label(scrollable_frame, text=str(item["quantity"])).grid(row=i, column=2, padx=5, pady=5, sticky=W)
-        var = ttk.BooleanVar(value=bool(item["pulled_at"]))
-        check = ttk.Checkbutton(scrollable_frame, variable=var, state=DISABLED if item["pulled_at"] else NORMAL)
+        # item is a tuple: (part_name, part_code, quantity, pulled_at)
+        ttk.Label(scrollable_frame, text=item[1]).grid(row=i, column=0, padx=5, pady=5, sticky=W)  # part_code
+        ttk.Label(scrollable_frame, text=item[0]).grid(row=i, column=1, padx=5, pady=5, sticky=W)  # part_name
+        ttk.Label(scrollable_frame, text=str(item[2])).grid(row=i, column=2, padx=5, pady=5, sticky=W)  # quantity
+        var = ttk.BooleanVar(value=bool(item[3]))  # pulled_at
+        check = ttk.Checkbutton(scrollable_frame, variable=var, state=DISABLED if item[3] else NORMAL)
         check.grid(row=i, column=3, padx=5, pady=5)
-        check_vars.append((item["part_code"], var))
+        check_vars.append((item[1], var))  # part_code
         entry = ttk.Entry(scrollable_frame, width=40, state=NORMAL if not var.get() else DISABLED)
         entry.grid(row=i, column=4, padx=5, pady=5, sticky=W)
-        reason_entries.append((item["part_code"], entry))
+        reason_entries.append((item[1], entry))  # part_code
         var.trace("w", lambda *args, v=var, e=entry: [e.configure(state=NORMAL if not v.get() else DISABLED), e.delete(0, END) if v.get() else None, check_submit_state()])
 
     footer_frame = ttk.Frame(bom_window)
@@ -171,10 +202,10 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
                 for part_code, var in check_vars:
                     pulled = var.get()
                     reason = next(e.get().strip() for pc, e in reason_entries if pc == part_code)
-                    if pulled and not next(item["pulled_at"] for item in bom_items if item["part_code"] == part_code):
+                    if pulled and not next(item[3] for item in bom_items if item[1] == part_code):  # pulled_at
                         pull_bom_item(cursor, serial_number, part_code, username)
-                    part_name = next(item["part_name"] for item in bom_items if item["part_code"] == part_code)
-                    quantity = next(item["quantity"] for item in bom_items if item["part_code"] == part_code)
+                    part_name = next(item[0] for item in bom_items if item[1] == part_code)  # part_name
+                    quantity = next(item[2] for item in bom_items if item[1] == part_code)  # quantity
                     bom_items_list.append({"part_name": part_name, "part_code": part_code, "quantity": quantity, "pulled": "Yes" if pulled else "No", "reason": reason})
                     if reason:
                         cursor.execute("INSERT INTO audit_log (timestamp, username, action) VALUES (?, ?, ?)",
@@ -193,7 +224,7 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
 
                 if originator:
                     pump_data = {k: pump.get(k, "") for k in ["serial_number", "assembly_part_number", "customer", "branch", "pump_model", "configuration", "impeller_size", "connection_type", "pressure_required", "flow_rate_required", "custom_motor", "flush_seal_housing"]}
-                    threading.Thread(target=send_email, args=(originator["email"], f"Pump {serial_number} Moved to Assembly", f"Dear {originator['username']},",
+                    threading.Thread(target=send_email, args=(originator[1], f"Pump {serial_number} Moved to Assembly", f"Dear {originator[0]},",
                                                               f"<p>All items for pump {serial_number} pulled, moved to Assembly.</p><h3 style='color: #34495e;'>Pump Details</h3>{generate_pump_details_table(pump_data)}{generate_bom_table(bom_items_list)}",
                                                               "Regards,<br>Stores Team"), daemon=True).start()
                 else:

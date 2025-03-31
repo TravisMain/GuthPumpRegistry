@@ -20,6 +20,7 @@ ASSEMBLY_PART_NUMBERS_PATH = os.path.join(BASE_DIR, "assets", "assembly_part_num
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 BUILD_NUMBER = "1.0.0"
 STORES_EMAIL = "stores@guth.co.za"
+NOTIFICATIONS_DIR = os.path.join(BASE_DIR, "docs", "Notifications")  # New Notifications folder
 
 DEFAULT_DIRS = {
     "certificate": os.path.join(BASE_DIR, "certificates"),
@@ -286,27 +287,47 @@ def show_dashboard(root, username, role, logout_callback):
                     insert_bom=True
                 )
                 cursor.execute("SELECT part_code, part_name, quantity FROM bom_items WHERE serial_number = ?", (serial,))
-                bom_items = [{"part_code": row["part_code"], "part_name": row["part_name"], "quantity": row["quantity"]} for row in cursor.fetchall()]
+                # bom_items uses tuple indices: (part_code, part_name, quantity)
+                bom_items = [{"part_code": row[0], "part_name": row[1], "quantity": row[2]} for row in cursor.fetchall()]
                 conn.commit()
                 logger.info(f"New pump created by {username}: {serial} with BOM")
 
-            pump_data = {k: data[k] for k in ["serial_number", "assembly_part_number", "customer", "branch", "pump_model", "configuration", "impeller_size", "connection_type", "pressure_required", "flow_rate_required", "custom_motor", "flush_seal_housing"]}
-            pump_data["serial_number"] = serial
-            pump_data["requested_by"] = username
+            # Build pump_data after serial is assigned
+            pump_data = {
+                "serial_number": serial,  # Assign serial first
+                "assembly_part_number": data["assembly_part_number"],
+                "customer": data["customer"],
+                "branch": data["branch"],
+                "pump_model": data["pump_model"],
+                "configuration": data["configuration"],
+                "impeller_size": data["impeller_size"],
+                "connection_type": data["connection_type"],
+                "pressure_required": data["pressure_required"],
+                "flow_rate_required": data["flow_rate_required"],
+                "custom_motor": data["custom_motor"],
+                "flush_seal_housing": data["flush_seal_housing"],
+                "requested_by": username
+            }
+            logger.debug(f"pump_data: {pump_data}")
 
             config = load_config()
-            for dir_key in ["certificate", "confirmation", "bom"]:
+            # Use specific Notifications folder for new_pump_notification
+            os.makedirs(NOTIFICATIONS_DIR, exist_ok=True)
+            for dir_key in ["confirmation", "bom"]:  # Other dirs from config
                 dir_path = config["document_dirs"][dir_key]
                 os.makedirs(dir_path, exist_ok=True)
 
-            pdf_path = os.path.join(config["document_dirs"]["certificate"], f"new_pump_notification_{serial}.pdf")
+            pdf_path = os.path.join(NOTIFICATIONS_DIR, f"new_pump_notification_{serial}.pdf")  # New path
             bom_pdf_path = os.path.join(config["document_dirs"]["bom"], f"bom_checklist_{serial}.pdf")
             confirmation_path = os.path.join(config["document_dirs"]["confirmation"], f"confirmation_pump_created_{serial}.pdf")
 
+            logger.debug(f"Generating PDF at {pdf_path}")
             generate_pdf_notification(serial, pump_data, title="New Pump Assembly Notification", output_path=pdf_path)
             os.startfile(pdf_path, "print")
+            logger.debug(f"Generating BOM PDF at {bom_pdf_path}")
             generate_bom_checklist(serial, bom_items, output_path=bom_pdf_path)
             os.startfile(bom_pdf_path, "print")
+            logger.debug(f"Generating confirmation PDF at {confirmation_path}")
             confirmation_data = {"serial_number": serial, "assembly_part_number": data["assembly_part_number"], "status": "Created", "created_by": username, "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
             generate_pdf_notification(serial, confirmation_data, title=f"Confirmation - Pump Created {serial}", output_path=confirmation_path)
 
@@ -317,6 +338,7 @@ def show_dashboard(root, username, role, logout_callback):
                 {generate_pump_details_table(pump_data)}
                 <p>The BOM checklist is attached.</p>
             """
+            logger.debug(f"Sending email to {STORES_EMAIL} with subject: {subject}")
             threading.Thread(target=send_email, args=(STORES_EMAIL, subject, "Dear Stores Team,", body_content, "Regards,<br>Guth Pump Registry", pdf_path, confirmation_path, bom_pdf_path), daemon=True).start()
 
             if data["send_to_stores"] == "Yes":
@@ -326,8 +348,8 @@ def show_dashboard(root, username, role, logout_callback):
             refresh_all_pumps()
             refresh_stores_pumps()
         except Exception as e:
-            error_label.config(text=f"Failed to create pump: {str(e)}", bootstyle="danger")
             logger.error(f"Failed to create pump: {str(e)}")
+            Messagebox.show_error("Error", f"Failed to create pump: {str(e)}")
 
     ttk.Button(form_frame, text="Submit", command=submit_pump, bootstyle="success", style="large.TButton").grid(row=len(fields) + 1, column=0, pady=5, padx=5, sticky=W)
     ttk.Button(form_frame, text="Logoff", command=logout_callback, bootstyle="secondary", style="large.TButton").grid(row=len(fields) + 1, column=1, pady=5, padx=5, sticky=W)
@@ -386,12 +408,9 @@ def show_dashboard(root, username, role, logout_callback):
                     params.append(filter_status)
                 cursor.execute(query, params)
                 for pump in cursor.fetchall():
-                    if search_term in pump["serial_number"].lower():
-                        all_pumps_tree.insert("", END, values=(pump["serial_number"], pump["assembly_part_number"] or "N/A",
-                                                              pump["customer"], pump["branch"], pump["pump_model"],
-                                                              pump["configuration"], pump["impeller_size"], pump["connection_type"],
-                                                              pump["pressure_required"], pump["flow_rate_required"], pump["custom_motor"],
-                                                              pump["flush_seal_housing"], pump["status"]))
+                    # pump is a tuple: (serial_number, assembly_part_number, customer, branch, pump_model, configuration, impeller_size, connection_type, pressure_required, flow_rate_required, custom_motor, flush_seal_housing, status)
+                    if search_term in pump[0].lower():  # serial_number at index 0
+                        all_pumps_tree.insert("", END, values=(pump[0], pump[1] or "N/A", pump[2], pump[3], pump[4], pump[5], pump[6], pump[7], pump[8], pump[9], pump[10], pump[11], pump[12]))
             logger.info("Refreshed All Pumps table")
         except Exception as e:
             logger.error(f"Failed to refresh all pumps: {str(e)}")
@@ -427,7 +446,7 @@ def show_dashboard(root, username, role, logout_callback):
     stores_tree.configure(yscrollcommand=scrollbar_stores.set)
 
     def refresh_stores_pumps():
-        """Refresh the Pumps in Stores table with search and filter."""
+        """Refresh the Pumps in Stores table with search and filter, showing only pumps with customer = 'Stores'."""
         stores_tree.delete(*stores_tree.get_children())
         search_term = search_entry_stores.get().lower()
         filter_branch = filter_combobox_stores.get()
@@ -437,7 +456,7 @@ def show_dashboard(root, username, role, logout_callback):
                 query = """
                     SELECT serial_number, assembly_part_number, customer, branch, pump_model, configuration, impeller_size, connection_type,
                            pressure_required, flow_rate_required, custom_motor, flush_seal_housing, status
-                    FROM pumps WHERE status = 'Stores'
+                    FROM pumps WHERE customer = 'Stores'
                 """
                 params = []
                 if filter_branch != "All":
@@ -445,12 +464,9 @@ def show_dashboard(root, username, role, logout_callback):
                     params.append(filter_branch)
                 cursor.execute(query, params)
                 for pump in cursor.fetchall():
-                    if search_term in pump["serial_number"].lower():
-                        stores_tree.insert("", END, values=(pump["serial_number"], pump["assembly_part_number"] or "N/A",
-                                                           pump["customer"], pump["branch"], pump["pump_model"],
-                                                           pump["configuration"], pump["impeller_size"], pump["connection_type"],
-                                                           pump["pressure_required"], pump["flow_rate_required"], pump["custom_motor"],
-                                                           pump["flush_seal_housing"], pump["status"]))
+                    # pump is a tuple: (serial_number, assembly_part_number, customer, branch, pump_model, configuration, impeller_size, connection_type, pressure_required, flow_rate_required, custom_motor, flush_seal_housing, status)
+                    if search_term in pump[0].lower():  # serial_number at index 0
+                        stores_tree.insert("", END, values=(pump[0], pump[1] or "N/A", pump[2], pump[3], pump[4], pump[5], pump[6], pump[7], pump[8], pump[9], pump[10], pump[11], pump[12]))
             logger.info("Refreshed Pumps in Stores table")
             check_stores_minimum_quantity()
         except Exception as e:
@@ -485,10 +501,13 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM pumps WHERE serial_number = ?", (serial_number,))
-            pump = dict(cursor.fetchone() or {})
-            if not pump:
+            # Convert tuple to dict using column names
+            columns = [desc[0] for desc in cursor.description]
+            pump_tuple = cursor.fetchone()
+            if not pump_tuple:
                 logger.warning(f"No pump found for serial_number: {serial_number}")
                 return
+            pump = dict(zip(columns, pump_tuple))
     except Exception as e:
         logger.error(f"Failed to load pump data: {str(e)}")
         Messagebox.show_error("Error", f"Failed to load pump: {str(e)}")

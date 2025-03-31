@@ -32,62 +32,76 @@ pdfmetrics.registerFont(TTFont('Roboto', FONT_PATH))
 pdfmetrics.registerFont(TTFont('Roboto-Black', FONT_BOLD_PATH))
 
 def generate_graph(test_data):
-    """Generate a performance graph for the pump test data."""
+    """Generate a performance graph for pump test data, ensuring proper pump curves."""
     try:
-        flowrate = [float(f) for f in test_data["flowrate"] if f]
-        pressure = [float(p) for p in test_data["pressure"] if p]
-        amperage = [float(a) for a in test_data["amperage"] if a]
+        # Collect valid data points, allowing partial data
+        flowrate = []
+        pressure = []
+        amperage = []
+        for i in range(5):
+            f = test_data["flowrate"][i] if i < len(test_data["flowrate"]) else ""
+            p = test_data["pressure"][i] if i < len(test_data["pressure"]) else ""
+            a = test_data["amperage"][i] if i < len(test_data["amperage"]) else ""
+            if f or p or a:  # Include if at least one value is present
+                try:
+                    flowrate.append(float(f) if f else 0.0)
+                    pressure.append(float(p) if p else 0.0)
+                    amperage.append(float(a) if a else 0.0)
+                except ValueError:
+                    logger.debug(f"Invalid numeric value at index {i}: flow={f}, pressure={p}, amperage={a}")
+                    flowrate.append(0.0)
+                    pressure.append(0.0)
+                    amperage.append(0.0)
 
-        if not flowrate or len(flowrate) != len(pressure) or len(flowrate) != len(amperage):
-            logger.error("No valid data to plot: flowrate, pressure, or amperage lists are empty or mismatched")
+        if not any(flowrate):  # If all flowrates are 0 or empty, no plot
+            logger.debug("No valid flowrate data to plot")
             return None
 
-        fig, ax1 = plt.subplots(figsize=(10, 6))
+        # Sort by flowrate for a smooth pump curve
+        sorted_data = sorted(zip(flowrate, pressure, amperage), key=lambda x: x[0])
+        flowrate, pressure, amperage = zip(*sorted_data) if sorted_data else ([], [], [])
+
+        fig, ax1 = plt.subplots(figsize=(4, 2))  # Slightly larger for readability
         desaturated_blue = (100/255, 149/255, 237/255)  # #6495ED
         desaturated_red = (255/255, 99/255, 71/255)     # #FF6347
 
-        ax1.plot(flowrate, pressure, marker='o', color=desaturated_blue, label='Pressure (bar)')
-        ax1.set_xlabel("Flowrate (l/h)", fontsize=12)
-        ax1.set_ylabel("Pressure (bar)", color=desaturated_blue, fontsize=12)
-        ax1.tick_params(axis='y', labelcolor=desaturated_blue, labelsize=10)
-        ax1.tick_params(axis='x', labelsize=10)
+        # Plot pressure vs. flowrate (pump curve, typically decreasing)
+        ax1.plot(flowrate, pressure, marker='o', color=desaturated_blue, label='Pressure (bar)', linewidth=1.5)
+        ax1.set_xlabel("Flowrate (l/h)", fontsize=8)
+        ax1.set_ylabel("Pressure (bar)", color=desaturated_blue, fontsize=8)
+        ax1.tick_params(axis='y', labelcolor=desaturated_blue, labelsize=6)
+        ax1.tick_params(axis='x', labelsize=6)
         ax1.grid(True, linestyle='--', alpha=0.7)
 
+        # Plot amperage vs. flowrate on twin axis (typically increasing)
         ax2 = ax1.twinx()
-        ax2.plot(flowrate, amperage, marker='s', color=desaturated_red, label='Amperage (A)')
-        ax2.set_ylabel("Amperage (A)", color=desaturated_red, fontsize=12)
-        ax2.tick_params(axis='y', labelcolor=desaturated_red, labelsize=10)
+        ax2.plot(flowrate, amperage, marker='s', color=desaturated_red, label='Amperage (A)', linewidth=1.5)
+        ax2.set_ylabel("Amperage (A)", color=desaturated_red, fontsize=8)
+        ax2.tick_params(axis='y', labelcolor=desaturated_red, labelsize=6)
 
-        flowrate_range = max(flowrate) - min(flowrate) if flowrate else 1
-        pressure_range = max(pressure) - min(pressure) if pressure else 1
-        amperage_range = max(amperage) - min(amperage) if amperage else 1
+        # Dynamic axis limits with sensible defaults
+        flow_min, flow_max = min([f for f in flowrate if f > 0], default=0), max(flowrate, default=1000)
+        press_min, press_max = min([p for p in pressure if p > 0], default=0), max(pressure, default=5)
+        amp_min, amp_max = min([a for a in amperage if a > 0], default=0), max(amperage, default=10)
 
-        ax1.set_xlim(min(flowrate) - flowrate_range * 0.1, max(flowrate) + flowrate_range * 0.1)
-        ax1.set_ylim(min(pressure) - pressure_range * 0.1, max(pressure) + pressure_range * 0.1)
-        ax2.set_ylim(min(amperage) - amperage_range * 0.1, max(amperage) + amperage_range * 0.1)
+        flow_range = flow_max - flow_min if flow_max > flow_min else 100
+        press_range = press_max - press_min if press_max > press_min else 1
+        amp_range = amp_max - amp_min if amp_max > amp_min else 1
 
-        ax1.set_title(f"Performance Graph for Pump {test_data['serial_number']}", fontsize=14, pad=15)
+        ax1.set_xlim(max(0, flow_min - flow_range * 0.1), flow_max + flow_range * 0.1)
+        ax1.set_ylim(max(0, press_min - press_range * 0.1), press_max + press_range * 0.1)
+        ax2.set_ylim(max(0, amp_min - amp_range * 0.1), amp_max + amp_range * 0.1)
+
+        ax1.set_title("Pump Performance Preview", fontsize=10, pad=5)
         lines1, labels1 = ax1.get_legend_handles_labels()
         lines2, labels2 = ax2.get_legend_handles_labels()
-        ax1.legend(lines1 + lines2, labels1 + labels2, loc='best', fontsize=10)
+        ax1.legend(lines1 + lines2, labels1 + labels2, loc='best', fontsize=6)
 
         plt.tight_layout()
         return fig
     except Exception as e:
         logger.error(f"Graph generation failed: {str(e)}")
         return None
-
-def display_graph(fig):
-    """Display the performance graph in a new window."""
-    if not fig:
-        Messagebox.show_error("Failed to generate graph. Check test data for invalid entries.", "Graph Error")
-        return
-    graph_window = ttk.Toplevel()
-    graph_window.title("Performance Graph")
-    graph_window.state("zoomed")
-    canvas = FigureCanvasTkAgg(fig, master=graph_window)
-    canvas.draw()
-    canvas.get_tk_widget().pack(fill=BOTH, expand=True)
 
 def generate_certificate(data, serial_number):
     """Generate a pump test certificate PDF."""
@@ -132,7 +146,7 @@ def generate_certificate(data, serial_number):
 
     fab_data = [
         ["FABRICATION", ""],
-        ["Assembly Part Number:", data.get("assembly_part_number", "N/A")],
+        ["Assembly Number:", data.get("assembly_part_number", "N/A")],
         ["Pump Model:", data.get("pump_model", "N/A")],
         ["Serial Number:", serial_number],
         ["Impeller Diameter:", data.get("impeller_diameter", "N/A")],
@@ -307,19 +321,34 @@ def load_config():
         return {"document_dirs": {"certificate": os.path.join(BASE_DIR, "certificates")}}
 
 def show_pump_details_window(parent, serial_number, username, refresh_callback):
-    """Display pump details for approval."""
+    """Display pump details for approval, mirroring Tester dashboard with live graph."""
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT test_data FROM pumps WHERE serial_number = ?", (serial_number,))
             pump = cursor.fetchone()
-            if not pump or not pump["test_data"]:
+            if not pump or not pump[0]:
                 logger.warning(f"No test data found for serial_number: {serial_number}")
                 Messagebox.show_warning("No Data", f"No test data found for pump {serial_number}")
                 return
-            test_data = json.loads(pump["test_data"])
+            test_data = json.loads(pump[0])
+
+            cursor.execute("""
+                SELECT serial_number, customer, pump_model, configuration, requested_by, branch, impeller_size,
+                       connection_type, pressure_required, flow_rate_required, custom_motor, flush_seal_housing,
+                       assembly_part_number
+                FROM pumps WHERE serial_number = ?
+            """, (serial_number,))
+            columns = [desc[0] for desc in cursor.description]
+            pump_tuple = cursor.fetchone()
+            if not pump_tuple:
+                logger.warning(f"No pump found for serial_number: {serial_number}")
+                return
+            pump = dict(zip(columns, pump_tuple))
+            cursor.execute("SELECT username, email FROM users WHERE username = ?", (pump["requested_by"],))
+            originator = cursor.fetchone()
     except Exception as e:
-        logger.error(f"Failed to load test data: {str(e)}")
+        logger.error(f"Failed to load pump data: {str(e)}")
         Messagebox.show_error("Error", f"Failed to load pump data: {str(e)}")
         return
 
@@ -327,9 +356,13 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
     details_window.title(f"Pump Details - {serial_number}")
     details_window.state("zoomed")
 
-    header_frame = ttk.Frame(details_window, style="white.TFrame")
+    # Main container frame
+    container_frame = ttk.Frame(details_window)
+    container_frame.pack(fill=BOTH, expand=True)
+
+    # Header
+    header_frame = ttk.Frame(container_frame, style="white.TFrame")
     header_frame.pack(fill=X, pady=(0, 10), ipady=10)
-    ttk.Label(header_frame, text=f"Pump Details - {serial_number}", font=("Roboto", 14, "bold")).pack(anchor=W, padx=10)
     if os.path.exists(LOGO_PATH):
         try:
             img = Image.open(LOGO_PATH).resize((int(Image.open(LOGO_PATH).width * 0.5), int(Image.open(LOGO_PATH).height * 0.5)), Image.Resampling.LANCZOS)
@@ -337,62 +370,116 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
             ttk.Label(header_frame, image=logo).pack(side=RIGHT, padx=10)
             header_frame.image = logo
         except Exception as e:
-            logger.error(f"Logo load failed: {str(e)}")
+            logger.error(f"Details window logo load failed: {str(e)}")
+    ttk.Label(header_frame, text="Pump Approval Details", font=("Roboto", 14, "bold")).pack(anchor=W, padx=10)
 
-    canvas = ttk.Canvas(details_window)
-    scrollbar = ttk.Scrollbar(details_window, orient=VERTICAL, command=canvas.yview)
-    scrollable_frame = ttk.Frame(canvas)
+    # Scrollable content frame
+    content_frame = ttk.Frame(container_frame)
+    content_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-    scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    canvas = ttk.Canvas(content_frame)
+    scrollbar = ttk.Scrollbar(content_frame, orient=VERTICAL, command=canvas.yview)
+    main_frame = ttk.Frame(canvas)
+    main_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+    canvas.create_window((0, 0), window=main_frame, anchor="nw")
     canvas.configure(yscrollcommand=scrollbar.set)
-    canvas.pack(side=LEFT, fill=BOTH, expand=True, padx=10, pady=10)
+    canvas.pack(side=LEFT, fill=BOTH, expand=True)
     scrollbar.pack(side=RIGHT, fill=Y)
 
     def on_mouse_wheel(event):
-        canvas.yview_scroll(-1 * (event.delta // 120), "units")
+        if canvas.winfo_exists():
+            canvas.yview_scroll(-1 * (event.delta // 120), "units")
 
     canvas.bind("<MouseWheel>", on_mouse_wheel)
-    details_window.protocol("WM_DELETE_WINDOW", lambda: (canvas.unbind("<MouseWheel>"), details_window.destroy()))
+    def on_close():
+        try:
+            if canvas.winfo_exists():
+                canvas.unbind("<MouseWheel>")
+            details_window.destroy()
+        except Exception as e:
+            logger.debug(f"Minor error during window close: {str(e)}")
+    details_window.protocol("WM_DELETE_WINDOW", on_close)
 
-    main_layout = ttk.Frame(scrollable_frame)
-    main_layout.pack(fill=BOTH, expand=True, padx=10, pady=10)
+    # Top frame (Invoice, Customer, Job Number)
+    top_frame = ttk.Frame(main_frame)
+    top_frame.grid(row=0, column=0, pady=(0, 15), sticky=W)
+
+    ttk.Label(top_frame, text="Invoice Number:", font=("Roboto", 10)).grid(row=0, column=0, padx=10, pady=2, sticky=W)
+    invoice_entry = ttk.Entry(top_frame, width=30)
+    invoice_entry.insert(0, test_data.get("invoice_number", ""))
+    invoice_entry.grid(row=0, column=1, padx=10, pady=2, sticky=W)
+
+    ttk.Label(top_frame, text="Customer:", font=("Roboto", 10)).grid(row=1, column=0, padx=10, pady=2, sticky=W)
+    ttk.Label(top_frame, text=pump["customer"], font=("Roboto", 10)).grid(row=1, column=1, padx=10, pady=2, sticky=W)
+
+    ttk.Label(top_frame, text="Job Number:", font=("Roboto", 10)).grid(row=2, column=0, padx=10, pady=2, sticky=W)
+    job_entry = ttk.Entry(top_frame, width=30)
+    job_entry.insert(0, test_data.get("job_number", ""))
+    job_entry.grid(row=2, column=1, padx=10, pady=2, sticky=W)
+
+    # Main layout (left and right frames)
+    main_layout = ttk.Frame(main_frame)
+    main_layout.grid(row=1, column=0, pady=15, sticky=W+E)
 
     left_frame = ttk.Frame(main_layout)
-    left_frame.pack(side=LEFT, fill=Y, padx=(0, 15))
+    left_frame.pack(side=LEFT, padx=15, fill=Y)
+
+    fab_frame = ttk.LabelFrame(left_frame, text="Fabrication", padding=10)
+    fab_frame.pack(pady=(0, 10), fill=X)
+
+    ttk.Label(fab_frame, text="Assembly Part Number:", font=("Roboto", 10)).grid(row=0, column=0, padx=5, pady=5, sticky=W)
+    ttk.Label(fab_frame, text=pump.get("assembly_part_number", "N/A"), font=("Roboto", 10)).grid(row=0, column=1, padx=5, pady=5, sticky=W)
+
+    ttk.Label(fab_frame, text="Pump Model:", font=("Roboto", 10)).grid(row=1, column=0, padx=5, pady=5, sticky=W)
+    ttk.Label(fab_frame, text=pump["pump_model"], font=("Roboto", 10)).grid(row=1, column=1, padx=5, pady=5, sticky=W)
+
+    ttk.Label(fab_frame, text="Serial Number:", font=("Roboto", 10)).grid(row=2, column=0, padx=5, pady=5, sticky=W)
+    ttk.Label(fab_frame, text=serial_number, font=("Roboto", 10)).grid(row=2, column=1, padx=5, pady=5, sticky=W)
+
+    ttk.Label(fab_frame, text="Impeller Diameter:", font=("Roboto", 10)).grid(row=3, column=0, padx=5, pady=5, sticky=W)
+    impeller_entry = ttk.Entry(fab_frame, width=20)
+    impeller_entry.insert(0, test_data.get("impeller_diameter", pump.get("impeller_size", "")))
+    impeller_entry.grid(row=3, column=1, padx=5, pady=5, sticky=W)
+
+    ttk.Label(fab_frame, text="Assembled By:", font=("Roboto", 10)).grid(row=4, column=0, padx=5, pady=5, sticky=W)
+    ttk.Label(fab_frame, text=test_data.get("assembled_by", username), font=("Roboto", 10)).grid(row=4, column=1, padx=5, pady=5, sticky=W)
+
+    details_frame = ttk.LabelFrame(left_frame, text="Details", padding=10)
+    details_frame.pack(fill=X)
+
+    fields_left = [
+        ("Motor Size:", ttk.Entry(details_frame, width=20)),
+        ("Motor Speed:", ttk.Entry(details_frame, width=20)),
+        ("Motor Volts:", ttk.Entry(details_frame, width=20)),
+        ("Motor Enclosure:", ttk.Entry(details_frame, width=20)),
+        ("Mechanical Seal:", ttk.Entry(details_frame, width=20)),
+    ]
+    fields_right = [
+        ("Frequency:", ttk.Entry(details_frame, width=20)),
+        ("Pump Housing:", ttk.Entry(details_frame, width=20)),
+        ("Pump Connection:", ttk.Entry(details_frame, width=20)),
+        ("Suction:", ttk.Entry(details_frame, width=20)),
+        ("Discharge:", ttk.Entry(details_frame, width=20)),
+        ("Flush Arrangement:", ttk.Entry(details_frame, width=20)),
+    ]
+    for i, (label, widget) in enumerate(fields_left):
+        ttk.Label(details_frame, text=label, font=("Roboto", 10)).grid(row=i, column=0, padx=5, pady=5, sticky=W)
+        widget.grid(row=i, column=1, padx=5, pady=5, sticky=W)
+        widget.insert(0, test_data.get(label.lower().replace(":", "").replace(" ", "_"), ""))
+    for i, (label, widget) in enumerate(fields_right):
+        ttk.Label(details_frame, text=label, font=("Roboto", 10)).grid(row=i, column=2, padx=5, pady=5, sticky=W)
+        widget.grid(row=i, column=3, padx=5, pady=5, sticky=W)
+        widget.insert(0, test_data.get(label.lower().replace(":", "").replace(" ", "_"), "Yes" if "flush" in pump["configuration"].lower() else "No" if label == "Flush Arrangement:" else ""))
 
     right_frame = ttk.Frame(main_layout)
-    right_frame.pack(side=LEFT, fill=Y, padx=(15, 0))
+    right_frame.pack(side=LEFT, padx=15, fill=Y)
 
-    labels_entries = {}
-    fields = [
-        "invoice_number", "customer", "job_number", "assembly_part_number", "pump_model", "serial_number",
-        "impeller_diameter", "assembled_by", "motor_size", "motor_speed", "motor_volts",
-        "motor_enclosure", "mechanical_seal", "frequency", "pump_housing", "pump_connection",
-        "suction", "discharge", "flush_arrangement", "date_of_test", "duration_of_test",
-        "test_medium", "tested_by"
-    ]
+    # Sub-frame for Test Data and Graph side by side
+    test_graph_frame = ttk.Frame(right_frame)
+    test_graph_frame.pack(fill=X, pady=(0, 10))
 
-    mid_point = len(fields) // 2
-    left_fields = fields[:mid_point]
-    right_fields = fields[mid_point:]
-
-    for i, field in enumerate(left_fields):
-        ttk.Label(left_frame, text=f"{field.replace('_', ' ').title()}:", font=("Roboto", 10)).grid(row=i, column=0, padx=5, pady=5, sticky=W)
-        entry = ttk.Entry(left_frame, width=30)
-        entry.grid(row=i, column=1, padx=5, pady=5, sticky=W)
-        entry.insert(0, test_data.get(field, ""))
-        labels_entries[field] = entry
-
-    for i, field in enumerate(right_fields):
-        ttk.Label(right_frame, text=f"{field.replace('_', ' ').title()}:", font=("Roboto", 10)).grid(row=i, column=0, padx=5, pady=5, sticky=W)
-        entry = ttk.Entry(right_frame, width=30)
-        entry.grid(row=i, column=1, padx=5, pady=5, sticky=W)
-        entry.insert(0, test_data.get(field, ""))
-        labels_entries[field] = entry
-
-    table_frame = ttk.LabelFrame(right_frame, text="Test Data", padding=10)
-    table_frame.grid(row=len(right_fields), column=0, columnspan=2, pady=10, sticky=W+E)
+    table_frame = ttk.LabelFrame(test_graph_frame, text="Test Data", padding=10)
+    table_frame.pack(side=LEFT, fill=Y)
 
     ttk.Label(table_frame, text="Flowrate (l/h)", font=("Roboto", 10)).grid(row=0, column=1, padx=5, pady=5)
     ttk.Label(table_frame, text="Pressure (bar)", font=("Roboto", 10)).grid(row=0, column=2, padx=5, pady=5)
@@ -416,54 +503,142 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
         pressure_entries.append(pressure_entry)
         amp_entries.append(amp_entry)
 
-    button_frame = ttk.Frame(scrollable_frame)
-    button_frame.pack(pady=10)
+    # Graph preview to the right of test data
+    graph_frame = ttk.LabelFrame(test_graph_frame, text="Graph Preview", padding=5)
+    graph_frame.pack(side=LEFT, fill=Y, padx=(10, 0))
 
-    def save_changes():
-        """Save changes to pump test data."""
-        updated_test_data = {field: entry.get() for field, entry in labels_entries.items()}
-        updated_test_data["flowrate"] = [entry.get() for entry in flow_entries]
-        updated_test_data["pressure"] = [entry.get() for entry in pressure_entries]
-        updated_test_data["amperage"] = [entry.get() for entry in amp_entries]
+    def update_graph(*args):
+        """Update the graph based on current test data."""
+        current_data = {
+            "flowrate": [entry.get() for entry in flow_entries],
+            "pressure": [entry.get() for entry in pressure_entries],
+            "amperage": [entry.get() for entry in amp_entries],
+            "serial_number": serial_number
+        }
+        fig = generate_graph(current_data)
+        for widget in graph_frame.winfo_children():
+            widget.destroy()
+        if fig:
+            canvas = FigureCanvasTkAgg(fig, master=graph_frame)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=BOTH, expand=True)
+        else:
+            ttk.Label(graph_frame, text="No valid data to plot", font=("Roboto", 10)).pack(expand=True)
 
-        try:
-            for i in range(5):
-                if updated_test_data["flowrate"][i]:
-                    float(updated_test_data["flowrate"][i])
-                if updated_test_data["pressure"][i]:
-                    float(updated_test_data["pressure"][i])
-                if updated_test_data["amperage"][i]:
-                    float(updated_test_data["amperage"][i])
-        except ValueError:
-            Messagebox.show_error("Flowrate, Pressure, and Amperage must be numeric values.", "Validation Error")
-            return
+    # Initial graph display
+    update_graph()
+
+    # Bind test data entries to update graph
+    for entry in flow_entries + pressure_entries + amp_entries:
+        entry.bind("<KeyRelease>", update_graph)
+
+    hydro_frame = ttk.LabelFrame(right_frame, text="Hydraulic Test", padding=10)
+    hydro_frame.pack(fill=X)
+
+    ttk.Label(hydro_frame, text="Date of Test:", font=("Roboto", 10)).grid(row=0, column=0, padx=5, pady=5, sticky=W)
+    date_entry = ttk.Entry(hydro_frame, width=20)
+    date_entry.insert(0, test_data.get("date_of_test", datetime.now().strftime("%Y-%m-%d")))
+    date_entry.grid(row=0, column=1, padx=5, pady=5, sticky=W)
+
+    ttk.Label(hydro_frame, text="Duration of Test:", font=("Roboto", 10)).grid(row=1, column=0, padx=5, pady=5, sticky=W)
+    duration_entry = ttk.Entry(hydro_frame, width=20)
+    duration_entry.insert(0, test_data.get("duration_of_test", ""))
+    duration_entry.grid(row=1, column=1, padx=5, pady=5, sticky=W)
+
+    ttk.Label(hydro_frame, text="Test Medium:", font=("Roboto", 10)).grid(row=2, column=0, padx=5, pady=5, sticky=W)
+    medium_entry = ttk.Entry(hydro_frame, width=20)
+    medium_entry.insert(0, test_data.get("test_medium", ""))
+    medium_entry.grid(row=2, column=1, padx=5, pady=5, sticky=W)
+
+    ttk.Label(hydro_frame, text="Tested By:", font=("Roboto", 10)).grid(row=3, column=0, padx=5, pady=5, sticky=W)
+    ttk.Label(hydro_frame, text=test_data.get("tested_by", username), font=("Roboto", 10)).grid(row=3, column=1, padx=5, pady=5, sticky=W)
+
+    approval_frame = ttk.Frame(main_frame)
+    approval_frame.grid(row=2, column=0, pady=15, sticky=W+E)
+    ttk.Label(approval_frame, text="Date:", font=("Roboto", 10)).pack(side=LEFT, padx=10)
+    ttk.Label(approval_frame, text=datetime.now().strftime("%Y-%m-%d"), font=("Roboto", 10)).pack(side=LEFT, padx=10)
+
+    # Button frame outside canvas, aligned left
+    button_frame = ttk.Frame(container_frame)
+    button_frame.pack(side=BOTTOM, pady=15, anchor=W)
+
+    def retest_pump():
+        """Send the pump back to Testing state."""
+        updated_test_data = {
+            "invoice_number": invoice_entry.get(),
+            "customer": pump["customer"],
+            "job_number": job_entry.get(),
+            "assembly_part_number": pump.get("assembly_part_number", "N/A"),
+            "pump_model": pump["pump_model"],
+            "serial_number": serial_number,
+            "impeller_diameter": impeller_entry.get(),
+            "assembled_by": test_data.get("assembled_by", username),
+            "motor_size": fields_left[0][1].get(),
+            "motor_speed": fields_left[1][1].get(),
+            "motor_volts": fields_left[2][1].get(),
+            "motor_enclosure": fields_left[3][1].get(),
+            "mechanical_seal": fields_left[4][1].get(),
+            "frequency": fields_right[0][1].get(),
+            "pump_housing": fields_right[1][1].get(),
+            "pump_connection": fields_right[2][1].get(),
+            "suction": fields_right[3][1].get(),
+            "discharge": fields_right[4][1].get(),
+            "flush_arrangement": fields_right[5][1].get(),
+            "date_of_test": date_entry.get(),
+            "duration_of_test": duration_entry.get(),
+            "test_medium": medium_entry.get(),
+            "tested_by": test_data.get("tested_by", username),
+            "flowrate": [entry.get() for entry in flow_entries],
+            "pressure": [entry.get() for entry in pressure_entries],
+            "amperage": [entry.get() for entry in amp_entries],
+        }
 
         try:
             with get_db_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute("UPDATE pumps SET test_data = ? WHERE serial_number = ?",
+                cursor.execute("UPDATE pumps SET status = 'Testing', test_data = ? WHERE serial_number = ?",
                                (json.dumps(updated_test_data), serial_number))
                 conn.commit()
-                logger.info(f"Test data updated for pump {serial_number} by {username}")
+                logger.info(f"Pump {serial_number} sent back to Testing by {username}")
             refresh_callback()
             details_window.destroy()
+            Messagebox.show_info(f"Pump {serial_number} sent back to Testing.", "Retest Initiated")
         except Exception as e:
-            logger.error(f"Failed to save changes: {str(e)}")
-            Messagebox.show_error("Error", f"Failed to save changes: {str(e)}")
-
-    def view_graph():
-        """Display the performance graph."""
-        fig = generate_graph(test_data)
-        display_graph(fig)
+            logger.error(f"Failed to send pump back to Testing: {str(e)}")
+            Messagebox.show_error("Error", f"Failed to retest pump: {str(e)}")
 
     def approve_pump():
         """Approve the pump and generate/send certificate."""
-        updated_test_data = {field: entry.get() for field, entry in labels_entries.items()}
-        updated_test_data["flowrate"] = [entry.get() for entry in flow_entries]
-        updated_test_data["pressure"] = [entry.get() for entry in pressure_entries]
-        updated_test_data["amperage"] = [entry.get() for entry in amp_entries]
-        updated_test_data["approved_by"] = username
-        updated_test_data["approval_date"] = datetime.now().strftime("%Y-%m-%d")
+        updated_test_data = {
+            "invoice_number": invoice_entry.get(),
+            "customer": pump["customer"],
+            "job_number": job_entry.get(),
+            "assembly_part_number": pump.get("assembly_part_number", "N/A"),
+            "pump_model": pump["pump_model"],
+            "serial_number": serial_number,
+            "impeller_diameter": impeller_entry.get(),
+            "assembled_by": test_data.get("assembled_by", username),
+            "motor_size": fields_left[0][1].get(),
+            "motor_speed": fields_left[1][1].get(),
+            "motor_volts": fields_left[2][1].get(),
+            "motor_enclosure": fields_left[3][1].get(),
+            "mechanical_seal": fields_left[4][1].get(),
+            "frequency": fields_right[0][1].get(),
+            "pump_housing": fields_right[1][1].get(),
+            "pump_connection": fields_right[2][1].get(),
+            "suction": fields_right[3][1].get(),
+            "discharge": fields_right[4][1].get(),
+            "flush_arrangement": fields_right[5][1].get(),
+            "date_of_test": date_entry.get(),
+            "duration_of_test": duration_entry.get(),
+            "test_medium": medium_entry.get(),
+            "tested_by": test_data.get("tested_by", username),
+            "flowrate": [entry.get() for entry in flow_entries],
+            "pressure": [entry.get() for entry in pressure_entries],
+            "amperage": [entry.get() for entry in amp_entries],
+            "approved_by": username,
+            "approval_date": datetime.now().strftime("%Y-%m-%d"),
+        }
 
         try:
             for i in range(5):
@@ -483,11 +658,11 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
                 cursor = conn.cursor()
                 cursor.execute("SELECT requested_by FROM pumps WHERE serial_number = ?", (serial_number,))
                 requested_by_data = cursor.fetchone()
-                if requested_by_data and requested_by_data["requested_by"]:
-                    requested_by_username = requested_by_data["requested_by"]
+                if requested_by_data and requested_by_data[0]:
+                    requested_by_username = requested_by_data[0]
                     cursor.execute("SELECT email FROM users WHERE username = ?", (requested_by_username,))
                     requested_by_email = cursor.fetchone()
-                    if requested_by_email and requested_by_email["email"]:
+                    if requested_by_email and requested_by_email[0]:
                         subject = f"Pump {serial_number} Approved"
                         greeting = f"Dear {requested_by_username},"
                         body_content = f"""
@@ -498,10 +673,10 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
                         footer = "Best regards,<br>Guth Pump Registry Approval Team"
                         threading.Thread(
                             target=send_email,
-                            args=(requested_by_email["email"], subject, greeting, body_content, footer, pdf_path),
+                            args=(requested_by_email[0], subject, greeting, body_content, footer, pdf_path),
                             daemon=True
                         ).start()
-                        logger.info(f"Approval email sent to {requested_by_email['email']} for pump {serial_number}")
+                        logger.info(f"Approval email sent to {requested_by_email[0]} for pump {serial_number}")
                     else:
                         logger.warning(f"No email found for requested_by user {requested_by_username}")
                         Messagebox.show_warning("Email Not Sent", f"No email address found for {requested_by_username}.")
@@ -522,12 +697,12 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
             logger.error(f"Failed to approve pump: {str(e)}")
             Messagebox.show_error("Error", f"Failed to approve pump: {str(e)}")
 
-    ttk.Button(button_frame, text="Save Changes", command=save_changes, bootstyle="info", style="large.TButton").pack(side=LEFT, padx=5)
-    ttk.Button(button_frame, text="View Graph", command=view_graph, bootstyle="info", style="large.TButton").pack(side=LEFT, padx=5)
+    ttk.Button(button_frame, text="Retest", command=retest_pump, bootstyle="info", style="large.TButton").pack(side=LEFT, padx=5)
     ttk.Button(button_frame, text="Approve", command=approve_pump, bootstyle="success", style="large.TButton").pack(side=LEFT, padx=5)
     ttk.Button(button_frame, text="Close", command=details_window.destroy, bootstyle="secondary", style="large.TButton").pack(side=LEFT, padx=5)
 
-    footer_frame = ttk.Frame(details_window)
+    # Footer below buttons
+    footer_frame = ttk.Frame(container_frame)
     footer_frame.pack(side=BOTTOM, pady=10, fill=X)
     ttk.Label(footer_frame, text="\u00A9 Guth South Africa", font=("Roboto", 10)).pack(expand=True)
     ttk.Label(footer_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack(expand=True)
@@ -576,7 +751,9 @@ def show_approval_dashboard(root, username, role, logout_callback):
                     SELECT serial_number, assembly_part_number, customer, branch, pump_model, configuration, requested_by AS originator
                     FROM pumps WHERE status = 'Pending Approval'
                 """)
-                for pump in cursor.fetchall():
+                columns = [desc[0] for desc in cursor.description]
+                for row in cursor.fetchall():
+                    pump = dict(zip(columns, row))
                     tree.insert("", END, values=(pump["serial_number"], pump["assembly_part_number"] or "N/A",
                                                  pump["customer"], pump["branch"], pump["pump_model"],
                                                  pump["configuration"], pump["originator"]))

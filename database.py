@@ -13,6 +13,7 @@ CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 BOM_PATH = os.path.join(BASE_DIR, "assets", "bom.json")
 DB_LOCK = threading.Lock()
 
+# Connection pool (singleton pattern)
 _conn_pool = None
 
 def load_config():
@@ -32,44 +33,38 @@ def get_db_connection():
     if _conn_pool is None or _conn_pool.closed:
         with DB_LOCK:
             if _conn_pool is None or _conn_pool.closed:
-                try:
-                    _conn_pool = pyodbc.connect(conn_str)
-                except pyodbc.Error as e:
-                    logger.error(f"Failed to connect to database: {e}")
-                    raise
+                _conn_pool = pyodbc.connect(conn_str)
     return _conn_pool
 
 def initialize_database():
-    """Initialize the GuthPumpRegistry database and tables if they do not exist."""
+    """Initialize the GuthPumpRegistry tables if they do not exist."""
     config = load_config()
     conn_str = config.get("connection_string")
     try:
-        # Connect to master database to check/create GuthPumpRegistry
-        master_conn_str = conn_str.replace("DATABASE=GuthPumpRegistry", "DATABASE=master")
-        with pyodbc.connect(master_conn_str) as conn:
-            conn.autocommit = True
-            cursor = conn.cursor()
-            try:
-                cursor.execute("""
-                    IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'GuthPumpRegistry')
-                    BEGIN
-                        CREATE DATABASE GuthPumpRegistry
-                    END
-                """)
-                logger.info("Created GuthPumpRegistry database.")
-            except pyodbc.Error as e:
-                if "CREATE DATABASE permission denied" in str(e):
-                    logger.warning("Permission denied to create database. Assuming it already exists or will be created by an admin.")
-                else:
-                    raise
-            cursor.close()
-
-        # Connect to GuthPumpRegistry to create tables
         with pyodbc.connect(conn_str) as conn:
             cursor = conn.cursor()
             cursor.execute("USE GuthPumpRegistry")
             cursor.execute("""
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'pumps')
+                IF EXISTS (SELECT * FROM sys.tables WHERE name = 'bom_items')
+                DROP TABLE bom_items
+            """)
+            cursor.execute("""
+                IF EXISTS (SELECT * FROM sys.tables WHERE name = 'pumps')
+                DROP TABLE pumps
+            """)
+            cursor.execute("""
+                IF EXISTS (SELECT * FROM sys.tables WHERE name = 'users')
+                DROP TABLE users
+            """)
+            cursor.execute("""
+                IF EXISTS (SELECT * FROM sys.tables WHERE name = 'audit_log')
+                DROP TABLE audit_log
+            """)
+            cursor.execute("""
+                IF EXISTS (SELECT * FROM sys.tables WHERE name = 'serial_counter')
+                DROP TABLE serial_counter
+            """)
+            cursor.execute("""
                 CREATE TABLE pumps (
                     serial_number NVARCHAR(50) PRIMARY KEY,
                     pump_model NVARCHAR(50) NOT NULL,
@@ -100,7 +95,6 @@ def initialize_database():
                 )
             """)
             cursor.execute("""
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'bom_items')
                 CREATE TABLE bom_items (
                     id INT IDENTITY(1,1) PRIMARY KEY,
                     serial_number NVARCHAR(50),
@@ -113,19 +107,17 @@ def initialize_database():
                 )
             """)
             cursor.execute("""
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'users')
                 CREATE TABLE users (
                     id INT IDENTITY(1,1) PRIMARY KEY,
                     username NVARCHAR(50) UNIQUE NOT NULL,
-                    password_hash NVARCHAR(255) NOT NULL,
-                    role NVARCHAR(20) NOT NULL CHECK(role IN ('Admin', 'Stores', 'Assembler', 'Testing', 'Pump Originator', 'Approval')),
+                    password_hash VARBINARY(255) NOT NULL,
+                    role NVARCHAR(20) NOT NULL CHECK(role IN ('Admin', 'Stores', 'Assembler_Tester', 'Pump Originator', 'Approval')),
                     name NVARCHAR(50),
                     surname NVARCHAR(50),
                     email NVARCHAR(100)
                 )
             """)
             cursor.execute("""
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'audit_log')
                 CREATE TABLE audit_log (
                     id INT IDENTITY(1,1) PRIMARY KEY,
                     timestamp DATETIME NOT NULL,
@@ -134,7 +126,6 @@ def initialize_database():
                 )
             """)
             cursor.execute("""
-                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'serial_counter')
                 CREATE TABLE serial_counter (
                     id INT IDENTITY(1,1) PRIMARY KEY,
                     model_code NVARCHAR(50) NOT NULL,
@@ -149,14 +140,16 @@ def initialize_database():
             logger.info("Database tables initialized.")
     except pyodbc.Error as e:
         logger.error(f"Failed to initialize database: {e}")
-        if "Cannot open database" in str(e):
-            raise Exception("The GuthPumpRegistry database does not exist on the server. Contact your database administrator to create it.")
         raise
+
+def hash_password(password):
+    """Hash a password using bcrypt."""
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
 def insert_user(cursor, username, password, role, name=None, surname=None, email=None):
     """Insert a new user with hashed password."""
     try:
-        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        password_hash = hash_password(password)
         cursor.execute("INSERT INTO users (username, password_hash, role, name, surname, email) VALUES (?, ?, ?, ?, ?, ?)",
                        (username, password_hash, role, name, surname, email))
         logger.info(f"User inserted: {username} with role {role}")
@@ -167,8 +160,10 @@ def check_user(cursor, username, password):
     """Verify user credentials and return role if valid."""
     cursor.execute("SELECT password_hash, role FROM users WHERE username = ?", (username,))
     user = cursor.fetchone()
-    if user and bcrypt.checkpw(password.encode('utf-8'), user["password_hash"].encode('utf-8')):
-        return user["role"]
+    if user:
+        # password_hash (index 0) is bytes from VARBINARY, no encoding needed
+        if bcrypt.checkpw(password.encode('utf-8'), user[0]):
+            return user[1]  # Index 1 = role
     return None
 
 def create_pump(cursor, pump_model, configuration, customer, requested_by, branch="Main", impeller_size="Medium",
@@ -228,12 +223,11 @@ def insert_test_data():
         with get_db_connection() as conn:
             cursor = conn.cursor()
             test_users = [
-                ("user1", "password", "Pump Originator", "John", "Doe", "john.doe@example.com"),
-                ("stores1", "password", "Stores", "Jane", "Smith", "jane.smith@example.com"),
-                ("assembler1", "password", "Assembler", "Bob", "Jones", "bob.jones@example.com"),
-                ("tester1", "password", "Testing", "Alice", "Brown", "alice.brown@example.com"),
-                ("approver1", "password", "Approval", "Manager", "Smith", "manager.smith@example.com"),
-                ("admin1", "password", "Admin", "Admin", "User", "admin@example.com"),
+                ("user1", "password", "Pump Originator", "John", "Doe", "john.doe@guth.co.za"),
+                ("stores1", "password", "Stores", "Jane", "Smith", "jane.smith@guth.co.za"),
+                ("assembler_tester1", "password", "Assembler_Tester", "Alex", "Taylor", "alex.taylor@guth.co.za"),
+                ("approver1", "password", "Approval", "Manager", "Smith", "manager.smith@guth.co.za"),
+                ("admin1", "password", "Admin", "Admin", "User", "admin@guth.co.za"),
             ]
             for user in test_users:
                 insert_user(cursor, *user)
@@ -257,3 +251,4 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Initialization failed: {e}")
         print("Please ensure the GuthPumpRegistry database exists on the server or contact your database administrator.")
+        input("Press any key to continue . . .")

@@ -30,16 +30,17 @@ class BaseGUI:
         if self.main_frame:
             self.main_frame.destroy()
             self.main_frame = None
-        # Clear any previous login frame to avoid overlap
         if self.login_frame:
             self.login_frame.destroy()
         self.login_frame, self.error_label = show_login_screen(self.root, self.login, self.show_register)
 
     def login(self, username, password):
         """Handle login attempt and route to appropriate dashboard."""
-        if self.error_label:
-            self.error_label.config(text="")
-        
+        if not self.error_label:  # Ensure error_label exists
+            self.error_label = ttk.Label(self.login_frame, text="", bootstyle="danger")
+            self.error_label.pack(pady=5)
+        self.error_label.config(text="")
+
         try:
             with get_db_connection() as conn:
                 cursor = conn.cursor()
@@ -47,14 +48,16 @@ class BaseGUI:
             if role:
                 self.username = username
                 self.role = role
-                self.login_frame.destroy()
+                self.login_frame.destroy()  # Destroy login frame only on success
+                self.login_frame = None
+                self.error_label = None
                 self.root.unbind("<Return>")
                 self.root.state("zoomed")
                 if role == "Admin":
                     show_admin_gui(self.root, self.username, self.logout)
                 elif role == "Stores":
                     self.main_frame = show_stores_dashboard(self.root, self.username, self.role, self.logout)
-                elif role in ["Assembler", "Testing"]:
+                elif role == "Assembler_Tester":
                     self.main_frame = show_combined_assembler_tester_dashboard(self.root, self.username, self.role, self.logout)
                 elif role == "Approval":
                     self.main_frame = show_approval_dashboard(self.root, self.username, self.role, self.logout)
@@ -62,12 +65,11 @@ class BaseGUI:
                     self.main_frame = show_dashboard(self.root, self.username, self.role, self.logout)
                 logger.info(f"User {username} logged in with role {role}")
             else:
-                if self.error_label:
-                    self.error_label.config(text="Incorrect username or password", bootstyle="danger")
+                self.error_label.config(text="Incorrect username or password", bootstyle="danger")
                 logger.warning(f"Failed login attempt for {username}")
         except Exception as e:
-            if self.error_label:
-                self.error_label.config(text=f"Login failed: {str(e)}", bootstyle="danger")
+            # Keep login_frame intact on error
+            self.error_label.config(text=f"Login failed: {str(e)}", bootstyle="danger")
             logger.error(f"Login error for {username}: {str(e)}")
 
     def show_register(self):
@@ -75,7 +77,7 @@ class BaseGUI:
         show_register_window(self.root, self.register)
 
     def register(self, username, password, name, surname, email, error_label):
-        """Handle user registration."""
+        """Handle user registration (default to Pump Originator)."""
         if not all([username, password, name, surname, email]):
             error_label.config(text="All fields are required", bootstyle="danger")
             return

@@ -3,7 +3,7 @@ from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs import Messagebox
 from database import get_db_connection, create_pump
 import os
-import json  # Added this import
+import json
 from utils.config import get_logger
 
 logger = get_logger("pump_originator")
@@ -40,14 +40,14 @@ def show_pump_originator_gui(root, username, logout_callback):
     assembly_part_numbers = load_options(ASSEMBLY_PART_NUMBERS_PATH, "assembly_part_numbers")
 
     fields = [
-        ("Pump Model", ttk.Combobox, options["pump_model"], "P1 3.0kW"),
+        ("Pump Model", ttk.Combobox, options["pump_model"], "P1 3.0KW"),
         ("Configuration", ttk.Combobox, options["configuration"], "Standard"),
         ("Customer", ttk.Entry, None, "Guth Test"),
         ("Branch", ttk.Combobox, options["branch"], "Main"),
         ("Assembly Part Number", ttk.Combobox, assembly_part_numbers, assembly_part_numbers[0] if assembly_part_numbers else "N/A"),
         ("Pressure Required (bar)", ttk.Entry, None, ""),
         ("Flow Rate Required (L/h)", ttk.Entry, None, ""),
-        ("Impeller Size", ttk.Combobox, options["impeller_size"]["P1 3.0kW"], "Medium"),
+        ("Impeller Size", ttk.Combobox, options["impeller_size"]["P1 3.0KW"], "Medium"),
         ("Connection Type", ttk.Combobox, options["connection_type"], "Flange"),
         ("Custom Motor", ttk.Entry, None, ""),
         ("Flush Seal Housing", ttk.Checkbutton, ["Yes", "No"], "No")
@@ -119,8 +119,8 @@ def show_pump_originator_gui(root, username, logout_callback):
             refresh_stores_pumps()
             refresh_all_pumps()
         except Exception as e:
-            Messagebox.show_error(f"Failed to create pump: {str(e)}", "Error")
             logger.error(f"Failed to create pump: {str(e)}")
+            Messagebox.show_error("Error", f"Failed to create pump: {str(e)}")
 
     ttk.Button(create_frame, text="Create Pump", command=create, bootstyle=SUCCESS).pack(pady=20)
 
@@ -153,10 +153,8 @@ def show_pump_originator_gui(root, username, logout_callback):
                     FROM pumps
                 """)
                 for pump in cursor.fetchall():
-                    all_pumps_tree.insert("", END, values=(pump["serial_number"], pump["assembly_part_number"] or "N/A",
-                                                           pump["customer"], pump["branch"], pump["pump_model"],
-                                                           pump["configuration"], pump["created_at"], pump["status"],
-                                                           pump["pressure_required"], pump["flow_rate_required"]))
+                    # pump is a tuple: (serial_number, assembly_part_number, customer, branch, pump_model, configuration, created_at, status, pressure_required, flow_rate_required)
+                    all_pumps_tree.insert("", END, values=(pump[0], pump[1] or "N/A", pump[2], pump[3], pump[4], pump[5], pump[6], pump[7], pump[8], pump[9]))
             logger.info("Refreshed All Pumps table")
         except Exception as e:
             logger.error(f"Failed to refresh all pumps: {str(e)}")
@@ -190,10 +188,8 @@ def show_pump_originator_gui(root, username, logout_callback):
                     FROM pumps WHERE status = 'Stores'
                 """)
                 for pump in cursor.fetchall():
-                    stores_tree.insert("", END, values=(pump["serial_number"], pump["assembly_part_number"] or "N/A",
-                                                        pump["customer"], pump["branch"], pump["pump_model"],
-                                                        pump["configuration"], pump["created_at"], pump["status"],
-                                                        pump["pressure_required"], pump["flow_rate_required"]))
+                    # pump is a tuple: (serial_number, assembly_part_number, customer, branch, pump_model, configuration, created_at, status, pressure_required, flow_rate_required)
+                    stores_tree.insert("", END, values=(pump[0], pump[1] or "N/A", pump[2], pump[3], pump[4], pump[5], pump[6], pump[7], pump[8], pump[9]))
             logger.info("Refreshed Pumps in Stores table")
         except Exception as e:
             logger.error(f"Failed to refresh stores pumps: {str(e)}")

@@ -74,10 +74,10 @@ def load_options():
         return {}
 
 def show_combined_assembler_tester_dashboard(root, username, role, logout_callback):
-    """Display the combined assembler and tester dashboard."""
-    if role not in ["Assembler", "Testing"]:
+    """Display the combined assembler and tester dashboard for a single Assembler_Tester role."""
+    if role != "Assembler_Tester":
         logger.error(f"User {username} with role {role} attempted to access Assembler/Tester Dashboard")
-        Messagebox.show_error("Access Denied", "This dashboard is only accessible to Assembler or Testing roles.")
+        Messagebox.show_error("Access Denied", "This dashboard is only accessible to the Assembler_Tester role.")
         logout_callback()
         return
 
@@ -100,7 +100,7 @@ def show_combined_assembler_tester_dashboard(root, username, role, logout_callba
         except Exception as e:
             logger.error(f"Logo load failed: {str(e)}")
     ttk.Label(header_frame, text=f"Welcome, {username}", font=("Roboto", 18, "bold")).pack(anchor=W, padx=10)
-    ttk.Label(header_frame, text=f"{role} Dashboard", font=("Roboto", 12)).pack(anchor=W, padx=10)
+    ttk.Label(header_frame, text="Assembler/Tester Dashboard", font=("Roboto", 12)).pack(anchor=W, padx=10)
 
     assembler_frame = ttk.LabelFrame(main_frame, text="Assembly Tasks", padding=20, bootstyle="default")
     assembler_frame.pack(fill=X, padx=10, pady=10)
@@ -117,6 +117,19 @@ def show_combined_assembler_tester_dashboard(root, username, role, logout_callba
     assembler_scrollbar.pack(side=RIGHT, fill=Y)
     assembler_tree.configure(yscrollcommand=assembler_scrollbar.set)
 
+    # Enable mouse wheel scrolling for assembler_tree
+    def on_mouse_wheel(event):
+        if assembler_tree.winfo_exists():  # Safety check
+            # Windows uses delta (positive = up, negative = down), Linux/macOS use Button-4 (up) and Button-5 (down)
+            if event.delta > 0 or event.num == 4:  # Scroll up
+                assembler_tree.yview_scroll(-1, "units")
+            elif event.delta < 0 or event.num == 5:  # Scroll down
+                assembler_tree.yview_scroll(1, "units")
+
+    assembler_tree.bind("<MouseWheel>", on_mouse_wheel)  # Windows
+    assembler_tree.bind("<Button-4>", on_mouse_wheel)    # Linux/macOS scroll up
+    assembler_tree.bind("<Button-5>", on_mouse_wheel)    # Linux/macOS scroll down
+
     def refresh_assembler_pump_list():
         """Refresh the list of pumps in assembly."""
         assembler_tree.delete(*assembler_tree.get_children())
@@ -131,16 +144,15 @@ def show_combined_assembler_tester_dashboard(root, username, role, logout_callba
                     GROUP BY p.serial_number, p.assembly_part_number, p.customer, p.branch, p.pump_model, p.configuration
                 """)
                 for pump in cursor.fetchall():
-                    assembler_tree.insert("", END, values=(pump["serial_number"], pump["assembly_part_number"] or "N/A",
-                                                          pump["customer"], pump["branch"], pump["pump_model"],
-                                                          pump["configuration"]))
+                    # pump is a tuple: (serial_number, assembly_part_number, customer, branch, pump_model, configuration)
+                    assembler_tree.insert("", END, values=(pump[0], pump[1] or "N/A", pump[2], pump[3], pump[4], pump[5]))
             logger.info("Refreshed assembler pump list")
         except Exception as e:
             logger.error(f"Failed to refresh assembler pump list: {str(e)}")
             Messagebox.show_error("Error", f"Failed to load assembly pumps: {str(e)}")
 
     refresh_assembler_pump_list()
-    assembler_tree.bind("<Double-1>", lambda event: show_bom_window(main_frame, assembler_tree, username, refresh_assembler_pump_list, role))
+    assembler_tree.bind("<Double-1>", lambda event: show_bom_window(main_frame, assembler_tree, username, refresh_assembler_pump_list))
 
     testing_frame = ttk.LabelFrame(main_frame, text="Testing Tasks", padding=20, bootstyle="default")
     testing_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
@@ -168,16 +180,15 @@ def show_combined_assembler_tester_dashboard(root, username, role, logout_callba
                     FROM pumps WHERE status = 'Testing'
                 """)
                 for pump in cursor.fetchall():
-                    testing_tree.insert("", END, values=(pump["serial_number"], pump["assembly_part_number"] or "N/A",
-                                                        pump["customer"], pump["branch"], pump["pump_model"],
-                                                        pump["configuration"]))
+                    # pump is a tuple: (serial_number, assembly_part_number, customer, branch, pump_model, configuration)
+                    testing_tree.insert("", END, values=(pump[0], pump[1] or "N/A", pump[2], pump[3], pump[4], pump[5]))
             logger.info("Refreshed testing pump list")
         except Exception as e:
             logger.error(f"Failed to refresh testing pump list: {str(e)}")
             Messagebox.show_error("Error", f"Failed to load testing pumps: {str(e)}")
 
     refresh_testing_pump_list()
-    testing_tree.bind("<Double-1>", lambda event: show_test_report(main_frame, testing_tree, username, refresh_testing_pump_list, role))
+    testing_tree.bind("<Double-1>", lambda event: show_test_report(main_frame, testing_tree, username, refresh_testing_pump_list))
 
     footer_frame = ttk.Frame(main_frame)
     footer_frame.pack(side=BOTTOM, pady=10)
@@ -191,13 +202,8 @@ def show_combined_assembler_tester_dashboard(root, username, role, logout_callba
 
     return main_frame
 
-def show_bom_window(parent_frame, tree, username, refresh_callback, role):
-    """Display BOM for verification by Assembler role."""
-    if role != "Assembler":
-        logger.error(f"User {username} with role {role} attempted to access BOM window")
-        Messagebox.show_error("Access Denied", "BOM verification is only accessible to Assembler role.")
-        return
-
+def show_bom_window(parent_frame, tree, username, refresh_callback):
+    """Display BOM for verification by Assembler_Tester role."""
     selected = tree.selection()
     if not selected:
         logger.debug("No pump selected in Treeview")
@@ -208,13 +214,17 @@ def show_bom_window(parent_frame, tree, username, refresh_callback, role):
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM pumps WHERE serial_number = ?", (serial_number,))
-            pump = dict(cursor.fetchone() or {})
-            if not pump:
+            # Convert tuple to dict using column names
+            columns = [desc[0] for desc in cursor.description]
+            pump_tuple = cursor.fetchone()
+            if not pump_tuple:
                 logger.warning(f"No pump found for serial_number: {serial_number}")
                 return
+            pump = dict(zip(columns, pump_tuple))
             cursor.execute("SELECT part_name, part_code, quantity, pulled_at FROM bom_items WHERE serial_number = ? AND pulled_at IS NOT NULL", (serial_number,))
             bom_items = cursor.fetchall()
             cursor.execute("SELECT username, email FROM users WHERE username = ?", (pump["requested_by"],))
+            # originator is a tuple: (username, email)
             originator = cursor.fetchone()
     except Exception as e:
         logger.error(f"Failed to load BOM data: {str(e)}")
@@ -256,11 +266,12 @@ def show_bom_window(parent_frame, tree, username, refresh_callback, role):
 
     confirm_vars = []
     for i, item in enumerate(bom_items, start=1):
-        ttk.Label(scrollable_frame, text=item["part_code"]).grid(row=i, column=0, padx=5, pady=5, sticky=W)
-        ttk.Label(scrollable_frame, text=item["part_name"]).grid(row=i, column=1, padx=5, pady=5, sticky=W)
-        ttk.Label(scrollable_frame, text=str(item["quantity"])).grid(row=i, column=2, padx=5, pady=5, sticky=W)
+        # item is a tuple: (part_name, part_code, quantity, pulled_at)
+        ttk.Label(scrollable_frame, text=item[1]).grid(row=i, column=0, padx=5, pady=5, sticky=W)  # part_code
+        ttk.Label(scrollable_frame, text=item[0]).grid(row=i, column=1, padx=5, pady=5, sticky=W)  # part_name
+        ttk.Label(scrollable_frame, text=str(item[2])).grid(row=i, column=2, padx=5, pady=5, sticky=W)  # quantity
         confirm_var = ttk.BooleanVar(value=False)
-        confirm_check = ttk.Checkbutton(scrollable_frame, variable=confirm_var)
+        confirm_check = ttk.Checkbutton(scrollable_frame, variable=confirm_var, state=NORMAL)  # Always editable
         confirm_check.grid(row=i, column=3, padx=5, pady=5)
         confirm_vars.append(confirm_var)
 
@@ -292,8 +303,9 @@ def show_bom_window(parent_frame, tree, username, refresh_callback, role):
                     WHERE b.serial_number = ? AND b.pulled_at IS NULL
                 """, (serial_number,))
                 for item in cursor.fetchall():
-                    reason = item["reason"].replace(f"Reason for not pulling {item['part_code']} on {serial_number}: ", "") if item["reason"].startswith("Reason") else item["reason"]
-                    unpulled_tree.insert("", END, values=(item["part_code"], item["part_name"], reason))
+                    # item is a tuple: (part_code, part_name, reason)
+                    reason = item[2].replace(f"Reason for not pulling {item[0]} on {serial_number}: ", "") if item[2].startswith("Reason") else item[2]
+                    unpulled_tree.insert("", END, values=(item[0], item[1], reason))
         except Exception as e:
             logger.error(f"Failed to refresh unpulled list: {str(e)}")
             Messagebox.show_error("Error", f"Failed to load unpulled items: {str(e)}")
@@ -319,7 +331,7 @@ def show_bom_window(parent_frame, tree, username, refresh_callback, role):
                 cursor = conn.cursor()
                 cursor.execute("UPDATE pumps SET status = 'Testing' WHERE serial_number = ?", (serial_number,))
                 conn.commit()
-                logger.info(f"Pump {serial_number} moved to Testing by {username} (Assembler role)")
+                logger.info(f"Pump {serial_number} moved to Testing by {username} (Assembler_Tester role)")
 
                 config = load_config()
                 bom_dir = config["document_dirs"]["bom"]
@@ -336,7 +348,7 @@ def show_bom_window(parent_frame, tree, username, refresh_callback, role):
                     "pump_model": pump["pump_model"],
                     "configuration": pump["configuration"],
                 }
-                bom_items_str = "\n".join([f"{item['part_code']}: {item['part_name']} (Qty: {item['quantity']})" for item in bom_items])
+                bom_items_str = "\n".join([f"{item[1]}: {item[0]} (Qty: {item[2]})" for item in bom_items])  # part_code, part_name, quantity
                 bom_data["bom_items"] = bom_items_str
                 generate_pdf_notification(serial_number, bom_data, title=f"BOM - {serial_number}", output_path=bom_path)
 
@@ -366,14 +378,14 @@ def show_bom_window(parent_frame, tree, username, refresh_callback, role):
                         "flush_seal_housing": pump.get("flush_seal_housing", ""),
                     }
                     subject = f"Pump {serial_number} Moved to Testing"
-                    greeting = f"Dear {originator['username']},"
+                    greeting = f"Dear {originator[0]},"
                     body_content = f"""
                         <p>The assembly of pump {serial_number} is complete and has been moved to the Testing stage.</p>
                         <h3 style="color: #34495e;">Pump Details</h3>
                         {generate_pump_details_table(pump_data)}
                     """
-                    footer = "Regards,<br>Assembler Team"
-                    threading.Thread(target=send_email, args=(originator["email"], subject, greeting, body_content, footer, bom_path, confirmation_path), daemon=True).start()
+                    footer = "Regards,<br>Assembler/Tester Team"
+                    threading.Thread(target=send_email, args=(originator[1], subject, greeting, body_content, footer, bom_path, confirmation_path), daemon=True).start()
                 else:
                     logger.warning(f"No originator found for pump {serial_number}")
 
@@ -388,13 +400,8 @@ def show_bom_window(parent_frame, tree, username, refresh_callback, role):
         var.trace("w", lambda *args: check_submit_state())
     check_submit_state()
 
-def show_test_report(parent_frame, tree, username, refresh_callback, role):
-    """Display test report for Tester role."""
-    if role != "Testing":
-        logger.error(f"User {username} with role {role} attempted to access Test Report window")
-        Messagebox.show_error("Access Denied", "Test reporting is only accessible to Testing role.")
-        return
-
+def show_test_report(parent_frame, tree, username, refresh_callback):
+    """Display test report for Assembler_Tester role with all fields optional."""
     selected = tree.selection()
     if not selected:
         logger.debug("No pump selected in Treeview")
@@ -410,11 +417,15 @@ def show_test_report(parent_frame, tree, username, refresh_callback, role):
                        assembly_part_number
                 FROM pumps WHERE serial_number = ?
             """, (serial_number,))
-            pump = dict(cursor.fetchone() or {})
-            if not pump:
+            # Convert tuple to dict using column names
+            columns = [desc[0] for desc in cursor.description]
+            pump_tuple = cursor.fetchone()
+            if not pump_tuple:
                 logger.warning(f"No pump found for serial_number: {serial_number}")
                 return
+            pump = dict(zip(columns, pump_tuple))
             cursor.execute("SELECT username, email FROM users WHERE username = ?", (pump["requested_by"],))
+            # originator is a tuple: (username, email)
             originator = cursor.fetchone()
     except Exception as e:
         logger.error(f"Failed to load pump data: {str(e)}")
@@ -447,10 +458,20 @@ def show_test_report(parent_frame, tree, username, refresh_callback, role):
     scrollbar.pack(side=RIGHT, fill=Y)
 
     def on_mouse_wheel(event):
-        canvas.yview_scroll(-1 * (event.delta // 120), "units")
+        if canvas.winfo_exists():  # Safety check
+            canvas.yview_scroll(-1 * (event.delta // 120), "units")
 
     canvas.bind("<MouseWheel>", on_mouse_wheel)
-    test_window.protocol("WM_DELETE_WINDOW", lambda: (canvas.unbind("<MouseWheel>"), test_window.destroy()))
+    # Clean up binding and destroy window safely
+    def on_close():
+        try:
+            if canvas.winfo_exists():
+                canvas.unbind("<MouseWheel>")
+            test_window.destroy()
+        except Exception as e:
+            logger.debug(f"Minor error during window close: {str(e)}")
+
+    test_window.protocol("WM_DELETE_WINDOW", on_close)
 
     top_frame = ttk.Frame(main_frame)
     top_frame.grid(row=0, column=0, pady=(0, 15), sticky=W)
@@ -572,7 +593,7 @@ def show_test_report(parent_frame, tree, username, refresh_callback, role):
     ttk.Label(footer_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack()
 
     def complete_test():
-        """Submit test report for approval."""
+        """Submit test report for approval with all fields optional."""
         test_data = {
             "invoice_number": invoice_entry.get(),
             "customer": pump["customer"],
@@ -603,17 +624,15 @@ def show_test_report(parent_frame, tree, username, refresh_callback, role):
             "approval_date": datetime.now().strftime("%Y-%m-%d"),
         }
 
-        if not all(test_data["flowrate"]) or not all(test_data["pressure"]) or not all(test_data["amperage"]):
-            Messagebox.show_error("Error", "All test data fields must be filled.")
-            return
-
-        try:
-            for field in ["flowrate", "pressure", "amperage"]:
-                for value in test_data[field]:
-                    float(value)  # Validate numeric values
-        except ValueError:
-            Messagebox.show_error("Error", "Flowrate, Pressure, and Amperage must be numeric values.")
-            return
+        # Validate only non-empty test data fields as numeric
+        for field in ["flowrate", "pressure", "amperage"]:
+            for i, value in enumerate(test_data[field]):
+                if value.strip():  # Only check if the field has content
+                    try:
+                        float(value)
+                    except ValueError:
+                        Messagebox.show_error("Error", f"{field.capitalize()} Test {i+1} must be numeric if provided.")
+                        return
 
         try:
             with get_db_connection() as conn:
@@ -625,7 +644,7 @@ def show_test_report(parent_frame, tree, username, refresh_callback, role):
                     WHERE serial_number = ?
                 """, (json.dumps(test_data), serial_number))
                 conn.commit()
-                logger.info(f"Pump {serial_number} submitted for approval by {username} (Testing role)")
+                logger.info(f"Pump {serial_number} submitted for approval by {username} (Assembler_Tester role)")
 
                 config = load_config()
                 certificate_dir = config["document_dirs"]["certificate"]
@@ -649,28 +668,29 @@ def show_test_report(parent_frame, tree, username, refresh_callback, role):
                     "duration_of_test": test_data["duration_of_test"],
                     "test_medium": test_data["test_medium"],
                     "tested_by": test_data["tested_by"],
-                    "flowrate": ", ".join(test_data["flowrate"]),
-                    "pressure": ", ".join(test_data["pressure"]),
-                    "amperage": ", ".join(test_data["amperage"]),
+                    # Filter out empty entries for PDF display
+                    "flowrate": ", ".join([v for v in test_data["flowrate"] if v.strip()]) or "Not provided",
+                    "pressure": ", ".join([v for v in test_data["pressure"] if v.strip()]) or "Not provided",
+                    "amperage": ", ".join([v for v in test_data["amperage"] if v.strip()]) or "Not provided",
                 }
                 generate_pdf_notification(serial_number, pump_data, title=f"Test Certificate - {serial_number}", output_path=pdf_path)
 
                 if originator:
                     subject = f"Pump {serial_number} Submitted for Approval"
-                    greeting = f"Dear {originator['username']},"
+                    greeting = f"Dear {originator[0]},"
                     body_content = f"""
                         <p>The testing of pump {serial_number} is complete and has been submitted for approval.</p>
                         <h3 style="color: #34495e;">Pump Details</h3>
                         {generate_pump_details_table(pump_data)}
                         <h3 style="color: #34495e;">Test Data</h3>
                         {generate_test_data_table({
-                            "flowrate": test_data["flowrate"],
-                            "pressure": test_data["pressure"],
-                            "amperage": test_data["amperage"]
+                            "flowrate": [v for v in test_data["flowrate"] if v.strip()] or ["Not provided"],
+                            "pressure": [v for v in test_data["pressure"] if v.strip()] or ["Not provided"],
+                            "amperage": [v for v in test_data["amperage"] if v.strip()] or ["Not provided"]
                         })}
                     """
-                    footer = "Regards,<br>Testing Team"
-                    threading.Thread(target=send_email, args=(originator["email"], subject, greeting, body_content, footer, pdf_path), daemon=True).start()
+                    footer = "Regards,<br>Assembler/Tester Team"
+                    threading.Thread(target=send_email, args=(originator[1], subject, greeting, body_content, footer, pdf_path), daemon=True).start()
                 else:
                     logger.warning(f"No originator found for pump {serial_number}")
 
@@ -684,5 +704,5 @@ def show_test_report(parent_frame, tree, username, refresh_callback, role):
 
 if __name__ == "__main__":
     root = ttk.Window(themename="flatly")
-    show_combined_assembler_tester_dashboard(root, "testuser", "Testing", lambda: print("Logout"))
+    show_combined_assembler_tester_dashboard(root, "testuser", "Assembler_Tester", lambda: print("Logout"))
     root.mainloop()

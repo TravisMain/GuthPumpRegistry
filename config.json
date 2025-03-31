@@ -1,11 +1,11 @@
 {
-    "connection_string": "DRIVER={SQL Server};SERVER=COMPANY-SERVER\\SQLEXPRESS;DATABASE=GuthPumpRegistry;Trusted_Connection=yes;",
+    "connection_string": "DRIVER={SQL Server};SERVER=localhost\\SQLEXPRESS;DATABASE=GuthPumpRegistry;UID=sa;PWD=passwordnano14;Encrypt=no",
     "document_dirs": {
-        "certificate": "C:/Program Files/GuthPumpRegistry/docs/certificates",
-        "bom": "C:/Program Files/GuthPumpRegistry/docs/boms",
-        "confirmation": "C:/Program Files/GuthPumpRegistry/docs/confirmations",
-        "reports": "C:/Program Files/GuthPumpRegistry/reports",
-        "excel_exports": "C:/Program Files/GuthPumpRegistry/exports"
+        "certificate": "C:/Users/travism/source/repos/GuthPumpRegistry/docs/certificates",
+        "bom": "C:/Users/travism/source/repos/GuthPumpRegistry/docs/boms",
+        "confirmation": "C:/Users/travism/source/repos/GuthPumpRegistry/docs/confirmations",
+        "reports": "C:/Users/travism/source/repos/GuthPumpRegistry/reports",
+        "excel_exports": "C:/Users/travism/source/repos/GuthPumpRegistry/exports"
     },
     "email_settings": {
         "smtp_host": "smtp.gmail.com",

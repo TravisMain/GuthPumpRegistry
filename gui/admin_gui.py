@@ -153,7 +153,8 @@ def show_pumps_tab(frame):
         cursor = conn.cursor()
         cursor.execute("SELECT serial_number, pump_model, configuration, status, customer, created_at FROM pumps")
         for pump in cursor.fetchall():
-            frame.tree.insert("", END, values=(pump["serial_number"], pump["pump_model"], pump["configuration"], pump["status"], pump["customer"], pump["created_at"]))
+            # pump is a tuple: (serial_number, pump_model, configuration, status, customer, created_at)
+            frame.tree.insert("", END, values=(pump[0], pump[1], pump[2], pump[3], pump[4], pump[5]))
 
 def edit_pump_window(parent_frame, tree):
     """Edit or delete a pump record."""
@@ -166,7 +167,9 @@ def edit_pump_window(parent_frame, tree):
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM pumps WHERE serial_number = ?", (serial_number,))
-        pump = dict(cursor.fetchone() or {"serial_number": serial_number})
+        # Convert tuple to dict using column names
+        columns = [desc[0] for desc in cursor.description]
+        pump = dict(zip(columns, cursor.fetchone() or tuple([serial_number] + [None] * (len(columns) - 1))))
 
     edit_window = ttk.Toplevel(parent_frame)
     edit_window.title(f"Edit Pump {serial_number}")
@@ -254,10 +257,8 @@ def show_user_tab(frame):
         input_frame.pack(fill=X, padx=10, pady=10)
         frame.input_frame = input_frame
 
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT DISTINCT role FROM users")
-            roles = [row["role"] for row in cursor.fetchall()] or ["Admin", "Stores", "Testing", "Pump Originator", "Approval"]
+        # Updated roles to include "Assembler_Tester"
+        roles = ["Admin", "Stores", "Assembler_Tester", "Pump Originator", "Approval"]
 
         fields = ["Username", "Password", "Role", "Name", "Surname", "Email"]
         frame.entries = {}
@@ -278,25 +279,48 @@ def show_user_tab(frame):
 
         def add_user():
             email = frame.entries["email"].get()
+            username = frame.entries["username"].get()
+            password = frame.entries["password"].get()
+            role = frame.entries["role"].get()
+            name = frame.entries["name"].get()
+            surname = frame.entries["surname"].get()
+            if not all([username, password, role]):
+                frame.error_label.config(text="Username, Password, and Role are required", bootstyle="danger")
+                logger.debug("Missing required fields: username, password, or role")
+                return
             if not validate_email(email):
-                frame.error_label.config(text="Invalid email address")
+                frame.error_label.config(text="Invalid email address", bootstyle="danger")
+                logger.debug(f"Invalid email: {email}")
                 return
             with get_db_connection() as conn:
                 cursor = conn.cursor()
+                # Check existing users for debugging
+                cursor.execute("SELECT username FROM users WHERE username = ?", (username,))
+                existing_user = cursor.fetchone()
+                if existing_user:
+                    frame.error_label.config(text=f"User {username} already exists", bootstyle="danger")
+                    logger.warning(f"Duplicate username detected: {username}")
+                    return
                 try:
-                    password_hash = bcrypt.hashpw(frame.entries["password"].get().encode('utf-8'), bcrypt.gensalt())
-                    cursor.execute("INSERT INTO users (username, password_hash, role, name, surname, email) VALUES (?, ?, ?, ?, ?, ?)",
-                                   (frame.entries["username"].get(), password_hash, frame.entries["role"].get(),
-                                    frame.entries["name"].get(), frame.entries["surname"].get(), email))
+                    password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+                    cursor.execute("""
+                        INSERT INTO users (username, password_hash, role, name, surname, email)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    """, (username, password_hash, role, name, surname, email))
                     conn.commit()
-                    logger.info(f"Added user {frame.entries['username'].get()}")
-                    for entry in frame.entries.values():
+                    logger.info(f"Successfully added user {username} with role {role}")
+                    # Clear all fields after successful add
+                    for field, entry in frame.entries.items():
                         entry.delete(0, END)
-                    frame.error_label.config(text="")
+                    frame.entries["role"].set("Pump Originator")  # Reset role to default
+                    frame.error_label.config(text="User added successfully!", bootstyle="success")
                     refresh_user_list()
-                except pyodbc.IntegrityError:
-                    frame.error_label.config(text=f"User {frame.entries['username'].get()} already exists")
-                    logger.warning(f"User {frame.entries['username'].get()} already exists")
+                except pyodbc.IntegrityError as ie:
+                    frame.error_label.config(text=f"User {username} already exists (IntegrityError)", bootstyle="danger")
+                    logger.error(f"IntegrityError adding user {username} with role {role}: {str(ie)}")
+                except Exception as e:
+                    frame.error_label.config(text=f"Failed to add user: {str(e)}", bootstyle="danger")
+                    logger.error(f"Unexpected error adding user {username} with role {role}: {str(e)}")
 
         def edit_user():
             selected = frame.user_tree.selection()
@@ -353,7 +377,8 @@ def show_user_tab(frame):
                 cursor = conn.cursor()
                 cursor.execute("SELECT username, role FROM users")
                 for user in cursor.fetchall():
-                    frame.user_tree.insert("", END, values=(user["username"], user["role"]))
+                    # user is a tuple: (username, role)
+                    frame.user_tree.insert("", END, values=(user[0], user[1]))
 
         def on_right_click(event):
             item = frame.user_tree.identify_row(event.y)
@@ -454,18 +479,18 @@ def show_reports_tab(frame):
                 six_months_ago = today - timedelta(days=180)
                 cursor.execute("SELECT FORMAT(created_at, 'yyyy-MM') as month, COUNT(*) as count FROM pumps WHERE created_at >= ? GROUP BY FORMAT(created_at, 'yyyy-MM') ORDER BY month DESC", (six_months_ago,))
                 for row in cursor.fetchall():
-                    frame.report_data["Pumps by Month"].append(("Pumps by Month", row["month"], row["count"]))
-                    frame.report_treeviews["Pumps by Month"].insert("", END, values=(row["month"], row["count"]))
+                    frame.report_data["Pumps by Month"].append(("Pumps by Month", row[0], row[1]))
+                    frame.report_treeviews["Pumps by Month"].insert("", END, values=(row[0], row[1]))
 
                 cursor.execute("SELECT status, COUNT(*) as count FROM pumps GROUP BY status")
                 for row in cursor.fetchall():
-                    frame.report_data["Pumps by Status"].append(("Pumps by Status", row["status"], row["count"]))
-                    frame.report_treeviews["Pumps by Status"].insert("", END, values=(row["status"], row["count"]))
+                    frame.report_data["Pumps by Status"].append(("Pumps by Status", row[0], row[1]))
+                    frame.report_treeviews["Pumps by Status"].insert("", END, values=(row[0], row[1]))
 
                 cursor.execute("SELECT branch, COUNT(*) as count FROM pumps GROUP BY branch")
                 for row in cursor.fetchall():
-                    frame.report_data["Pumps by Branch"].append(("Pumps by Branch", row["branch"], row["count"]))
-                    frame.report_treeviews["Pumps by Branch"].insert("", END, values=(row["branch"], row["count"]))
+                    frame.report_data["Pumps by Branch"].append(("Pumps by Branch", row[0], row[1]))
+                    frame.report_treeviews["Pumps by Branch"].insert("", END, values=(row[0], row[1]))
 
                 two_days_ago = today - timedelta(days=2)
                 cursor.execute("""
@@ -476,9 +501,9 @@ def show_reports_tab(frame):
                     WHERE p.status = 'Assembler' AND a.action LIKE 'Pump % moved to Assembler by %' AND a.timestamp <= ?
                 """, (two_days_ago,))
                 for row in cursor.fetchall():
-                    detail = f"{row['serial_number']} | {row['customer']} | {row['branch']} | {row['pump_model']} | {row['configuration']}"
-                    frame.report_data["Pumps Over 2 Days in Assembly"].append(("Pumps Over 2 Days in Assembly", detail, row["days_in_assembly"]))
-                    frame.report_treeviews["Pumps Over 2 Days in Assembly"].insert("", END, values=(detail, f"{row['days_in_assembly']} days"))
+                    detail = f"{row[0]} | {row[1]} | {row[2]} | {row[3]} | {row[4]}"
+                    frame.report_data["Pumps Over 2 Days in Assembly"].append(("Pumps Over 2 Days in Assembly", detail, row[5]))
+                    frame.report_treeviews["Pumps Over 2 Days in Assembly"].insert("", END, values=(detail, f"{row[5]} days"))
 
                 week_start = today - timedelta(days=today.weekday())
                 cursor.execute("""
@@ -488,9 +513,9 @@ def show_reports_tab(frame):
                     WHERE a.action LIKE 'Pump % moved to Testing by %' AND a.timestamp >= ?
                 """, (week_start,))
                 for row in cursor.fetchall():
-                    detail = f"{row['serial_number']} | {row['customer']} | {row['branch']} | {row['pump_model']} | {row['configuration']}"
-                    frame.report_data["Pumps Assembled This Week"].append(("Pumps Assembled This Week", detail, row["timestamp"]))
-                    frame.report_treeviews["Pumps Assembled This Week"].insert("", END, values=(detail, row["timestamp"]))
+                    detail = f"{row[0]} | {row[1]} | {row[2]} | {row[3]} | {row[4]}"
+                    frame.report_data["Pumps Assembled This Week"].append(("Pumps Assembled This Week", detail, row[5]))
+                    frame.report_treeviews["Pumps Assembled This Week"].insert("", END, values=(detail, row[5]))
 
                 month_start = today.replace(day=1)
                 cursor.execute("""
@@ -500,9 +525,9 @@ def show_reports_tab(frame):
                     WHERE a.action LIKE 'Pump % moved to Testing by %' AND a.timestamp >= ?
                 """, (month_start,))
                 for row in cursor.fetchall():
-                    detail = f"{row['serial_number']} | {row['customer']} | {row['branch']} | {row['pump_model']} | {row['configuration']}"
-                    frame.report_data["Pumps Assembled This Month"].append(("Pumps Assembled This Month", detail, row["timestamp"]))
-                    frame.report_treeviews["Pumps Assembled This Month"].insert("", END, values=(detail, row["timestamp"]))
+                    detail = f"{row[0]} | {row[1]} | {row[2]} | {row[3]} | {row[4]}"
+                    frame.report_data["Pumps Assembled This Month"].append(("Pumps Assembled This Month", detail, row[5]))
+                    frame.report_treeviews["Pumps Assembled This Month"].insert("", END, values=(detail, row[5]))
 
                 year_start = today.replace(month=1, day=1)
                 cursor.execute("""
@@ -512,16 +537,16 @@ def show_reports_tab(frame):
                     WHERE a.action LIKE 'Pump % moved to Testing by %' AND a.timestamp >= ?
                 """, (year_start,))
                 for row in cursor.fetchall():
-                    detail = f"{row['serial_number']} | {row['customer']} | {row['branch']} | {row['pump_model']} | {row['configuration']}"
-                    frame.report_data["Pumps Assembled This Year"].append(("Pumps Assembled This Year", detail, row["timestamp"]))
-                    frame.report_treeviews["Pumps Assembled This Year"].insert("", END, values=(detail, row["timestamp"]))
+                    detail = f"{row[0]} | {row[1]} | {row[2]} | {row[3]} | {row[4]}"
+                    frame.report_data["Pumps Assembled This Year"].append(("Pumps Assembled This Year", detail, row[5]))
+                    frame.report_treeviews["Pumps Assembled This Year"].insert("", END, values=(detail, row[5]))
 
                 cursor.execute("SELECT pump_model, COUNT(*) as count FROM pumps GROUP BY pump_model")
                 model_counts = cursor.fetchall()
-                total_pumps = sum(row["count"] for row in model_counts)
+                total_pumps = sum(row[1] for row in model_counts)
                 for row in model_counts:
-                    percentage = (row["count"] / total_pumps * 100) if total_pumps > 0 else 0
-                    detail = f"{row['pump_model']}: {row['count']} pumps"
+                    percentage = (row[1] / total_pumps * 100) if total_pumps > 0 else 0
+                    detail = f"{row[0]}: {row[1]} pumps"
                     frame.report_data["Pump Model Distribution"].append(("Pump Model Distribution", detail, f"{percentage:.2f}%"))
                     frame.report_treeviews["Pump Model Distribution"].insert("", END, values=(detail, f"{percentage:.2f}%"))
 
@@ -572,7 +597,8 @@ def show_activity_log_tab(frame):
                 cursor = conn.cursor()
                 cursor.execute("SELECT timestamp, username, action FROM audit_log ORDER BY timestamp DESC")
                 for log in cursor.fetchall():
-                    frame.log_tree.insert("", END, values=(log["timestamp"], log["username"], log["action"]))
+                    # log is a tuple: (timestamp, username, action)
+                    frame.log_tree.insert("", END, values=(log[0], log[1], log[2]))
 
         def export_to_excel():
             config = load_config()
@@ -606,12 +632,9 @@ def show_backup_tab(frame):
 
     def backup_db():
         Messagebox.show_warning("Backup Not Implemented", "SQL Server backup requires server-side scripting (e.g., SQL Agent job). Contact your DBA.")
-        # Placeholder: For SQLite, we'd use shutil.copy2(DB_PATH, backup_path)
-        # For SQL Server, this needs a server-side backup command (not implemented here)
 
     def restore_db():
         Messagebox.show_warning("Restore Not Implemented", "SQL Server restore requires server-side scripting (e.g., SQL Agent job). Contact your DBA.")
-        # Placeholder: For SQLite, we'd use shutil.copy2(file_path, DB_PATH)
 
     ttk.Button(backup_frame, text="Backup Database", command=backup_db, bootstyle="info", style="large.TButton").pack(pady=5)
     ttk.Button(backup_frame, text="Restore Database", command=restore_db, bootstyle="warning", style="large.TButton").pack(pady=5)
@@ -740,9 +763,11 @@ def edit_user_window(parent_frame, username):
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
-        user = dict(cursor.fetchone())
-        cursor.execute("SELECT DISTINCT role FROM users")
-        roles = [row["role"] for row in cursor.fetchall()] or ["Admin", "Stores", "Testing", "Pump Originator", "Approval"]
+        # Convert tuple to dict using column names
+        columns = [desc[0] for desc in cursor.description]
+        user = dict(zip(columns, cursor.fetchone()))
+        # Updated roles to include "Assembler_Tester"
+        roles = ["Admin", "Stores", "Assembler_Tester", "Pump Originator", "Approval"]
 
     edit_window = ttk.Toplevel(parent_frame)
     edit_window.title(f"Edit User {username}")
@@ -769,7 +794,7 @@ def edit_user_window(parent_frame, username):
         ttk.Label(frame, text=f"{field.replace('_', ' ').title()}:", font=("Roboto", 14)).grid(row=i, column=0, pady=5, sticky=W)
         if field == "role":
             entry = ttk.Combobox(frame, values=roles, font=("Roboto", 12), state="readonly")
-            entry.set("Testing" if user["role"] == "Assembler" else user["role"])
+            entry.set(user["role"])
         else:
             entry = ttk.Entry(frame, font=("Roboto", 12))
             if field != "password":
@@ -792,3 +817,8 @@ def edit_user_window(parent_frame, username):
             edit_window.destroy()
 
     ttk.Button(frame, text="Save", command=save_changes, bootstyle="success", style="large.TButton").grid(row=len(fields), column=0, columnspan=2, pady=10)
+
+if __name__ == "__main__":
+    root = ttk.Window(themename="flatly")
+    show_admin_gui(root, "admin1", lambda: print("Logout"))
+    root.mainloop()
