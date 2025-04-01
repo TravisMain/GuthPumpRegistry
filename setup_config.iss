@@ -157,6 +157,7 @@ begin
   SQLDatabaseEdit.Left := 0;
   SQLDatabaseEdit.Text := 'GuthPumpDB';
 
+  
   SQLUsernameLabel := TNewStaticText.Create(SQLConfigPage);
   SQLUsernameLabel.Parent := SQLConfigPage.Surface;
   SQLUsernameLabel.Caption := 'SQL Username (e.g., sa):';

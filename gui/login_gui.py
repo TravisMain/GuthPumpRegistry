@@ -4,9 +4,18 @@ from ttkbootstrap.tooltip import ToolTip
 from PIL import Image, ImageTk
 from utils.config import get_logger
 import os
+import sys
 
 logger = get_logger("login_gui")
-BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+
+# Determine the base directory for bundled resources
+if getattr(sys, 'frozen', False):
+    # Running as a bundled executable (PyInstaller)
+    BASE_DIR = sys._MEIPASS
+else:
+    # Running in development mode
+    BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+
 LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo.png")
 BUILD_NUMBER = "1.0.0"
 

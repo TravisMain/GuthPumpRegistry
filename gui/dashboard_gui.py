@@ -5,6 +5,7 @@ from ttkbootstrap import Style
 from PIL import Image, ImageTk
 import pyodbc
 import os
+import sys
 from datetime import datetime
 import json
 import threading
@@ -13,7 +14,15 @@ from export_utils import send_email, generate_pdf_notification, generate_pump_de
 from database import get_db_connection, create_pump
 
 logger = get_logger("dashboard_gui")
-BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+
+# Determine the base directory for bundled resources
+if getattr(sys, 'frozen', False):
+    # Running as a bundled executable (PyInstaller)
+    BASE_DIR = sys._MEIPASS
+else:
+    # Running in development mode
+    BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+
 LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo.png")
 OPTIONS_PATH = os.path.join(BASE_DIR, "assets", "pump_options.json")
 ASSEMBLY_PART_NUMBERS_PATH = os.path.join(BASE_DIR, "assets", "assembly_part_numbers.json")

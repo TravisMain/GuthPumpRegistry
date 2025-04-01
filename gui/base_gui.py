@@ -47,7 +47,8 @@ except Exception as e:
         logger.error(error_msg)
     except:
         print("BaseGUI: Failed to initialize logging")
-    sys.stdin.read(1)
+    if not getattr(sys, 'frozen', False):  # Only pause in development mode
+        input("Press Enter to continue . . .")
     sys.exit(1)
 
 class BaseGUI:
@@ -181,5 +182,6 @@ if __name__ == "__main__":
         error_msg = f"BaseGUI: Main error: {str(e)}\n{traceback.format_exc()}"
         logger.error(error_msg)
         print(error_msg)
-        sys.stdin.read(1)
+        if not getattr(sys, 'frozen', False):  # Only pause in development mode
+            input("Press Enter to continue . . .")
         sys.exit(1)

@@ -5,11 +5,13 @@ from PyInstaller.utils.hooks import collect_submodules
 block_cipher = None
 
 a = Analysis(
-    ['gui/base_gui.py'],
+    ['gui\\base_gui.py'],
     pathex=['C:\\Users\\travism\\source\\repos\\GuthPumpRegistry'],
     binaries=[('C:\\Program Files\\Python311\\python311.dll', '.')],
     datas=[
-        ('assets', 'assets'),
+        ('assets\\*.ttf', 'assets'),  # Explicitly include font files
+        ('assets\\*.json', 'assets'),  # Explicitly include JSON files
+        ('assets', 'assets'),  # Include the entire assets directory
         ('gui', 'gui'),
         ('utils', 'utils'),
         ('database.py', '.'),
@@ -39,7 +41,9 @@ a = Analysis(
         'logging',
         'bcrypt',
         'pandas',
-        'tkinter.filedialog'
+        'tkinter.filedialog',
+        'matplotlib',  # Added for matplotlib.pyplot in approval_gui.py
+        'matplotlib.backends.backend_tkagg'  # Added for FigureCanvasTkAgg
     ],
     hookspath=[],
     hooksconfig={},
@@ -73,5 +77,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='app_icon.ico'
+    icon='app_icon.ico'  # Ensure this path is correct
 )

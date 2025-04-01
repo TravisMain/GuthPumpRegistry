@@ -3,11 +3,20 @@ from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs import Messagebox
 from database import get_db_connection, create_pump
 import os
+import sys
 import json
 from utils.config import get_logger
 
 logger = get_logger("pump_originator")
-BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+
+# Determine the base directory for bundled resources
+if getattr(sys, 'frozen', False):
+    # Running as a bundled executable (PyInstaller)
+    BASE_DIR = sys._MEIPASS
+else:
+    # Running in development mode
+    BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+
 BUILD_NUMBER = "1.0.0"
 OPTIONS_PATH = os.path.join(BASE_DIR, "assets", "pump_options.json")
 ASSEMBLY_PART_NUMBERS_PATH = os.path.join(BASE_DIR, "assets", "assembly_part_numbers.json")
@@ -15,9 +24,14 @@ ASSEMBLY_PART_NUMBERS_PATH = os.path.join(BASE_DIR, "assets", "assembly_part_num
 def load_options(file_path, key=""):
     """Load options from a JSON file."""
     try:
+        if not os.path.exists(file_path):
+            logger.error(f"File not found: {file_path}")
+            return []
         with open(file_path, "r") as f:
             data = json.load(f)
-            return data.get(key, data) if key else data
+            result = data.get(key, data) if key else data
+            logger.debug(f"Loaded options from {file_path}: {result}")
+            return result
     except Exception as e:
         logger.error(f"Failed to load options from {file_path}: {str(e)}")
         return []
@@ -39,16 +53,26 @@ def show_pump_originator_gui(root, username, logout_callback):
     options = load_options(OPTIONS_PATH)
     assembly_part_numbers = load_options(ASSEMBLY_PART_NUMBERS_PATH, "assembly_part_numbers")
 
+    # Log the loaded options for debugging
+    logger.debug(f"Loaded options: {options}")
+    logger.debug(f"Loaded assembly part numbers: {assembly_part_numbers}")
+
+    # Check if options are empty and display an error if they are
+    if not options or not assembly_part_numbers:
+        ttk.Label(create_frame, text="Error: Failed to load pump options or assembly part numbers.", font=("Roboto", 12), bootstyle="danger").pack(pady=10)
+        logger.error("Pump options or assembly part numbers are empty. Fields will not be rendered.")
+        return main_frame
+
     fields = [
-        ("Pump Model", ttk.Combobox, options["pump_model"], "P1 3.0KW"),
-        ("Configuration", ttk.Combobox, options["configuration"], "Standard"),
+        ("Pump Model", ttk.Combobox, options.get("pump_model", []), "P1 3.0KW"),
+        ("Configuration", ttk.Combobox, options.get("configuration", []), "Standard"),
         ("Customer", ttk.Entry, None, "Guth Test"),
-        ("Branch", ttk.Combobox, options["branch"], "Main"),
+        ("Branch", ttk.Combobox, options.get("branch", []), "Main"),
         ("Assembly Part Number", ttk.Combobox, assembly_part_numbers, assembly_part_numbers[0] if assembly_part_numbers else "N/A"),
         ("Pressure Required (bar)", ttk.Entry, None, ""),
         ("Flow Rate Required (L/h)", ttk.Entry, None, ""),
-        ("Impeller Size", ttk.Combobox, options["impeller_size"]["P1 3.0KW"], "Medium"),
-        ("Connection Type", ttk.Combobox, options["connection_type"], "Flange"),
+        ("Impeller Size", ttk.Combobox, options.get("impeller_size", {}).get("P1 3.0KW", []), "Medium"),
+        ("Connection Type", ttk.Combobox, options.get("connection_type", []), "Flange"),
         ("Custom Motor", ttk.Entry, None, ""),
         ("Flush Seal Housing", ttk.Checkbutton, ["Yes", "No"], "No")
     ]
@@ -61,7 +85,7 @@ def show_pump_originator_gui(root, username, logout_callback):
                 entry.insert(0, default)
         elif widget_type == ttk.Combobox:
             entry = widget_type(create_frame, values=opts, state="readonly")
-            entry.set(default)
+            entry.set(default if default in opts else opts[0] if opts else "N/A")
         elif widget_type == ttk.Checkbutton:
             var = ttk.BooleanVar(value=default == "Yes")
             entry = widget_type(create_frame, text="", variable=var, bootstyle="success-round-toggle")

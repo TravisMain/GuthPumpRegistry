@@ -3,6 +3,7 @@ from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs import Messagebox
 from PIL import Image, ImageTk
 import os
+import sys
 from database import get_db_connection
 from utils.config import get_logger
 import json
@@ -21,16 +22,30 @@ import threading
 from export_utils import send_email, generate_pump_details_table
 
 logger = get_logger("approval_gui")
-BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+
+# Determine the base directory for bundled resources
+if getattr(sys, 'frozen', False):
+    # Running as a bundled executable (PyInstaller)
+    BASE_DIR = sys._MEIPASS
+else:
+    # Running in development mode
+    BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+
 LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo.png")
 PDF_LOGO_PATH = os.path.join(BASE_DIR, "assets", "guth_logo.png")
 FONT_PATH = os.path.join(BASE_DIR, "assets", "Roboto-Regular.ttf")
 FONT_BOLD_PATH = os.path.join(BASE_DIR, "assets", "Roboto-Black.ttf")
 BUILD_NUMBER = "1.0.0"
 
-# Register Roboto fonts
-pdfmetrics.registerFont(TTFont('Roboto', FONT_PATH))
-pdfmetrics.registerFont(TTFont('Roboto-Black', FONT_BOLD_PATH))
+# Register Roboto fonts with error handling
+try:
+    pdfmetrics.registerFont(TTFont('Roboto', FONT_PATH))
+    pdfmetrics.registerFont(TTFont('Roboto-Black', FONT_BOLD_PATH))
+    logger.info("Roboto fonts registered successfully")
+except Exception as e:
+    error_msg = f"Failed to register fonts: {str(e)}"
+    logger.error(error_msg)
+    raise Exception(error_msg)
 
 def generate_test_graph(test_data, output_path=None, for_gui=False):
     """Generate a graph of test data (amperage and pressure vs. flowrate) for GUI or PDF."""
@@ -70,10 +85,18 @@ def generate_test_graph(test_data, output_path=None, for_gui=False):
         ax2.set_ylabel("Amperage (A)", color=desaturated_red, fontsize=8)
         ax2.tick_params(axis='y', labelcolor=desaturated_red, labelsize=6)
 
-        # Dynamic axis limits
-        flow_min, flow_max = min([f for f in flowrate if f > 0], default=0), max(flowrate, default=1000)
-        press_min, press_max = min([p for p in pressure if p > 0], default=0), max(pressure, default=5)
-        amp_min, amp_max = min([a for a in amperage if a > 0], default=0), max(amperage, default=10)
+        # Dynamic axis limits with explicit list handling to avoid linter warnings
+        positive_flowrate = [f for f in flowrate if f > 0]
+        flow_min = min(positive_flowrate) if positive_flowrate else 0
+        flow_max = max(flowrate) if flowrate else 1000
+
+        positive_pressure = [p for p in pressure if p > 0]
+        press_min = min(positive_pressure) if positive_pressure else 0
+        press_max = max(pressure) if pressure else 5
+
+        positive_amperage = [a for a in amperage if a > 0]
+        amp_min = min(positive_amperage) if positive_amperage else 0
+        amp_max = max(amperage) if amperage else 10
 
         flow_range = flow_max - flow_min if flow_max > flow_min else 100
         press_range = press_max - press_min if press_max > press_min else 1

@@ -1,5 +1,6 @@
 import pyodbc
 import os
+import sys
 import threading
 from datetime import datetime
 import json
@@ -8,7 +9,15 @@ from utils.serial_utils import generate_serial_number
 from utils.config import get_logger
 
 logger = get_logger("database")
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Determine the base directory for bundled resources
+if getattr(sys, 'frozen', False):
+    # Running as a bundled executable (PyInstaller)
+    BASE_DIR = sys._MEIPASS
+else:
+    # Running in development mode
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 BOM_PATH = os.path.join(BASE_DIR, "assets", "bom.json")
 DB_LOCK = threading.Lock()
@@ -26,15 +35,26 @@ def load_config():
 def get_db_connection():
     """Get a singleton database connection."""
     global _conn_pool
-    config = load_config()
-    conn_str = config.get("connection_string")
-    if not conn_str:
-        raise ValueError("No connection string found in config.json")
-    if _conn_pool is None or _conn_pool.closed:
-        with DB_LOCK:
-            if _conn_pool is None or _conn_pool.closed:
-                _conn_pool = pyodbc.connect(conn_str)
-    return _conn_pool
+    try:
+        config = load_config()
+        conn_str = config.get("connection_string")
+        if not conn_str:
+            raise ValueError("No connection string found in config.json")
+        if _conn_pool is None or _conn_pool.closed:
+            with DB_LOCK:
+                if _conn_pool is None or _conn_pool.closed:
+                    _conn_pool = pyodbc.connect(conn_str)
+                    logger.info("Database connection established successfully")
+        return _conn_pool
+    except pyodbc.Error as e:
+        error_msg = f"Failed to connect to the database: {str(e)}"
+        logger.error(error_msg)
+        if "IM002" in str(e):
+            error_msg += "\nThe required ODBC driver is not installed on this PC. Please install 'ODBC Driver 17 for SQL Server' and try again."
+        raise Exception(error_msg)
+    except Exception as e:
+        logger.error(f"Unexpected error while connecting to the database: {str(e)}")
+        raise
 
 def initialize_database():
     """Initialize the GuthPumpRegistry tables if they do not exist."""
