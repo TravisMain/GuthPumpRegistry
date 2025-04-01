@@ -14,6 +14,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Image as RLImage
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
+from reportlab.lib.units import inch  # Explicitly import inch to fix warnings
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 import threading
@@ -31,41 +32,31 @@ BUILD_NUMBER = "1.0.0"
 pdfmetrics.registerFont(TTFont('Roboto', FONT_PATH))
 pdfmetrics.registerFont(TTFont('Roboto-Black', FONT_BOLD_PATH))
 
-def generate_graph(test_data):
-    """Generate a performance graph for pump test data, ensuring proper pump curves."""
+def generate_test_graph(test_data, output_path=None, for_gui=False):
+    """Generate a graph of test data (amperage and pressure vs. flowrate) for GUI or PDF."""
     try:
-        # Collect valid data points, allowing partial data
-        flowrate = []
-        pressure = []
-        amperage = []
-        for i in range(5):
-            f = test_data["flowrate"][i] if i < len(test_data["flowrate"]) else ""
-            p = test_data["pressure"][i] if i < len(test_data["pressure"]) else ""
-            a = test_data["amperage"][i] if i < len(test_data["amperage"]) else ""
-            if f or p or a:  # Include if at least one value is present
-                try:
-                    flowrate.append(float(f) if f else 0.0)
-                    pressure.append(float(p) if p else 0.0)
-                    amperage.append(float(a) if a else 0.0)
-                except ValueError:
-                    logger.debug(f"Invalid numeric value at index {i}: flow={f}, pressure={p}, amperage={a}")
-                    flowrate.append(0.0)
-                    pressure.append(0.0)
-                    amperage.append(0.0)
+        # Collect valid data points
+        flowrate = [float(f) if f.strip() else 0.0 for f in test_data["flowrate"]]
+        pressure = [float(p) if p.strip() else 0.0 for p in test_data["pressure"]]
+        amperage = [float(a) if a.strip() else 0.0 for a in test_data["amperage"]]
 
-        if not any(flowrate):  # If all flowrates are 0 or empty, no plot
-            logger.debug("No valid flowrate data to plot")
+        # Filter out points where all values are 0
+        valid_data = [(f, p, a) for f, p, a in zip(flowrate, pressure, amperage) if f or p or a]
+        if not valid_data:
+            logger.debug("No valid data to plot")
             return None
 
-        # Sort by flowrate for a smooth pump curve
+        flowrate, pressure, amperage = zip(*valid_data)
         sorted_data = sorted(zip(flowrate, pressure, amperage), key=lambda x: x[0])
         flowrate, pressure, amperage = zip(*sorted_data) if sorted_data else ([], [], [])
 
-        fig, ax1 = plt.subplots(figsize=(4, 2))  # Slightly larger for readability
+        # Set figure size based on context (GUI or PDF)
+        figsize = (4, 2) if for_gui else (6, 3)
+        fig, ax1 = plt.subplots(figsize=figsize)
         desaturated_blue = (100/255, 149/255, 237/255)  # #6495ED
         desaturated_red = (255/255, 99/255, 71/255)     # #FF6347
 
-        # Plot pressure vs. flowrate (pump curve, typically decreasing)
+        # Plot pressure vs. flowrate
         ax1.plot(flowrate, pressure, marker='o', color=desaturated_blue, label='Pressure (bar)', linewidth=1.5)
         ax1.set_xlabel("Flowrate (l/h)", fontsize=8)
         ax1.set_ylabel("Pressure (bar)", color=desaturated_blue, fontsize=8)
@@ -73,13 +64,13 @@ def generate_graph(test_data):
         ax1.tick_params(axis='x', labelsize=6)
         ax1.grid(True, linestyle='--', alpha=0.7)
 
-        # Plot amperage vs. flowrate on twin axis (typically increasing)
+        # Plot amperage vs. flowrate on twin axis
         ax2 = ax1.twinx()
         ax2.plot(flowrate, amperage, marker='s', color=desaturated_red, label='Amperage (A)', linewidth=1.5)
         ax2.set_ylabel("Amperage (A)", color=desaturated_red, fontsize=8)
         ax2.tick_params(axis='y', labelcolor=desaturated_red, labelsize=6)
 
-        # Dynamic axis limits with sensible defaults
+        # Dynamic axis limits
         flow_min, flow_max = min([f for f in flowrate if f > 0], default=0), max(flowrate, default=1000)
         press_min, press_max = min([p for p in pressure if p > 0], default=0), max(pressure, default=5)
         amp_min, amp_max = min([a for a in amperage if a > 0], default=0), max(amperage, default=10)
@@ -92,12 +83,17 @@ def generate_graph(test_data):
         ax1.set_ylim(max(0, press_min - press_range * 0.1), press_max + press_range * 0.1)
         ax2.set_ylim(max(0, amp_min - amp_range * 0.1), amp_max + amp_range * 0.1)
 
-        ax1.set_title("Pump Performance Preview", fontsize=10, pad=5)
+        ax1.set_title("Pump Test Results", fontsize=10, pad=5)
         lines1, labels1 = ax1.get_legend_handles_labels()
         lines2, labels2 = ax2.get_legend_handles_labels()
         ax1.legend(lines1 + lines2, labels1 + labels2, loc='best', fontsize=6)
 
         plt.tight_layout()
+        if output_path:
+            plt.savefig(output_path, format='png', dpi=100, bbox_inches="tight")
+            plt.close()
+            logger.info(f"Generated test graph at {output_path}")
+            return output_path
         return fig
     except Exception as e:
         logger.error(f"Graph generation failed: {str(e)}")
@@ -131,7 +127,7 @@ def generate_certificate(data, serial_number):
     top_data = [
         ["Invoice Number:", data.get("invoice_number", "N/A")],
         ["Customer:", data.get("customer", "N/A")],
-        ["Job Number:", data.get("job_number", data.get("job_number_1", "N/A"))]
+        ["Job Number:", data.get("job_number", "N/A")]
     ]
     top_table = Table(top_data, colWidths=[125, 375], style=[
         ('FONTNAME', (0, 0), (-1, -1), 'Roboto'),
@@ -242,43 +238,17 @@ def generate_certificate(data, serial_number):
     story.append(test_results_table)
     story.append(Spacer(1, 3))
 
-    buf = io.BytesIO()
-    fig, ax1 = plt.subplots(figsize=(6, 2.5))
-    desaturated_blue = (100/255, 149/255, 237/255)
-    desaturated_red = (255/255, 99/255, 71/255)
-
-    flowrate_values = [float(f) if f else 0.0 for f in data["flowrate"]]
-    pressure_values = [float(p) if p else 0.0 for p in data["pressure"]]
-    amperage_values = [float(a) if a else 0.0 for a in data["amperage"]]
-
-    ax1.plot(flowrate_values, pressure_values, color=desaturated_blue, linestyle='-')
-    ax1.set_xlabel("Flow (L/h)", fontsize=10)
-    ax1.set_ylabel("Pressure (bar)", color=desaturated_blue, fontsize=10)
-    ax1.tick_params('y', colors=desaturated_blue)
-    ax1.set_xlim(0, 20000)
-    ax1.set_ylim(0, 3.5)
-    ax1.set_xticks([0, 5000, 10000, 15000, 20000])
-    ax1.set_yticks([0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5])
-    ax1.grid(True, linestyle='--', alpha=0.7)
-
-    ax2 = ax1.twinx()
-    ax2.plot(flowrate_values, amperage_values, color=desaturated_red, linestyle='-')
-    ax2.set_ylabel("Amperage (A)", color=desaturated_red, fontsize=10)
-    ax2.tick_params('y', colors=desaturated_red)
-    ax2.set_ylim(0, 7)
-    ax2.set_yticks([0, 1, 2, 3, 4, 5, 6, 7])
-
-    fig.tight_layout()
-    plt.savefig(buf, format='png', dpi=400)
-    buf.seek(0)
-    graph = RLImage(buf, width=450, height=200)
-    graph_table = Table([[graph]], colWidths=[500], style=[
-        ('BOX', (0, 0), (-1, -1), 0.5, colors.grey),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-    ])
-    story.append(graph_table)
-    story.append(Spacer(1, 3))
+    # Embed graph in PDF
+    graph_path = generate_test_graph(data, output_path=f"temp_graph_{serial_number}.png")
+    if graph_path and os.path.exists(graph_path):
+        graph = RLImage(graph_path, width=6*inch, height=3*inch)
+        graph_table = Table([[graph]], colWidths=[6*inch], style=[
+            ('BOX', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ])
+        story.append(graph_table)
+        story.append(Spacer(1, 3))
 
     approval_data = [
         ["APPROVAL", "", "", ""],
@@ -307,8 +277,6 @@ def generate_certificate(data, serial_number):
     except Exception as e:
         logger.error(f"Failed to generate certificate: {str(e)}")
         raise
-    finally:
-        buf.close()
 
 def load_config():
     """Load configuration from config.json."""
@@ -356,11 +324,9 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
     details_window.title(f"Pump Details - {serial_number}")
     details_window.state("zoomed")
 
-    # Main container frame
     container_frame = ttk.Frame(details_window)
     container_frame.pack(fill=BOTH, expand=True)
 
-    # Header
     header_frame = ttk.Frame(container_frame, style="white.TFrame")
     header_frame.pack(fill=X, pady=(0, 10), ipady=10)
     if os.path.exists(LOGO_PATH):
@@ -373,7 +339,6 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
             logger.error(f"Details window logo load failed: {str(e)}")
     ttk.Label(header_frame, text="Pump Approval Details", font=("Roboto", 14, "bold")).pack(anchor=W, padx=10)
 
-    # Scrollable content frame
     content_frame = ttk.Frame(container_frame)
     content_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
@@ -400,7 +365,6 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
             logger.debug(f"Minor error during window close: {str(e)}")
     details_window.protocol("WM_DELETE_WINDOW", on_close)
 
-    # Top frame (Invoice, Customer, Job Number)
     top_frame = ttk.Frame(main_frame)
     top_frame.grid(row=0, column=0, pady=(0, 15), sticky=W)
 
@@ -417,7 +381,6 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
     job_entry.insert(0, test_data.get("job_number", ""))
     job_entry.grid(row=2, column=1, padx=10, pady=2, sticky=W)
 
-    # Main layout (left and right frames)
     main_layout = ttk.Frame(main_frame)
     main_layout.grid(row=1, column=0, pady=15, sticky=W+E)
 
@@ -474,7 +437,6 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
     right_frame = ttk.Frame(main_layout)
     right_frame.pack(side=LEFT, padx=15, fill=Y)
 
-    # Sub-frame for Test Data and Graph side by side
     test_graph_frame = ttk.Frame(right_frame)
     test_graph_frame.pack(fill=X, pady=(0, 10))
 
@@ -503,19 +465,17 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
         pressure_entries.append(pressure_entry)
         amp_entries.append(amp_entry)
 
-    # Graph preview to the right of test data
     graph_frame = ttk.LabelFrame(test_graph_frame, text="Graph Preview", padding=5)
     graph_frame.pack(side=LEFT, fill=Y, padx=(10, 0))
 
     def update_graph(*args):
-        """Update the graph based on current test data."""
         current_data = {
             "flowrate": [entry.get() for entry in flow_entries],
             "pressure": [entry.get() for entry in pressure_entries],
             "amperage": [entry.get() for entry in amp_entries],
             "serial_number": serial_number
         }
-        fig = generate_graph(current_data)
+        fig = generate_test_graph(current_data, for_gui=True)
         for widget in graph_frame.winfo_children():
             widget.destroy()
         if fig:
@@ -525,10 +485,7 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
         else:
             ttk.Label(graph_frame, text="No valid data to plot", font=("Roboto", 10)).pack(expand=True)
 
-    # Initial graph display
     update_graph()
-
-    # Bind test data entries to update graph
     for entry in flow_entries + pressure_entries + amp_entries:
         entry.bind("<KeyRelease>", update_graph)
 
@@ -558,12 +515,10 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
     ttk.Label(approval_frame, text="Date:", font=("Roboto", 10)).pack(side=LEFT, padx=10)
     ttk.Label(approval_frame, text=datetime.now().strftime("%Y-%m-%d"), font=("Roboto", 10)).pack(side=LEFT, padx=10)
 
-    # Button frame outside canvas, aligned left
     button_frame = ttk.Frame(container_frame)
     button_frame.pack(side=BOTTOM, pady=15, anchor=W)
 
     def retest_pump():
-        """Send the pump back to Testing state."""
         updated_test_data = {
             "invoice_number": invoice_entry.get(),
             "customer": pump["customer"],
@@ -592,7 +547,6 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
             "pressure": [entry.get() for entry in pressure_entries],
             "amperage": [entry.get() for entry in amp_entries],
         }
-
         try:
             with get_db_connection() as conn:
                 cursor = conn.cursor()
@@ -608,7 +562,6 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
             Messagebox.show_error("Error", f"Failed to retest pump: {str(e)}")
 
     def approve_pump():
-        """Approve the pump and generate/send certificate."""
         updated_test_data = {
             "invoice_number": invoice_entry.get(),
             "customer": pump["customer"],
@@ -639,7 +592,6 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
             "approved_by": username,
             "approval_date": datetime.now().strftime("%Y-%m-%d"),
         }
-
         try:
             for i in range(5):
                 if updated_test_data["flowrate"][i]:
@@ -701,14 +653,12 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
     ttk.Button(button_frame, text="Approve", command=approve_pump, bootstyle="success", style="large.TButton").pack(side=LEFT, padx=5)
     ttk.Button(button_frame, text="Close", command=details_window.destroy, bootstyle="secondary", style="large.TButton").pack(side=LEFT, padx=5)
 
-    # Footer below buttons
     footer_frame = ttk.Frame(container_frame)
     footer_frame.pack(side=BOTTOM, pady=10, fill=X)
     ttk.Label(footer_frame, text="\u00A9 Guth South Africa", font=("Roboto", 10)).pack(expand=True)
     ttk.Label(footer_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack(expand=True)
 
 def show_approval_dashboard(root, username, role, logout_callback):
-    """Display the approval dashboard."""
     root.state('zoomed')
     for widget in root.winfo_children():
         widget.destroy()
@@ -742,7 +692,6 @@ def show_approval_dashboard(root, username, role, logout_callback):
     tree.configure(yscrollcommand=scrollbar.set)
 
     def refresh_approval_list():
-        """Refresh the list of pumps pending approval."""
         tree.delete(*tree.get_children())
         try:
             with get_db_connection() as conn:

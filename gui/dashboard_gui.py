@@ -20,7 +20,7 @@ ASSEMBLY_PART_NUMBERS_PATH = os.path.join(BASE_DIR, "assets", "assembly_part_num
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 BUILD_NUMBER = "1.0.0"
 STORES_EMAIL = "stores@guth.co.za"
-NOTIFICATIONS_DIR = os.path.join(BASE_DIR, "docs", "Notifications")  # New Notifications folder
+NOTIFICATIONS_DIR = os.path.join(BASE_DIR, "docs", "Notifications")
 
 DEFAULT_DIRS = {
     "certificate": os.path.join(BASE_DIR, "certificates"),
@@ -132,7 +132,7 @@ def show_dashboard(root, username, role, logout_callback):
     fields = [
         ("Customer", "entry", None, True),
         ("Branch", "combobox", options["branch"], True),
-        ("Assembly Part Number", "combobox", assembly_part_numbers, True),
+        ("Assembly Part Number", "entry", None, True),
         ("Pump Model", "combobox", options["pump_model"], True),
         ("Configuration", "combobox", options["configuration"], True),
         ("Impeller Size", "combobox", None, True),
@@ -155,7 +155,7 @@ def show_dashboard(root, username, role, logout_callback):
     tooltips = {
         "customer": "Select the customer branch for this pump",
         "branch": "Select the branch responsible for this pump",
-        "assembly part number": "Select the assembly part number for this pump",
+        "assembly part number": "Enter the assembly part number for this pump",
         "pump model": "Select the pump model based on power rating",
         "configuration": "Choose the pump configuration type",
         "impeller size": "Choose the impeller size or enter a custom size if 'Other' is selected",
@@ -179,6 +179,10 @@ def show_dashboard(root, username, role, logout_callback):
                 pump_model_combobox = ttk.Combobox(form_frame, values=opts, font=("Roboto", 10), state="readonly")
                 pump_model_combobox.set(opts[0])
                 entry = pump_model_combobox
+            elif label == "Configuration":
+                configuration_combobox = ttk.Combobox(form_frame, values=opts, font=("Roboto", 10), state="readonly")
+                configuration_combobox.set(opts[0])
+                entry = configuration_combobox
             elif label == "Impeller Size":
                 impeller_combobox = ttk.Combobox(form_frame, font=("Roboto", 10), state="readonly")
                 initial_pump_model = pump_model_combobox.get()
@@ -217,9 +221,6 @@ def show_dashboard(root, username, role, logout_callback):
 
                 connection_combobox.bind("<<ComboboxSelected>>", on_connection_select)
                 entry = connection_combobox
-            elif label == "Assembly Part Number":
-                entry = ttk.Combobox(form_frame, values=opts, font=("Roboto", 10), state="readonly")
-                entry.set(opts[0] if opts else "N/A")
             else:
                 entry = ttk.Combobox(form_frame, values=opts, font=("Roboto", 10), state="readonly")
                 entry.set(opts[0])
@@ -227,6 +228,34 @@ def show_dashboard(root, username, role, logout_callback):
             entry = ttk.Checkbutton(form_frame, text="", bootstyle="success-round-toggle")
         entry.grid(row=i, column=1, pady=3, sticky=EW)
         entries[label.lower().replace(" ", "_")] = entry
+
+    # Auto-populate Pump Model and Configuration based on Assembly Part Number
+    assembly_part_entry = entries["assembly_part_number"]
+    assembly_part_mapping = options.get("assembly_part_mapping", {})
+
+    def on_assembly_part_change(event):
+        part_number = assembly_part_entry.get().strip()
+        mapping = assembly_part_mapping.get(part_number, None)
+        if mapping:
+            pump_model_combobox.set(mapping["pump_model"])
+            configuration_combobox.set(mapping["configuration"])
+            # Trigger impeller size update
+            selected_pump_model = pump_model_combobox.get()
+            new_impeller_opts = options["impeller_size"].get(selected_pump_model, []) + ["Other"]
+            impeller_combobox["values"] = new_impeller_opts
+            impeller_combobox.set(new_impeller_opts[0])
+            custom_impeller_entry.grid_remove()
+        else:
+            # Reset to default if no mapping found, but allow manual selection
+            pump_model_combobox.set(options["pump_model"][0])
+            configuration_combobox.set(options["configuration"][0])
+            selected_pump_model = pump_model_combobox.get()
+            new_impeller_opts = options["impeller_size"].get(selected_pump_model, []) + ["Other"]
+            impeller_combobox["values"] = new_impeller_opts
+            impeller_combobox.set(new_impeller_opts[0])
+            custom_impeller_entry.grid_remove()
+
+    assembly_part_entry.bind("<KeyRelease>", on_assembly_part_change)
 
     # Handle "Send to Stores" toggle
     customer_entry = entries["customer"]
@@ -294,7 +323,7 @@ def show_dashboard(root, username, role, logout_callback):
 
             # Build pump_data after serial is assigned
             pump_data = {
-                "serial_number": serial,  # Assign serial first
+                "serial_number": serial,
                 "assembly_part_number": data["assembly_part_number"],
                 "customer": data["customer"],
                 "branch": data["branch"],
@@ -311,13 +340,12 @@ def show_dashboard(root, username, role, logout_callback):
             logger.debug(f"pump_data: {pump_data}")
 
             config = load_config()
-            # Use specific Notifications folder for new_pump_notification
             os.makedirs(NOTIFICATIONS_DIR, exist_ok=True)
-            for dir_key in ["confirmation", "bom"]:  # Other dirs from config
+            for dir_key in ["confirmation", "bom"]:
                 dir_path = config["document_dirs"][dir_key]
                 os.makedirs(dir_path, exist_ok=True)
 
-            pdf_path = os.path.join(NOTIFICATIONS_DIR, f"new_pump_notification_{serial}.pdf")  # New path
+            pdf_path = os.path.join(NOTIFICATIONS_DIR, f"new_pump_notification_{serial}.pdf")
             bom_pdf_path = os.path.join(config["document_dirs"]["bom"], f"bom_checklist_{serial}.pdf")
             confirmation_path = os.path.join(config["document_dirs"]["confirmation"], f"confirmation_pump_created_{serial}.pdf")
 
@@ -408,8 +436,7 @@ def show_dashboard(root, username, role, logout_callback):
                     params.append(filter_status)
                 cursor.execute(query, params)
                 for pump in cursor.fetchall():
-                    # pump is a tuple: (serial_number, assembly_part_number, customer, branch, pump_model, configuration, impeller_size, connection_type, pressure_required, flow_rate_required, custom_motor, flush_seal_housing, status)
-                    if search_term in pump[0].lower():  # serial_number at index 0
+                    if search_term in pump[0].lower():
                         all_pumps_tree.insert("", END, values=(pump[0], pump[1] or "N/A", pump[2], pump[3], pump[4], pump[5], pump[6], pump[7], pump[8], pump[9], pump[10], pump[11], pump[12]))
             logger.info("Refreshed All Pumps table")
         except Exception as e:
@@ -464,8 +491,7 @@ def show_dashboard(root, username, role, logout_callback):
                     params.append(filter_branch)
                 cursor.execute(query, params)
                 for pump in cursor.fetchall():
-                    # pump is a tuple: (serial_number, assembly_part_number, customer, branch, pump_model, configuration, impeller_size, connection_type, pressure_required, flow_rate_required, custom_motor, flush_seal_housing, status)
-                    if search_term in pump[0].lower():  # serial_number at index 0
+                    if search_term in pump[0].lower():
                         stores_tree.insert("", END, values=(pump[0], pump[1] or "N/A", pump[2], pump[3], pump[4], pump[5], pump[6], pump[7], pump[8], pump[9], pump[10], pump[11], pump[12]))
             logger.info("Refreshed Pumps in Stores table")
             check_stores_minimum_quantity()
@@ -501,7 +527,6 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM pumps WHERE serial_number = ?", (serial_number,))
-            # Convert tuple to dict using column names
             columns = [desc[0] for desc in cursor.description]
             pump_tuple = cursor.fetchone()
             if not pump_tuple:
@@ -538,7 +563,7 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
         ("serial_number", "entry", None),
         ("customer", "entry", None),
         ("branch", "combobox", options["branch"]),
-        ("assembly_part_number", "combobox", assembly_part_numbers),
+        ("assembly_part_number", "entry", None),
         ("pump_model", "combobox", options["pump_model"]),
         ("configuration", "combobox", options["configuration"]),
         ("impeller_size", "combobox", None),
@@ -555,6 +580,8 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
         custom_impeller_entry.insert(0, pump.get("impeller_size", ""))
     custom_impeller_entry.grid_remove()
 
+    assembly_part_mapping = options.get("assembly_part_mapping", {})
+
     for i, (field, widget_type, opts) in enumerate(fields):
         ttk.Label(frame, text=f"{field.replace('_', ' ').title()}:", font=("Roboto", 14)).grid(row=i, column=0, pady=5, sticky=W)
         value = pump.get(field, "")
@@ -568,6 +595,9 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
                 pump_model_combobox = ttk.Combobox(frame, values=opts, font=("Roboto", 12), state="readonly")
                 pump_model_combobox.set(value if value in opts else opts[0])
                 entry = pump_model_combobox
+            elif field == "configuration":
+                entry = ttk.Combobox(frame, values=opts, font=("Roboto", 12), state="readonly")
+                entry.set(value if value in opts else opts[0])
             elif field == "impeller_size":
                 impeller_combobox = ttk.Combobox(frame, font=("Roboto", 12), state="readonly")
                 initial_pump_model = pump.get("pump_model", "P1 3.0KW")
@@ -597,9 +627,6 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
                 connection_opts = opts + ["Other"] if "Other" not in opts else opts
                 entry = ttk.Combobox(frame, values=connection_opts, font=("Roboto", 12), state="readonly")
                 entry.set(value if value in connection_opts else connection_opts[0] if connection_opts[0] != "Other" else connection_opts[1] if len(connection_opts) > 1 else "")
-            elif field == "assembly_part_number":
-                entry = ttk.Combobox(frame, values=opts, font=("Roboto", 12), state="readonly")
-                entry.set(value if value in opts else opts[0] if opts else "N/A")
             else:
                 entry = ttk.Combobox(frame, values=opts, font=("Roboto", 12), state="readonly")
                 entry.set(value if value in opts else opts[0])
@@ -608,6 +635,22 @@ def edit_pump_window(parent_frame, tree, root, username, role, logout_callback):
             entry.state(['selected'] if value == "Yes" else ['!selected'])
         entry.grid(row=i, column=1, pady=5, sticky=EW)
         entries[field] = entry
+
+    # Auto-populate Pump Model and Configuration in edit window
+    assembly_part_entry = entries["assembly_part_number"]
+    def on_assembly_part_change_edit(event):
+        part_number = assembly_part_entry.get().strip()
+        mapping = assembly_part_mapping.get(part_number, None)
+        if mapping:
+            pump_model_combobox.set(mapping["pump_model"])
+            entries["configuration"].set(mapping["configuration"])
+            selected_pump_model = pump_model_combobox.get()
+            new_impeller_opts = options["impeller_size"].get(selected_pump_model, []) + ["Other"]
+            impeller_combobox["values"] = new_impeller_opts
+            impeller_combobox.set(new_impeller_opts[0])
+            custom_impeller_entry.grid_remove()
+
+    assembly_part_entry.bind("<KeyRelease>", on_assembly_part_change_edit)
 
     frame.grid_columnconfigure(1, weight=1)
 
