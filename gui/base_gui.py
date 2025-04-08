@@ -15,14 +15,27 @@ def resource_path(relative_path):
 BASE_DIR = resource_path("")
 print(f"BaseGUI: BASE_DIR set to {BASE_DIR}")
 
+# Define config paths
+if getattr(sys, 'frozen', False):
+    CONFIG_DIR = os.path.join(os.getenv('APPDATA'), "GuthPumpRegistry")
+    os.makedirs(CONFIG_DIR, exist_ok=True)
+    CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
+    DEFAULT_CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+else:
+    CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+    DEFAULT_CONFIG_PATH = CONFIG_PATH
+
+# Logging setup with persistent config directory
+LOG_DIR = os.path.join(BASE_DIR if not getattr(sys, 'frozen', False) else CONFIG_DIR, "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+log_file = os.path.join(LOG_DIR, "app.log")
+
 try:
-    # Logging setup inside try block
-    log_file = os.path.join(BASE_DIR, "app.log")
     logging.basicConfig(filename=log_file, level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     from utils.config import get_logger
     logger = get_logger("base_gui")
     logger.info("Logger initialized")
-    print("BaseGUI: Logger initialized")
+    print(f"BaseGUI: Logger initialized at {log_file}")
 
     # Import all modules
     logger.info("Attempting to load all imports")
@@ -30,7 +43,7 @@ try:
     import ttkbootstrap as ttk
     import pyodbc
     from gui.styles import configure_styles
-    from gui.login_gui import show_login_screen
+    from gui.login_gui import show_login_screen, save_login_details  # Added save_login_details import
     from gui.register_gui import show_register_window
     from gui.dashboard_gui import show_dashboard
     from gui.admin_gui import show_admin_gui
@@ -77,7 +90,7 @@ class BaseGUI:
         self.login_frame, self.error_label = show_login_screen(self.root, self.login, self.show_register)
 
     def login(self, username, password):
-        """Handle login attempt and route to appropriate dashboard."""
+        """Handle login attempt, save login details if Remember Me is checked, and route to appropriate dashboard."""
         logger.info(f"Login attempt for {username}")
         print(f"BaseGUI: Login attempt for {username}")
         if not self.error_label:
@@ -90,6 +103,18 @@ class BaseGUI:
                 cursor = conn.cursor()
                 role = check_user(cursor, username, password)
             if role:
+                # Save login details if Remember Me is checked
+                if hasattr(self.login_frame, 'remember_me'):  # Check if login_frame has remember_me attribute
+                    remember_me = self.login_frame.remember_me.get()
+                    if remember_me:
+                        save_login_details(username, password, True)
+                        logger.info(f"Saved login details for {username} due to Remember Me")
+                        print(f"BaseGUI: Saved login details for {username} due to Remember Me")
+                    else:
+                        save_login_details("", "", False)  # Clear saved details if unchecked
+                        logger.info("Cleared saved login details as Remember Me was unchecked")
+                        print("BaseGUI: Cleared saved login details as Remember Me was unchecked")
+
                 self.username = username
                 self.role = role
                 self.login_frame.destroy()
@@ -131,6 +156,8 @@ class BaseGUI:
         print(f"BaseGUI: Register attempt for {username}")
         if not all([username, password, name, surname, email]):
             error_label.config(text="All fields are required", bootstyle="danger")
+            logger.warning(f"Registration failed for {username}: Missing fields")
+            print(f"BaseGUI: Registration failed for {username}: Missing fields")
             return
         try:
             with get_db_connection() as conn:

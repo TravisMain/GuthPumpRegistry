@@ -9,41 +9,36 @@ a = Analysis(
     pathex=['C:\\Users\\travism\\source\\repos\\GuthPumpRegistry'],
     binaries=[('C:\\Program Files\\Python311\\python311.dll', '.')],
     datas=[
-        ('assets\\*.ttf', 'assets'),  # Explicitly include font files
-        ('assets\\*.json', 'assets'),  # Explicitly include JSON files
-        ('assets', 'assets'),  # Include the entire assets directory
+        ('assets\\bom.json', 'assets'),
+        ('assets\\pump_options.json', 'assets'),
+        ('assets\\assembly_part_numbers.json', 'assets'),
+        ('assets\\logo.png', 'assets'),
         ('gui', 'gui'),
         ('utils', 'utils'),
         ('database.py', '.'),
-        ('export_utils.py', '.'),
-        ('config.json', '.')
+        ('export_utils.py', '.'),  # Main PDF/email utility
+        ('doc_utils.py', '.'),     # Added if distinct from export_utils.py
+        ('config.json', '.'),
+        ('README.md', '.'),
+        ('USER_GUIDE.md', '.')
     ],
     hiddenimports=[
-        'reportlab',
+        'ttkbootstrap',                  # GUI framework
+        'pyodbc',                        # Database connectivity
+        'bcrypt',                        # Password hashing
+        'reportlab',                     # PDF generation
         'reportlab.lib.pagesizes',
         'reportlab.lib.units',
         'reportlab.lib.styles',
         'reportlab.lib.colors',
         'reportlab.platypus',
         'reportlab.graphics',
-        'ttkbootstrap',
-        'pyodbc',
-        'smtplib',
-        'email.mime.multipart',
-        'email.mime.text',
-        'email.mime.application',
-        'PIL',
-        'os',
-        'json',
-        'datetime',
-        'sys',
-        'traceback',
-        'logging',
-        'bcrypt',
-        'pandas',
-        'tkinter.filedialog',
-        'matplotlib',  # Added for matplotlib.pyplot in approval_gui.py
-        'matplotlib.backends.backend_tkagg'  # Added for FigureCanvasTkAgg
+        'PIL',                           # Image processing
+        'threading',                     # Thread safety
+        'matplotlib',                    # Graphing in approval_gui.py
+        'matplotlib.backends.backend_tkagg',  # Tkinter canvas for graphs
+        'pandas',                        # Added back if used elsewhere
+        'tkinter.filedialog'             # Added back if used elsewhere
     ],
     hookspath=[],
     hooksconfig={},
@@ -66,16 +61,16 @@ exe = EXE(
     a.binaries,
     a.zipfiles,
     a.datas,
-    name='base_gui',
-    debug=False,  # Disable debug since no console
+    name='GuthPumpRegistry',
+    debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=False,  # Changed to False for no console
+    console=False,  # No console for GUI app
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='app_icon.ico'  # Ensure this path is correct
+    icon='app_icon.ico'  # Verify this exists at project root
 )

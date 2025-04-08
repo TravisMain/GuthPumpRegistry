@@ -4,6 +4,7 @@ from ttkbootstrap.dialogs import Messagebox
 from PIL import Image, ImageTk
 from database import get_db_connection
 import os
+import sys
 from datetime import datetime
 import json
 import threading
@@ -11,33 +12,71 @@ from utils.config import get_logger
 from export_utils import send_email, generate_pdf_notification, generate_pump_details_table, generate_test_data_table
 
 logger = get_logger("combined_assembler_tester_gui")
-BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+
+# Determine the base directory for bundled resources
+if getattr(sys, 'frozen', False):
+    BASE_DIR = sys._MEIPASS
+else:
+    BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+
+# Define config paths
+if getattr(sys, 'frozen', False):
+    # Use AppData for persistent config in installed app
+    CONFIG_DIR = os.path.join(os.getenv('APPDATA'), "GuthPumpRegistry")
+    os.makedirs(CONFIG_DIR, exist_ok=True)
+    CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
+    DEFAULT_CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+else:
+    CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+    DEFAULT_CONFIG_PATH = CONFIG_PATH
+
 LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo.png")
 OPTIONS_PATH = os.path.join(BASE_DIR, "assets", "pump_options.json")
-CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 BUILD_NUMBER = "1.0.0"
 
-DEFAULT_DIRS = {
-    "certificate": os.path.join(BASE_DIR, "certificates"),
-    "bom": os.path.join(BASE_DIR, "boms"),
-    "confirmation": os.path.join(BASE_DIR, "confirmations"),
-    "reports": os.path.join(BASE_DIR, "reports"),
-    "excel_exports": os.path.join(BASE_DIR, "exports")
-}
-
 def load_config():
-    """Load configuration from config.json, creating defaults if missing."""
+    """Load configuration from config.json, creating it with defaults if missing."""
+    # Check user-specific config first (writable location)
+    if os.path.exists(CONFIG_PATH):
+        try:
+            with open(CONFIG_PATH, "r") as f:
+                config = json.load(f)
+            logger.info(f"Loaded user config from {CONFIG_PATH}")
+        except Exception as e:
+            logger.error(f"Failed to load user config from {CONFIG_PATH}: {str(e)}")
+            config = {}
+    else:
+        # Fall back to bundled default config
+        if os.path.exists(DEFAULT_CONFIG_PATH):
+            try:
+                with open(DEFAULT_CONFIG_PATH, "r") as f:
+                    config = json.load(f)
+                logger.info(f"Loaded default config from {DEFAULT_CONFIG_PATH}")
+            except Exception as e:
+                logger.error(f"Failed to load default config from {DEFAULT_CONFIG_PATH}: {str(e)}")
+                config = {}
+        else:
+            config = {}
+            logger.warning(f"No config found at {CONFIG_PATH} or {DEFAULT_CONFIG_PATH}")
+
+    # Ensure defaults are applied for required keys
+    config.setdefault("document_dirs", {
+        "certificate": os.path.join(BASE_DIR, "certificates"),
+        "bom": os.path.join(BASE_DIR, "boms"),
+        "confirmation": os.path.join(BASE_DIR, "confirmations"),
+        "reports": os.path.join(BASE_DIR, "reports"),
+        "excel_exports": os.path.join(BASE_DIR, "exports")
+    })
+
+    # If user config didn’t exist, create it with defaults
     if not os.path.exists(CONFIG_PATH):
-        config = {"document_dirs": DEFAULT_DIRS}
-        with open(CONFIG_PATH, "w") as f:
-            json.dump(config, f, indent=4)
-        logger.info(f"Created default config file at {CONFIG_PATH}")
-        return config
-    with open(CONFIG_PATH, "r") as f:
-        config = json.load(f)
-    config.setdefault("document_dirs", DEFAULT_DIRS)
-    for key, default in DEFAULT_DIRS.items():
-        config["document_dirs"].setdefault(key, default)
+        try:
+            with open(CONFIG_PATH, "w") as f:
+                json.dump(config, f, indent=4)
+            logger.info(f"Created default config file at {CONFIG_PATH}")
+        except Exception as e:
+            logger.error(f"Failed to create default config at {CONFIG_PATH}: {str(e)}")
+
     return config
 
 class CustomTooltip:

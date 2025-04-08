@@ -1,4 +1,5 @@
 ﻿import os
+import sys
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -16,18 +17,74 @@ import matplotlib.pyplot as plt
 
 logger = get_logger("export_utils")
 EXPORT_UTILS_VERSION = "2025-03-30_v5"
-BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
-CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+
+# Determine the base directory for bundled resources
+if getattr(sys, 'frozen', False):
+    BASE_DIR = sys._MEIPASS
+else:
+    BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+
+# Define config paths
+if getattr(sys, 'frozen', False):
+    # Use AppData for persistent config in installed app
+    CONFIG_DIR = os.path.join(os.getenv('APPDATA'), "GuthPumpRegistry")
+    os.makedirs(CONFIG_DIR, exist_ok=True)
+    CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
+    DEFAULT_CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+else:
+    CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+    DEFAULT_CONFIG_PATH = CONFIG_PATH
+
 LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo.png")
 
 def load_config():
-    """Load configuration from config.json."""
-    try:
-        with open(CONFIG_PATH, "r") as f:
-            return json.load(f)
-    except Exception as e:
-        logger.error(f"Failed to load config from {CONFIG_PATH}: {str(e)}")
-        raise FileNotFoundError(f"Config file not found or invalid at {CONFIG_PATH}")
+    """Load configuration from config.json, creating it with defaults if missing."""
+    # Check user-specific config first (writable location)
+    if os.path.exists(CONFIG_PATH):
+        try:
+            with open(CONFIG_PATH, "r") as f:
+                config = json.load(f)
+            logger.info(f"Loaded user config from {CONFIG_PATH}")
+        except Exception as e:
+            logger.error(f"Failed to load user config from {CONFIG_PATH}: {str(e)}")
+            config = {}
+    else:
+        # Fall back to bundled default config
+        if os.path.exists(DEFAULT_CONFIG_PATH):
+            try:
+                with open(DEFAULT_CONFIG_PATH, "r") as f:
+                    config = json.load(f)
+                logger.info(f"Loaded default config from {DEFAULT_CONFIG_PATH}")
+            except Exception as e:
+                logger.error(f"Failed to load default config from {DEFAULT_CONFIG_PATH}: {str(e)}")
+                config = {}
+        else:
+            config = {}
+            logger.warning(f"No config found at {CONFIG_PATH} or {DEFAULT_CONFIG_PATH}")
+
+    # Ensure defaults are applied for required keys
+    config.setdefault("document_dirs", {
+        "certificate": os.path.join(BASE_DIR, "certificates")
+    })
+    config.setdefault("email_settings", {
+        "smtp_host": "smtp.gmail.com",
+        "smtp_port": "587",
+        "smtp_username": "",
+        "smtp_password": "",
+        "sender_email": "",
+        "use_tls": True
+    })
+
+    # If user config didn’t exist, create it with defaults
+    if not os.path.exists(CONFIG_PATH):
+        try:
+            with open(CONFIG_PATH, "w") as f:
+                json.dump(config, f, indent=4)
+            logger.info(f"Created default config file at {CONFIG_PATH}")
+        except Exception as e:
+            logger.error(f"Failed to create default config at {CONFIG_PATH}: {str(e)}")
+
+    return config
 
 def generate_test_graph(test_data, output_path="temp_graph.png"):
     """Generate a graph of test data (amperage and pressure)."""
@@ -121,8 +178,8 @@ def send_email(to_email, subject, greeting, body_content, footer="", *attachment
 
 def generate_pdf_notification(serial_number, data, title="Pump Assembly Notification", output_path=None):
     """Generate a PDF document with pump details, BOM items, and test data graph if applicable."""
+    config = load_config()
     if output_path is None:
-        config = load_config()
         output_dir = config["document_dirs"].get("certificate", os.path.join(BASE_DIR, "certificates"))
         os.makedirs(output_dir, exist_ok=True)
         output_path = os.path.join(output_dir, f"{serial_number}_{title.replace(' ', '_')}.pdf")

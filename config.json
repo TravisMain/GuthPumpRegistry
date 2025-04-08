@@ -1,11 +1,11 @@
 {
     "connection_string": "DRIVER={ODBC Driver 17 for SQL Server};SERVER=192.168.1.7\\SQLEXPRESS;DATABASE=GuthPumpRegistry;UID=sa;PWD=passwordnano14;Encrypt=yes;TrustServerCertificate=yes;",
     "document_dirs": {
-        "certificate": "C:/Users/travism/source/repos/GuthPumpRegistry/docs/certificates",
-        "bom": "C:/Users/travism/source/repos/GuthPumpRegistry/docs/boms",
-        "confirmation": "C:/Users/travism/source/repos/GuthPumpRegistry/docs/confirmations",
-        "reports": "C:/Users/travism/source/repos/GuthPumpRegistry/reports",
-        "excel_exports": "C:/Users/travism/source/repos/GuthPumpRegistry/exports"
+        "certificate": "C:/Users/travism/OneDrive - Guth South Africa (Pty) Ltd/Technical Drive/Pumps/Pump Test Certificates/Pump Program/Certificates",
+        "bom": "C:/Users/travism/OneDrive - Guth South Africa (Pty) Ltd/Technical Drive/Pumps/Pump Test Certificates/Pump Program/Bill Of Material",
+        "confirmation": "C:/Users/travism/OneDrive - Guth South Africa (Pty) Ltd/Technical Drive/Pumps/Pump Test Certificates/Pump Program/Confirmation Documents",
+        "reports": "C:/Users/travism/OneDrive - Guth South Africa (Pty) Ltd/Technical Drive/Pumps/Pump Test Certificates/Pump Program/Reports",
+        "excel_exports": "C:/Users/travism/OneDrive - Guth South Africa (Pty) Ltd/Technical Drive/Pumps/Pump Test Certificates/Pump Program/Excel Reports"
     },
     "email_settings": {
         "smtp_host": "smtp.gmail.com",

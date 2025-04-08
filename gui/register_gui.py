@@ -4,9 +4,16 @@ from ttkbootstrap.tooltip import ToolTip
 from PIL import Image, ImageTk
 from utils.config import get_logger
 import os
+import sys
 
 logger = get_logger("register_gui")
-BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+
+# Determine the base directory for bundled resources
+if getattr(sys, 'frozen', False):
+    BASE_DIR = sys._MEIPASS
+else:
+    BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+
 LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo.png")
 BUILD_NUMBER = "1.0.0"
 
@@ -35,7 +42,7 @@ def show_register_window(root, register_callback):
             logo = ImageTk.PhotoImage(img_resized)
             ttk.Label(header_frame, image=logo).grid(row=0, column=1, pady=10, padx=(0, 20), sticky=E)
             header_frame.image = logo  # Keep reference
-            logger.debug(f"Logo loaded and scaled to {logo.width()}x{logo.height()}")
+            logger.debug(f"Logo loaded and scaled to {logo.width()}x{logo.height()} from {LOGO_PATH}")
         except Exception as e:
             logger.error(f"Logo load failed: {str(e)}")
             ttk.Label(header_frame, text="Logo Load Failed", font=("Roboto", 18, "bold")).grid(row=0, column=1, pady=10, padx=(0, 20), sticky=E)

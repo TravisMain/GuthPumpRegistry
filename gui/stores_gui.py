@@ -4,13 +4,31 @@ from ttkbootstrap.dialogs import Messagebox
 from PIL import Image, ImageTk
 from database import get_db_connection, pull_bom_item
 import os
+import sys
 from datetime import datetime
 import threading
 from utils.config import get_logger
 from export_utils import send_email, generate_pump_details_table, generate_bom_table
 
 logger = get_logger("stores_gui")
-BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+
+# Determine the base directory for bundled resources
+if getattr(sys, 'frozen', False):
+    BASE_DIR = sys._MEIPASS
+else:
+    BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+
+# Define config paths
+if getattr(sys, 'frozen', False):
+    # Use AppData for persistent config in installed app
+    CONFIG_DIR = os.path.join(os.getenv('APPDATA'), "GuthPumpRegistry")
+    os.makedirs(CONFIG_DIR, exist_ok=True)
+    CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
+    DEFAULT_CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+else:
+    CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+    DEFAULT_CONFIG_PATH = CONFIG_PATH
+
 LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo.png")
 BUILD_NUMBER = "1.0.0"
 
@@ -214,11 +232,15 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
                 conn.commit()
                 logger.info(f"BOM submitted for {serial_number} by {username}, moved to Assembler")
 
+                # Print BOM to a temporary file
+                temp_dir = os.path.join(os.getenv('TEMP', os.path.join(BASE_DIR, "temp")))
+                os.makedirs(temp_dir, exist_ok=True)
+                bom_print_path = os.path.join(temp_dir, f"bom_print_{serial_number}.txt")
                 try:
-                    with open("bom_print.txt", "w") as f:
+                    with open(bom_print_path, "w") as f:
                         f.write(f"BOM for Pump {serial_number}:\n" + "\n".join(f"Part: {item['part_name']} ({item['part_code']}), Qty: {item['quantity']}, Pulled: {item['pulled']}, Reason: {item['reason']}" for item in bom_items_list))
-                    os.startfile("bom_print.txt", "print")
-                    logger.info(f"BOM printed for {serial_number}")
+                    os.startfile(bom_print_path, "print")
+                    logger.info(f"BOM printed for {serial_number} to {bom_print_path}")
                 except Exception as e:
                     logger.error(f"Failed to print BOM: {str(e)}")
 

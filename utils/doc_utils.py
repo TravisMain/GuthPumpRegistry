@@ -1,4 +1,5 @@
 import os
+import sys
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table
 from reportlab.lib.styles import getSampleStyleSheet
@@ -12,20 +13,53 @@ import time
 from datetime import datetime
 import json
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+logger = get_logger("doc_utils")
+
+# Determine the base directory for bundled resources
+if getattr(sys, 'frozen', False):
+    BASE_DIR = sys._MEIPASS
+    CONFIG_DIR = os.path.join(os.getenv('APPDATA'), "GuthPumpRegistry")
+    os.makedirs(CONFIG_DIR, exist_ok=True)
+    CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
+    DEFAULT_CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+else:
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+    DEFAULT_CONFIG_PATH = CONFIG_PATH
+
 LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo.png")
-CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 BUILD_NUMBER = "1.0.0"
-logger = get_logger("export_utils")
 
 def load_config():
-    """Load configuration from config.json."""
-    try:
-        with open(CONFIG_PATH, "r") as f:
-            return json.load(f)
-    except Exception as e:
-        logger.error(f"Failed to load config from {CONFIG_PATH}: {str(e)}")
-        raise
+    """Load configuration from config.json, falling back to defaults if missing."""
+    if os.path.exists(CONFIG_PATH):
+        try:
+            with open(CONFIG_PATH, "r") as f:
+                config = json.load(f)
+            logger.debug(f"Loaded config from {CONFIG_PATH}")
+            return config
+        except Exception as e:
+            logger.error(f"Failed to load config from {CONFIG_PATH}: {str(e)}")
+    if os.path.exists(DEFAULT_CONFIG_PATH):
+        try:
+            with open(DEFAULT_CONFIG_PATH, "r") as f:
+                config = json.load(f)
+            logger.debug(f"Loaded default config from {DEFAULT_CONFIG_PATH}")
+            return config
+        except Exception as e:
+            logger.error(f"Failed to load default config from {DEFAULT_CONFIG_PATH}: {str(e)}")
+    logger.warning(f"No config found at {CONFIG_PATH} or {DEFAULT_CONFIG_PATH}, using defaults")
+    return {
+        "document_dirs": {"notifications": os.path.join(BASE_DIR, "data")},
+        "email_settings": {
+            "smtp_host": "smtp.gmail.com",
+            "smtp_port": "587",
+            "smtp_username": "",
+            "smtp_password": "",
+            "sender_email": "",
+            "use_tls": True
+        }
+    }
 
 def generate_html_email(subject, greeting, body_content, footer=""):
     """Generate a styled HTML email template."""
@@ -41,7 +75,7 @@ def generate_html_email(subject, greeting, body_content, footer=""):
             {body_content}
             <p style="margin-top: 20px;">{footer}</p>
             <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
-            <p style="font-size: 12px; color: #777; text-align: center;">� Guth South Africa | Build {BUILD_NUMBER}</p>
+            <p style="font-size: 12px; color: #777; text-align: center;">© Guth South Africa | Build {BUILD_NUMBER}</p>
         </div>
     </body>
     </html>
@@ -96,6 +130,8 @@ def generate_bom_table(bom_items):
 
 def generate_test_data_table(test_data):
     """Generate an HTML table for test data."""
+    if not test_data or not all(key in test_data for key in ["flowrate", "pressure", "amperage"]):
+        return "<p>No valid test data available.</p>"
     rows = "".join(f"""
         <tr>
             <td style="border: 1px solid #ddd; padding: 8px;">Test {i+1}</td>
@@ -123,9 +159,12 @@ def generate_test_data_table(test_data):
 
 def generate_pdf_notification(serial_number, data, title="Pump Assembly Notification", output_path=None):
     """Generate a PDF notification document."""
+    config = load_config()
     if output_path is None:
-        output_path = os.path.join(BASE_DIR, "data", f"notification_{serial_number}.pdf")
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        output_dir = config.get("document_dirs", {}).get("notifications", os.path.join(BASE_DIR, "data"))
+        os.makedirs(output_dir, exist_ok=True)
+        output_path = os.path.join(output_dir, f"notification_{serial_number}.pdf")
+    
     doc = SimpleDocTemplate(output_path, pagesize=A4, rightMargin=36, leftMargin=36, topMargin=36, bottomMargin=36)
     styles = getSampleStyleSheet()
     story = []
@@ -167,7 +206,7 @@ def generate_pdf_notification(serial_number, data, title="Pump Assembly Notifica
     story.append(table)
     story.append(Spacer(1, 12))
 
-    story.append(Paragraph(f"� Guth South Africa | Build {BUILD_NUMBER}", styles['Normal']))
+    story.append(Paragraph(f"© Guth South Africa | Build {BUILD_NUMBER}", styles['Normal']))
     try:
         doc.build(story)
         logger.info(f"PDF notification generated: {output_path}")
@@ -223,3 +262,36 @@ def send_email(to_email, subject, greeting, body_content, footer="", *attachment
             time.sleep(2)
     logger.error(f"Failed to send email to {to_email} after {smtp_retries} attempts")
     return False
+
+if __name__ == "__main__":
+    # Test data
+    pump_data = {
+        "serial_number": "5101 001 - 25",
+        "pump_model": "P1 3.0KW",
+        "configuration": "Standard",
+        "customer": "Guth Test"
+    }
+    bom_items = [
+        {"part_name": "Impeller", "part_code": "IMP-001", "quantity": 1},
+        {"part_name": "Motor", "part_code": "MTR-3.0kW", "quantity": 1}
+    ]
+    test_data = {
+        "flowrate": ["1000", "1010", "1020", "", ""],
+        "pressure": ["2.5", "2.6", "2.4", "", ""],
+        "amperage": ["5.0", "5.1", "4.9", "", ""]
+    }
+
+    # Generate PDF
+    pdf_path = generate_pdf_notification("5101 001 - 25", {**pump_data, "bom_items": bom_items})
+    print(f"Generated PDF at: {pdf_path}")
+
+    # Send email
+    email_sent = send_email(
+        "test@example.com",
+        "Test Notification",
+        "Hello,",
+        generate_pump_details_table(pump_data) + generate_bom_table(bom_items) + generate_test_data_table(test_data),
+        "Best regards,",
+        pdf_path
+    )
+    print(f"Email sent: {email_sent}")

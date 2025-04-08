@@ -4,6 +4,8 @@ from ttkbootstrap.dialogs import Messagebox
 from PIL import Image, ImageTk
 import os
 import sys
+import tempfile
+import logging
 from database import get_db_connection
 from utils.config import get_logger
 import json
@@ -11,25 +13,50 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from datetime import datetime
 import io
+import traceback
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Image as RLImage
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
-from reportlab.lib.units import inch  # Explicitly import inch to fix warnings
+from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 import threading
 from export_utils import send_email, generate_pump_details_table
 
+# Initialize logger with fallback to stderr
 logger = get_logger("approval_gui")
+try:
+    log_file = os.path.join(os.getcwd(), "app.log")
+    logging.basicConfig(
+        filename=log_file,
+        level=logging.DEBUG,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+except Exception:
+    logging.basicConfig(
+        stream=sys.stderr,
+        level=logging.DEBUG,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+logger.info("Approval GUI logger initialized")
 
 # Determine the base directory for bundled resources
 if getattr(sys, 'frozen', False):
-    # Running as a bundled executable (PyInstaller)
     BASE_DIR = sys._MEIPASS
 else:
-    # Running in development mode
     BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+
+# Define config paths
+if getattr(sys, 'frozen', False):
+    # Use AppData for persistent config in installed app
+    CONFIG_DIR = os.path.join(os.getenv('APPDATA'), "GuthPumpRegistry")
+    os.makedirs(CONFIG_DIR, exist_ok=True)
+    CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
+    DEFAULT_CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+else:
+    CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+    DEFAULT_CONFIG_PATH = CONFIG_PATH
 
 LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo.png")
 PDF_LOGO_PATH = os.path.join(BASE_DIR, "assets", "guth_logo.png")
@@ -47,15 +74,53 @@ except Exception as e:
     logger.error(error_msg)
     raise Exception(error_msg)
 
+def load_config():
+    """Load configuration from config.json, creating it with defaults if missing."""
+    # Check user-specific config first (writable location)
+    if os.path.exists(CONFIG_PATH):
+        try:
+            with open(CONFIG_PATH, "r") as f:
+                config = json.load(f)
+            logger.info(f"Loaded user config from {CONFIG_PATH}")
+        except Exception as e:
+            logger.error(f"Failed to load user config from {CONFIG_PATH}: {str(e)}")
+            config = {}
+    else:
+        # Fall back to bundled default config
+        if os.path.exists(DEFAULT_CONFIG_PATH):
+            try:
+                with open(DEFAULT_CONFIG_PATH, "r") as f:
+                    config = json.load(f)
+                logger.info(f"Loaded default config from {DEFAULT_CONFIG_PATH}")
+            except Exception as e:
+                logger.error(f"Failed to load default config from {DEFAULT_CONFIG_PATH}: {str(e)}")
+                config = {}
+        else:
+            config = {}
+            logger.warning(f"No config found at {CONFIG_PATH} or {DEFAULT_CONFIG_PATH}")
+
+    # Ensure defaults are applied
+    config.setdefault("document_dirs", {
+        "certificate": os.path.join(BASE_DIR, "certificates")
+    })
+    # If user config didn’t exist, create it with defaults
+    if not os.path.exists(CONFIG_PATH):
+        try:
+            with open(CONFIG_PATH, "w") as f:
+                json.dump(config, f, indent=4)
+            logger.info(f"Created default config file at {CONFIG_PATH}")
+        except Exception as e:
+            logger.error(f"Failed to create default config at {CONFIG_PATH}: {str(e)}")
+
+    return config
+
 def generate_test_graph(test_data, output_path=None, for_gui=False):
     """Generate a graph of test data (amperage and pressure vs. flowrate) for GUI or PDF."""
     try:
-        # Collect valid data points
-        flowrate = [float(f) if f.strip() else 0.0 for f in test_data["flowrate"]]
-        pressure = [float(p) if p.strip() else 0.0 for p in test_data["pressure"]]
-        amperage = [float(a) if a.strip() else 0.0 for a in test_data["amperage"]]
+        flowrate = [float(f) if f.strip() else 0.0 for f in test_data.get("flowrate", [""] * 5)]
+        pressure = [float(p) if p.strip() else 0.0 for p in test_data.get("pressure", [""] * 5)]
+        amperage = [float(a) if a.strip() else 0.0 for a in test_data.get("amperage", [""] * 5)]
 
-        # Filter out points where all values are 0
         valid_data = [(f, p, a) for f, p, a in zip(flowrate, pressure, amperage) if f or p or a]
         if not valid_data:
             logger.debug("No valid data to plot")
@@ -65,13 +130,11 @@ def generate_test_graph(test_data, output_path=None, for_gui=False):
         sorted_data = sorted(zip(flowrate, pressure, amperage), key=lambda x: x[0])
         flowrate, pressure, amperage = zip(*sorted_data) if sorted_data else ([], [], [])
 
-        # Set figure size based on context (GUI or PDF)
         figsize = (4, 2) if for_gui else (6, 3)
         fig, ax1 = plt.subplots(figsize=figsize)
         desaturated_blue = (100/255, 149/255, 237/255)  # #6495ED
         desaturated_red = (255/255, 99/255, 71/255)     # #FF6347
 
-        # Plot pressure vs. flowrate
         ax1.plot(flowrate, pressure, marker='o', color=desaturated_blue, label='Pressure (bar)', linewidth=1.5)
         ax1.set_xlabel("Flowrate (l/h)", fontsize=8)
         ax1.set_ylabel("Pressure (bar)", color=desaturated_blue, fontsize=8)
@@ -79,13 +142,11 @@ def generate_test_graph(test_data, output_path=None, for_gui=False):
         ax1.tick_params(axis='x', labelsize=6)
         ax1.grid(True, linestyle='--', alpha=0.7)
 
-        # Plot amperage vs. flowrate on twin axis
         ax2 = ax1.twinx()
         ax2.plot(flowrate, amperage, marker='s', color=desaturated_red, label='Amperage (A)', linewidth=1.5)
         ax2.set_ylabel("Amperage (A)", color=desaturated_red, fontsize=8)
         ax2.tick_params(axis='y', labelcolor=desaturated_red, labelsize=6)
 
-        # Dynamic axis limits with explicit list handling to avoid linter warnings
         positive_flowrate = [f for f in flowrate if f > 0]
         flow_min = min(positive_flowrate) if positive_flowrate else 0
         flow_max = max(flowrate) if flowrate else 1000
@@ -114,12 +175,16 @@ def generate_test_graph(test_data, output_path=None, for_gui=False):
         plt.tight_layout()
         if output_path:
             plt.savefig(output_path, format='png', dpi=100, bbox_inches="tight")
-            plt.close()
-            logger.info(f"Generated test graph at {output_path}")
-            return output_path
+            plt.close(fig)
+            if os.path.exists(output_path):
+                logger.info(f"Generated test graph at {output_path}")
+                return output_path
+            else:
+                logger.error(f"Graph file not created at {output_path}")
+                return None
         return fig
     except Exception as e:
-        logger.error(f"Graph generation failed: {str(e)}")
+        logger.error(f"Graph generation failed: {str(e)}\n{traceback.format_exc()}")
         return None
 
 def generate_certificate(data, serial_number):
@@ -142,7 +207,7 @@ def generate_certificate(data, serial_number):
             story.append(logo)
             story.append(Spacer(1, 3))
         except Exception as e:
-            logger.error(f"Failed to add logo to certificate: {str(e)}")
+            logger.error(f"Failed to add logo to certificate: {str(e)}\n{traceback.format_exc()}")
 
     story.append(Paragraph("PUMP TEST REPORT", heading_style))
     story.append(Spacer(1, 3))
@@ -261,9 +326,12 @@ def generate_certificate(data, serial_number):
     story.append(test_results_table)
     story.append(Spacer(1, 3))
 
-    # Embed graph in PDF
-    graph_path = generate_test_graph(data, output_path=f"temp_graph_{serial_number}.png")
-    if graph_path and os.path.exists(graph_path):
+    # Embed graph in PDF using temp directory
+    temp_dir = tempfile.gettempdir()
+    graph_path = os.path.join(temp_dir, f"temp_graph_{serial_number}.png")
+    graph_result = generate_test_graph(data, output_path=graph_path)
+    if graph_result and os.path.exists(graph_path):
+        logger.debug(f"Graph file exists at {graph_path} before adding to story")
         graph = RLImage(graph_path, width=6*inch, height=3*inch)
         graph_table = Table([[graph]], colWidths=[6*inch], style=[
             ('BOX', (0, 0), (-1, -1), 0.5, colors.grey),
@@ -272,6 +340,8 @@ def generate_certificate(data, serial_number):
         ])
         story.append(graph_table)
         story.append(Spacer(1, 3))
+    else:
+        logger.warning(f"No graph generated for certificate at {pdf_path}")
 
     approval_data = [
         ["APPROVAL", "", "", ""],
@@ -294,22 +364,27 @@ def generate_certificate(data, serial_number):
     story.append(approval_table)
 
     try:
+        logger.debug(f"Building PDF at {pdf_path} with graph at {graph_path}")
         doc.build(story)
         logger.info(f"Certificate generated: {pdf_path}")
+        # Clean up graph file only after PDF is built
+        if graph_result and os.path.exists(graph_path):
+            try:
+                os.remove(graph_path)
+                logger.info(f"Cleaned up temporary graph file: {graph_path}")
+            except Exception as e:
+                logger.warning(f"Failed to remove temporary graph file {graph_path}: {str(e)}")
         return pdf_path
     except Exception as e:
-        logger.error(f"Failed to generate certificate: {str(e)}")
+        logger.error(f"Failed to generate certificate: {str(e)}\n{traceback.format_exc()}")
+        # Clean up graph file in case of error
+        if graph_result and os.path.exists(graph_path):
+            try:
+                os.remove(graph_path)
+                logger.info(f"Cleaned up temporary graph file after error: {graph_path}")
+            except Exception as cleanup_e:
+                logger.warning(f"Failed to remove temporary graph file after error {graph_path}: {str(cleanup_e)}")
         raise
-
-def load_config():
-    """Load configuration from config.json."""
-    config_path = os.path.join(BASE_DIR, "config.json")
-    try:
-        with open(config_path, "r") as f:
-            return json.load(f)
-    except Exception as e:
-        logger.error(f"Failed to load config: {str(e)}")
-        return {"document_dirs": {"certificate": os.path.join(BASE_DIR, "certificates")}}
 
 def show_pump_details_window(parent, serial_number, username, refresh_callback):
     """Display pump details for approval, mirroring Tester dashboard with live graph."""
@@ -339,7 +414,7 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
             cursor.execute("SELECT username, email FROM users WHERE username = ?", (pump["requested_by"],))
             originator = cursor.fetchone()
     except Exception as e:
-        logger.error(f"Failed to load pump data: {str(e)}")
+        logger.error(f"Failed to load pump data: {str(e)}\n{traceback.format_exc()}")
         Messagebox.show_error("Error", f"Failed to load pump data: {str(e)}")
         return
 
@@ -359,7 +434,7 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
             ttk.Label(header_frame, image=logo).pack(side=RIGHT, padx=10)
             header_frame.image = logo
         except Exception as e:
-            logger.error(f"Details window logo load failed: {str(e)}")
+            logger.error(f"Details window logo load failed: {str(e)}\n{traceback.format_exc()}")
     ttk.Label(header_frame, text="Pump Approval Details", font=("Roboto", 14, "bold")).pack(anchor=W, padx=10)
 
     content_frame = ttk.Frame(container_frame)
@@ -543,32 +618,32 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
 
     def retest_pump():
         updated_test_data = {
-            "invoice_number": invoice_entry.get(),
-            "customer": pump["customer"],
-            "job_number": job_entry.get(),
+            "invoice_number": invoice_entry.get() or "",
+            "customer": pump["customer"] or "N/A",
+            "job_number": job_entry.get() or "",
             "assembly_part_number": pump.get("assembly_part_number", "N/A"),
-            "pump_model": pump["pump_model"],
+            "pump_model": pump["pump_model"] or "N/A",
             "serial_number": serial_number,
-            "impeller_diameter": impeller_entry.get(),
-            "assembled_by": test_data.get("assembled_by", username),
-            "motor_size": fields_left[0][1].get(),
-            "motor_speed": fields_left[1][1].get(),
-            "motor_volts": fields_left[2][1].get(),
-            "motor_enclosure": fields_left[3][1].get(),
-            "mechanical_seal": fields_left[4][1].get(),
-            "frequency": fields_right[0][1].get(),
-            "pump_housing": fields_right[1][1].get(),
-            "pump_connection": fields_right[2][1].get(),
-            "suction": fields_right[3][1].get(),
-            "discharge": fields_right[4][1].get(),
-            "flush_arrangement": fields_right[5][1].get(),
-            "date_of_test": date_entry.get(),
-            "duration_of_test": duration_entry.get(),
-            "test_medium": medium_entry.get(),
-            "tested_by": test_data.get("tested_by", username),
-            "flowrate": [entry.get() for entry in flow_entries],
-            "pressure": [entry.get() for entry in pressure_entries],
-            "amperage": [entry.get() for entry in amp_entries],
+            "impeller_diameter": impeller_entry.get() or "",
+            "assembled_by": test_data.get("assembled_by", username) or "",
+            "motor_size": fields_left[0][1].get() or "",
+            "motor_speed": fields_left[1][1].get() or "",
+            "motor_volts": fields_left[2][1].get() or "",
+            "motor_enclosure": fields_left[3][1].get() or "",
+            "mechanical_seal": fields_left[4][1].get() or "",
+            "frequency": fields_right[0][1].get() or "",
+            "pump_housing": fields_right[1][1].get() or "",
+            "pump_connection": fields_right[2][1].get() or "",
+            "suction": fields_right[3][1].get() or "",
+            "discharge": fields_right[4][1].get() or "",
+            "flush_arrangement": fields_right[5][1].get() or "",
+            "date_of_test": date_entry.get() or "",
+            "duration_of_test": duration_entry.get() or "",
+            "test_medium": medium_entry.get() or "",
+            "tested_by": test_data.get("tested_by", username) or "",
+            "flowrate": [entry.get() or "" for entry in flow_entries],
+            "pressure": [entry.get() or "" for entry in pressure_entries],
+            "amperage": [entry.get() or "" for entry in amp_entries],
         }
         try:
             with get_db_connection() as conn:
@@ -581,54 +656,59 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
             details_window.destroy()
             Messagebox.show_info(f"Pump {serial_number} sent back to Testing.", "Retest Initiated")
         except Exception as e:
-            logger.error(f"Failed to send pump back to Testing: {str(e)}")
+            logger.error(f"Failed to send pump back to Testing: {str(e)}\n{traceback.format_exc()}")
             Messagebox.show_error("Error", f"Failed to retest pump: {str(e)}")
 
     def approve_pump():
         updated_test_data = {
-            "invoice_number": invoice_entry.get(),
-            "customer": pump["customer"],
-            "job_number": job_entry.get(),
+            "invoice_number": invoice_entry.get() or "",
+            "customer": pump["customer"] or "N/A",
+            "job_number": job_entry.get() or "",
             "assembly_part_number": pump.get("assembly_part_number", "N/A"),
-            "pump_model": pump["pump_model"],
+            "pump_model": pump["pump_model"] or "N/A",
             "serial_number": serial_number,
-            "impeller_diameter": impeller_entry.get(),
-            "assembled_by": test_data.get("assembled_by", username),
-            "motor_size": fields_left[0][1].get(),
-            "motor_speed": fields_left[1][1].get(),
-            "motor_volts": fields_left[2][1].get(),
-            "motor_enclosure": fields_left[3][1].get(),
-            "mechanical_seal": fields_left[4][1].get(),
-            "frequency": fields_right[0][1].get(),
-            "pump_housing": fields_right[1][1].get(),
-            "pump_connection": fields_right[2][1].get(),
-            "suction": fields_right[3][1].get(),
-            "discharge": fields_right[4][1].get(),
-            "flush_arrangement": fields_right[5][1].get(),
-            "date_of_test": date_entry.get(),
-            "duration_of_test": duration_entry.get(),
-            "test_medium": medium_entry.get(),
-            "tested_by": test_data.get("tested_by", username),
-            "flowrate": [entry.get() for entry in flow_entries],
-            "pressure": [entry.get() for entry in pressure_entries],
-            "amperage": [entry.get() for entry in amp_entries],
-            "approved_by": username,
+            "impeller_diameter": impeller_entry.get() or "",
+            "assembled_by": test_data.get("assembled_by", username) or "",
+            "motor_size": fields_left[0][1].get() or "",
+            "motor_speed": fields_left[1][1].get() or "",
+            "motor_volts": fields_left[2][1].get() or "",
+            "motor_enclosure": fields_left[3][1].get() or "",
+            "mechanical_seal": fields_left[4][1].get() or "",
+            "frequency": fields_right[0][1].get() or "",
+            "pump_housing": fields_right[1][1].get() or "",
+            "pump_connection": fields_right[2][1].get() or "",
+            "suction": fields_right[3][1].get() or "",
+            "discharge": fields_right[4][1].get() or "",
+            "flush_arrangement": fields_right[5][1].get() or "",
+            "date_of_test": date_entry.get() or "",
+            "duration_of_test": duration_entry.get() or "",
+            "test_medium": medium_entry.get() or "",
+            "tested_by": test_data.get("tested_by", username) or "",
+            "flowrate": [entry.get() or "" for entry in flow_entries],
+            "pressure": [entry.get() or "" for entry in pressure_entries],
+            "amperage": [entry.get() or "" for entry in amp_entries],
+            "approved_by": username or "Unknown",
             "approval_date": datetime.now().strftime("%Y-%m-%d"),
         }
         try:
             for i in range(5):
-                if updated_test_data["flowrate"][i]:
+                if updated_test_data["flowrate"][i] and updated_test_data["flowrate"][i].strip():
                     float(updated_test_data["flowrate"][i])
-                if updated_test_data["pressure"][i]:
+                if updated_test_data["pressure"][i] and updated_test_data["pressure"][i].strip():
                     float(updated_test_data["pressure"][i])
-                if updated_test_data["amperage"][i]:
+                if updated_test_data["amperage"][i] and updated_test_data["amperage"][i].strip():
                     float(updated_test_data["amperage"][i])
         except ValueError:
-            Messagebox.show_error("Flowrate, Pressure, and Amperage must be numeric values.", "Validation Error")
+            Messagebox.show_error("Error", "Flowrate, Pressure, and Amperage must be numeric if provided.")
             return
 
         try:
             pdf_path = generate_certificate(updated_test_data, serial_number)
+            if not pdf_path or not os.path.exists(pdf_path):
+                logger.error(f"Certificate generation failed or file missing: {pdf_path}")
+                Messagebox.show_error("Error", "Failed to generate certificate PDF.")
+                return
+
             with get_db_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute("SELECT requested_by FROM pumps WHERE serial_number = ?", (serial_number,))
@@ -669,8 +749,9 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
             os.startfile(pdf_path)
             Messagebox.show_info(f"Pump {serial_number} approved.\nCertificate saved at: {pdf_path}", "Approval Success")
         except Exception as e:
-            logger.error(f"Failed to approve pump: {str(e)}")
-            Messagebox.show_error("Error", f"Failed to approve pump: {str(e)}")
+            error_msg = f"Failed to approve pump: {str(e)}\n{traceback.format_exc()}"
+            logger.error(error_msg)
+            Messagebox.show_error("Error", error_msg)
 
     ttk.Button(button_frame, text="Retest", command=retest_pump, bootstyle="info", style="large.TButton").pack(side=LEFT, padx=5)
     ttk.Button(button_frame, text="Approve", command=approve_pump, bootstyle="success", style="large.TButton").pack(side=LEFT, padx=5)
@@ -698,7 +779,7 @@ def show_approval_dashboard(root, username, role, logout_callback):
             ttk.Label(header_frame, image=logo).pack(side=RIGHT, padx=10)
             header_frame.image = logo
         except Exception as e:
-            logger.error(f"Logo load failed: {str(e)}")
+            logger.error(f"Logo load failed: {str(e)}\n{traceback.format_exc()}")
     ttk.Label(header_frame, text=f"Welcome, {username}", font=("Roboto", 18, "bold")).pack(anchor=W, padx=10)
     ttk.Label(header_frame, text="Approval Dashboard", font=("Roboto", 12)).pack(anchor=W, padx=10)
 
@@ -731,7 +812,7 @@ def show_approval_dashboard(root, username, role, logout_callback):
                                                  pump["configuration"], pump["originator"]))
             logger.info("Refreshed approval list")
         except Exception as e:
-            logger.error(f"Failed to refresh approval list: {str(e)}")
+            logger.error(f"Failed to refresh approval list: {str(e)}\n{traceback.format_exc()}")
             Messagebox.show_error("Error", f"Failed to load pumps: {str(e)}")
 
     refresh_approval_list()

@@ -12,25 +12,44 @@ logger = get_logger("database")
 
 # Determine the base directory for bundled resources
 if getattr(sys, 'frozen', False):
-    # Running as a bundled executable (PyInstaller)
     BASE_DIR = sys._MEIPASS
+    CONFIG_DIR = os.path.join(os.getenv('APPDATA'), "GuthPumpRegistry")
+    os.makedirs(CONFIG_DIR, exist_ok=True)
+    CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
+    DEFAULT_CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+    BOM_PATH = os.path.join(BASE_DIR, "assets", "bom.json")
 else:
-    # Running in development mode
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+    DEFAULT_CONFIG_PATH = CONFIG_PATH
+    BOM_PATH = os.path.join(BASE_DIR, "assets", "bom.json")
 
-CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
-BOM_PATH = os.path.join(BASE_DIR, "assets", "bom.json")
 DB_LOCK = threading.Lock()
 
 # Connection pool (singleton pattern)
 _conn_pool = None
 
 def load_config():
-    """Load configuration from config.json, raising an error if missing."""
-    if not os.path.exists(CONFIG_PATH):
-        raise FileNotFoundError("config.json not found. Run installer to set up.")
-    with open(CONFIG_PATH, "r") as f:
-        return json.load(f)
+    """Load configuration from config.json, falling back to defaults if missing."""
+    if os.path.exists(CONFIG_PATH):
+        try:
+            with open(CONFIG_PATH, "r") as f:
+                config = json.load(f)
+            logger.debug(f"Loaded config from {CONFIG_PATH}")
+            return config
+        except Exception as e:
+            logger.error(f"Failed to load config from {CONFIG_PATH}: {str(e)}")
+    # Fall back to default config path if user config isn’t found
+    if os.path.exists(DEFAULT_CONFIG_PATH):
+        try:
+            with open(DEFAULT_CONFIG_PATH, "r") as f:
+                config = json.load(f)
+            logger.debug(f"Loaded default config from {DEFAULT_CONFIG_PATH}")
+            return config
+        except Exception as e:
+            logger.error(f"Failed to load default config from {DEFAULT_CONFIG_PATH}: {str(e)}")
+    logger.warning(f"No config found at {CONFIG_PATH} or {DEFAULT_CONFIG_PATH}, using minimal defaults")
+    return {"connection_string": None}  # Minimal default, will raise an error if not set
 
 def get_db_connection():
     """Get a singleton database connection."""
@@ -39,7 +58,7 @@ def get_db_connection():
         config = load_config()
         conn_str = config.get("connection_string")
         if not conn_str:
-            raise ValueError("No connection string found in config.json")
+            raise ValueError("No connection string found in config.json. Please configure via the application.")
         if _conn_pool is None or _conn_pool.closed:
             with DB_LOCK:
                 if _conn_pool is None or _conn_pool.closed:
@@ -57,34 +76,17 @@ def get_db_connection():
         raise
 
 def initialize_database():
-    """Initialize the GuthPumpRegistry tables if they do not exist."""
+    """Initialize the GuthPumpRegistry tables if they do not exist, without dropping existing tables."""
     config = load_config()
     conn_str = config.get("connection_string")
     try:
         with pyodbc.connect(conn_str) as conn:
             cursor = conn.cursor()
             cursor.execute("USE GuthPumpRegistry")
+
+            # Create tables if they don’t exist (non-destructive)
             cursor.execute("""
-                IF EXISTS (SELECT * FROM sys.tables WHERE name = 'bom_items')
-                DROP TABLE bom_items
-            """)
-            cursor.execute("""
-                IF EXISTS (SELECT * FROM sys.tables WHERE name = 'pumps')
-                DROP TABLE pumps
-            """)
-            cursor.execute("""
-                IF EXISTS (SELECT * FROM sys.tables WHERE name = 'users')
-                DROP TABLE users
-            """)
-            cursor.execute("""
-                IF EXISTS (SELECT * FROM sys.tables WHERE name = 'audit_log')
-                DROP TABLE audit_log
-            """)
-            cursor.execute("""
-                IF EXISTS (SELECT * FROM sys.tables WHERE name = 'serial_counter')
-                DROP TABLE serial_counter
-            """)
-            cursor.execute("""
+                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'pumps')
                 CREATE TABLE pumps (
                     serial_number NVARCHAR(50) PRIMARY KEY,
                     pump_model NVARCHAR(50) NOT NULL,
@@ -115,6 +117,7 @@ def initialize_database():
                 )
             """)
             cursor.execute("""
+                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'bom_items')
                 CREATE TABLE bom_items (
                     id INT IDENTITY(1,1) PRIMARY KEY,
                     serial_number NVARCHAR(50),
@@ -127,6 +130,7 @@ def initialize_database():
                 )
             """)
             cursor.execute("""
+                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'users')
                 CREATE TABLE users (
                     id INT IDENTITY(1,1) PRIMARY KEY,
                     username NVARCHAR(50) UNIQUE NOT NULL,
@@ -138,6 +142,7 @@ def initialize_database():
                 )
             """)
             cursor.execute("""
+                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'audit_log')
                 CREATE TABLE audit_log (
                     id INT IDENTITY(1,1) PRIMARY KEY,
                     timestamp DATETIME NOT NULL,
@@ -146,6 +151,7 @@ def initialize_database():
                 )
             """)
             cursor.execute("""
+                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'serial_counter')
                 CREATE TABLE serial_counter (
                     id INT IDENTITY(1,1) PRIMARY KEY,
                     model_code NVARCHAR(50) NOT NULL,
@@ -154,12 +160,13 @@ def initialize_database():
                     year NVARCHAR(4) NOT NULL
                 )
             """)
+            # Create indexes if they don’t exist
             cursor.execute("IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'idx_pumps_status') CREATE INDEX idx_pumps_status ON pumps(status)")
             cursor.execute("IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'idx_bom_items_serial') CREATE INDEX idx_bom_items_serial ON bom_items(serial_number)")
             conn.commit()
-            logger.info("Database tables initialized.")
+            logger.info("Database tables verified/initialized successfully.")
     except pyodbc.Error as e:
-        logger.error(f"Failed to initialize database: {e}")
+        logger.error(f"Failed to initialize database: {str(e)}")
         raise
 
 def hash_password(password):
@@ -175,16 +182,21 @@ def insert_user(cursor, username, password, role, name=None, surname=None, email
         logger.info(f"User inserted: {username} with role {role}")
     except pyodbc.IntegrityError:
         logger.info(f"User {username} already exists, skipping insertion")
+        raise
 
 def check_user(cursor, username, password):
     """Verify user credentials and return role if valid."""
-    cursor.execute("SELECT password_hash, role FROM users WHERE username = ?", (username,))
-    user = cursor.fetchone()
-    if user:
-        # password_hash (index 0) is bytes from VARBINARY, no encoding needed
-        if bcrypt.checkpw(password.encode('utf-8'), user[0]):
-            return user[1]  # Index 1 = role
-    return None
+    try:
+        cursor.execute("SELECT password_hash, role FROM users WHERE username = ?", (username,))
+        user = cursor.fetchone()
+        if user:
+            # password_hash (index 0) is bytes from VARBINARY, no encoding needed
+            if bcrypt.checkpw(password.encode('utf-8'), user[0]):
+                return user[1]  # Index 1 = role
+        return None
+    except Exception as e:
+        logger.error(f"Error checking user {username}: {str(e)}")
+        return None
 
 def create_pump(cursor, pump_model, configuration, customer, requested_by, branch="Main", impeller_size="Medium",
                 connection_type="Flange", pressure_required=0.0, flow_rate_required=0.0, custom_motor="",
@@ -193,73 +205,100 @@ def create_pump(cursor, pump_model, configuration, customer, requested_by, branc
     if pressure_required is None or flow_rate_required is None:
         raise ValueError("Pressure and flow rate are mandatory.")
     serial = generate_serial_number(pump_model, configuration, cursor)
-    cursor.execute("""
-        INSERT INTO pumps (serial_number, pump_model, configuration, customer, status, created_at, requested_by,
-                          branch, impeller_size, connection_type, pressure_required, flow_rate_required,
-                          custom_motor, flush_seal_housing, assembly_part_number)
-        VALUES (?, ?, ?, ?, 'Stores', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (serial, pump_model, configuration, customer, datetime.now(), requested_by, branch, impeller_size,
-          connection_type, float(pressure_required), float(flow_rate_required), custom_motor, flush_seal_housing,
-          assembly_part_number))
-    
-    if insert_bom:
-        bom_items = load_bom_from_json(pump_model, configuration)
-        for item in bom_items:
-            cursor.execute("INSERT INTO bom_items (serial_number, part_name, part_code, quantity) VALUES (?, ?, ?, ?)",
-                           (serial, item["part_name"], item["part_code"], item["quantity"]))
-        logger.info(f"Inserted {len(bom_items)} BOM items for pump {serial}")
+    try:
+        cursor.execute("""
+            INSERT INTO pumps (serial_number, pump_model, configuration, customer, status, created_at, requested_by,
+                              branch, impeller_size, connection_type, pressure_required, flow_rate_required,
+                              custom_motor, flush_seal_housing, assembly_part_number)
+            VALUES (?, ?, ?, ?, 'Stores', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (serial, pump_model, configuration, customer, datetime.now(), requested_by, branch, impeller_size,
+              connection_type, float(pressure_required), float(flow_rate_required), custom_motor, flush_seal_housing,
+              assembly_part_number))
+        
+        if insert_bom:
+            bom_items = load_bom_from_json(pump_model, configuration)
+            for item in bom_items:
+                cursor.execute("INSERT INTO bom_items (serial_number, part_name, part_code, quantity) VALUES (?, ?, ?, ?)",
+                               (serial, item["part_name"], item["part_code"], item["quantity"]))
+            logger.info(f"Inserted {len(bom_items)} BOM items for pump {serial}")
 
-    cursor.execute("INSERT INTO audit_log (timestamp, username, action) VALUES (?, ?, ?)",
-                   (datetime.now(), requested_by, f"Created pump S/N: {serial}"))
-    return serial
+        cursor.execute("INSERT INTO audit_log (timestamp, username, action) VALUES (?, ?, ?)",
+                       (datetime.now(), requested_by, f"Created pump S/N: {serial}"))
+        return serial
+    except Exception as e:
+        logger.error(f"Failed to create pump {serial}: {str(e)}")
+        raise
 
 def pull_bom_item(cursor, serial_number, part_code, username):
     """Mark a BOM item as pulled and log the action."""
-    cursor.execute("UPDATE bom_items SET pulled_at = ? WHERE serial_number = ? AND part_code = ?",
-                   (datetime.now(), serial_number, part_code))
-    cursor.execute("INSERT INTO audit_log (timestamp, username, action) VALUES (?, ?, ?)",
-                   (datetime.now(), username, f"Pulled part {part_code} for S/N: {serial_number}"))
+    try:
+        cursor.execute("UPDATE bom_items SET pulled_at = ? WHERE serial_number = ? AND part_code = ?",
+                       (datetime.now(), serial_number, part_code))
+        cursor.execute("INSERT INTO audit_log (timestamp, username, action) VALUES (?, ?, ?)",
+                       (datetime.now(), username, f"Pulled part {part_code} for S/N: {serial_number}"))
+        logger.info(f"Pulled BOM item {part_code} for {serial_number} by {username}")
+    except Exception as e:
+        logger.error(f"Failed to pull BOM item {part_code} for {serial_number}: {str(e)}")
+        raise
 
 def update_pump_status(cursor, serial_number, new_status, username):
     """Update the status of a pump and log the action."""
-    cursor.execute("UPDATE pumps SET status = ? WHERE serial_number = ?", (new_status, serial_number))
-    cursor.execute("INSERT INTO audit_log (timestamp, username, action) VALUES (?, ?, ?)",
-                   (datetime.now(), username, f"Updated S/N: {serial_number} to {new_status}"))
-    logger.info(f"Status updated: {serial_number} to {new_status} by {username}")
+    try:
+        cursor.execute("UPDATE pumps SET status = ? WHERE serial_number = ?", (new_status, serial_number))
+        cursor.execute("INSERT INTO audit_log (timestamp, username, action) VALUES (?, ?, ?)",
+                       (datetime.now(), username, f"Updated S/N: {serial_number} to {new_status}"))
+        logger.info(f"Status updated: {serial_number} to {new_status} by {username}")
+    except Exception as e:
+        logger.error(f"Failed to update status for {serial_number}: {str(e)}")
+        raise
 
 def load_bom_from_json(pump_model, configuration):
     """Load BOM items from JSON file."""
     try:
+        if not os.path.exists(BOM_PATH):
+            logger.error(f"BOM file not found: {BOM_PATH}")
+            return []
         with open(BOM_PATH, "r") as f:
             bom_data = json.load(f)
-            return bom_data.get(pump_model, {}).get(configuration, [])
+            items = bom_data.get(pump_model, {}).get(configuration, [])
+            logger.debug(f"Loaded BOM items for {pump_model}/{configuration}: {items}")
+            return items
     except (FileNotFoundError, json.JSONDecodeError) as e:
         logger.error(f"Failed to load BOM from JSON: {str(e)}")
         return []
 
 def insert_test_data():
-    """Insert initial test data into the database."""
+    """Insert initial test data into the database if tables are empty."""
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
-            test_users = [
-                ("user1", "password", "Pump Originator", "John", "Doe", "john.doe@guth.co.za"),
-                ("stores1", "password", "Stores", "Jane", "Smith", "jane.smith@guth.co.za"),
-                ("assembler_tester1", "password", "Assembler_Tester", "Alex", "Taylor", "alex.taylor@guth.co.za"),
-                ("approver1", "password", "Approval", "Manager", "Smith", "manager.smith@guth.co.za"),
-                ("admin1", "password", "Admin", "Admin", "User", "admin@guth.co.za"),
-            ]
-            for user in test_users:
-                insert_user(cursor, *user)
-            test_pumps = [
-                ("P1 3.0KW", "Standard", "Guth Pinetown", "user1", "Guth Pinetown", "Medium", "Flange", 2.5, 1000, "", "No", "APN-001"),
-                ("P1 3.0KW", "Standard", "Guth Durban", "user1", "Guth Durban", "Small", "Threaded", 3.0, 1200, "", "Yes", "APN-002"),
-                ("P1 3.0KW", "Standard", "Guth Cape Town", "user1", "Guth Cape Town", "Large", "Welded", 2.0, 800, "", "No", "APN-003"),
-            ]
-            for pump in test_pumps:
-                create_pump(cursor, *pump)
+            # Check if tables are empty
+            cursor.execute("SELECT COUNT(*) FROM users")
+            if cursor.fetchone()[0] == 0:
+                test_users = [
+                    ("user1", "password", "Pump Originator", "John", "Doe", "john.doe@guth.co.za"),
+                    ("stores1", "password", "Stores", "Jane", "Smith", "jane.smith@guth.co.za"),
+                    ("assembler_tester1", "password", "Assembler_Tester", "Alex", "Taylor", "alex.taylor@guth.co.za"),
+                    ("approver1", "password", "Approval", "Manager", "Smith", "manager.smith@guth.co.za"),
+                    ("admin1", "password", "Admin", "Admin", "User", "admin@guth.co.za"),
+                ]
+                for user in test_users:
+                    insert_user(cursor, *user)
+                logger.info("Inserted test users")
+
+            cursor.execute("SELECT COUNT(*) FROM pumps")
+            if cursor.fetchone()[0] == 0:
+                test_pumps = [
+                    ("P1 3.0KW", "Standard", "Guth Pinetown", "user1", "Guth Pinetown", "Medium", "Flange", 2.5, 1000, "", "No", "APN-001"),
+                    ("P1 3.0KW", "Standard", "Guth Durban", "user1", "Guth Durban", "Small", "Threaded", 3.0, 1200, "", "Yes", "APN-002"),
+                    ("P1 3.0KW", "Standard", "Guth Cape Town", "user1", "Guth Cape Town", "Large", "Welded", 2.0, 800, "", "No", "APN-003"),
+                ]
+                for pump in test_pumps:
+                    create_pump(cursor, *pump)
+                logger.info("Inserted test pumps")
+
             conn.commit()
-            logger.info("Test data inserted successfully.")
+            logger.info("Test data insertion completed successfully.")
     except Exception as e:
         logger.error(f"Failed to insert test data: {str(e)}")
         raise
@@ -268,6 +307,7 @@ if __name__ == "__main__":
     try:
         initialize_database()
         insert_test_data()
+        print("Database initialized and test data inserted successfully.")
     except Exception as e:
         print(f"Initialization failed: {e}")
         print("Please ensure the GuthPumpRegistry database exists on the server or contact your database administrator.")

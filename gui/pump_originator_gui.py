@@ -1,6 +1,7 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs import Messagebox
+from ttkbootstrap.tooltip import ToolTip
 from database import get_db_connection, create_pump
 import os
 import sys
@@ -11,15 +12,32 @@ logger = get_logger("pump_originator")
 
 # Determine the base directory for bundled resources
 if getattr(sys, 'frozen', False):
-    # Running as a bundled executable (PyInstaller)
     BASE_DIR = sys._MEIPASS
+    CONFIG_DIR = os.path.join(os.getenv('APPDATA'), "GuthPumpRegistry")
+    os.makedirs(CONFIG_DIR, exist_ok=True)
+    CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
+    DEFAULT_CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 else:
-    # Running in development mode
     BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+    CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+    DEFAULT_CONFIG_PATH = CONFIG_PATH
 
 BUILD_NUMBER = "1.0.0"
 OPTIONS_PATH = os.path.join(BASE_DIR, "assets", "pump_options.json")
 ASSEMBLY_PART_NUMBERS_PATH = os.path.join(BASE_DIR, "assets", "assembly_part_numbers.json")
+
+def load_config():
+    """Load configuration from config.json."""
+    if os.path.exists(CONFIG_PATH):
+        try:
+            with open(CONFIG_PATH, "r") as f:
+                config = json.load(f)
+            logger.debug(f"Loaded config from {CONFIG_PATH}")
+            return config
+        except Exception as e:
+            logger.error(f"Failed to load config from {CONFIG_PATH}: {str(e)}")
+    logger.warning(f"Using default config as {CONFIG_PATH} not found")
+    return {"document_dirs": {"certificate": os.path.join(BASE_DIR, "certificates")}}
 
 def load_options(file_path, key=""):
     """Load options from a JSON file."""
@@ -38,6 +56,7 @@ def load_options(file_path, key=""):
 
 def show_pump_originator_gui(root, username, logout_callback):
     """Display the Pump Originator GUI for creating pumps and viewing status."""
+    logger.info(f"Showing Pump Originator GUI for {username}")
     root.state('zoomed')
     for widget in root.winfo_children():
         widget.destroy()
@@ -53,10 +72,6 @@ def show_pump_originator_gui(root, username, logout_callback):
     options = load_options(OPTIONS_PATH)
     assembly_part_numbers = load_options(ASSEMBLY_PART_NUMBERS_PATH, "assembly_part_numbers")
 
-    # Log the loaded options for debugging
-    logger.debug(f"Loaded options: {options}")
-    logger.debug(f"Loaded assembly part numbers: {assembly_part_numbers}")
-
     # Check if options are empty and display an error if they are
     if not options or not assembly_part_numbers:
         ttk.Label(create_frame, text="Error: Failed to load pump options or assembly part numbers.", font=("Roboto", 12), bootstyle="danger").pack(pady=10)
@@ -64,20 +79,20 @@ def show_pump_originator_gui(root, username, logout_callback):
         return main_frame
 
     fields = [
-        ("Pump Model", ttk.Combobox, options.get("pump_model", []), "P1 3.0KW"),
-        ("Configuration", ttk.Combobox, options.get("configuration", []), "Standard"),
-        ("Customer", ttk.Entry, None, "Guth Test"),
-        ("Branch", ttk.Combobox, options.get("branch", []), "Main"),
-        ("Assembly Part Number", ttk.Combobox, assembly_part_numbers, assembly_part_numbers[0] if assembly_part_numbers else "N/A"),
-        ("Pressure Required (bar)", ttk.Entry, None, ""),
-        ("Flow Rate Required (L/h)", ttk.Entry, None, ""),
-        ("Impeller Size", ttk.Combobox, options.get("impeller_size", {}).get("P1 3.0KW", []), "Medium"),
-        ("Connection Type", ttk.Combobox, options.get("connection_type", []), "Flange"),
-        ("Custom Motor", ttk.Entry, None, ""),
-        ("Flush Seal Housing", ttk.Checkbutton, ["Yes", "No"], "No")
+        ("Pump Model", ttk.Combobox, options.get("pump_model", []), "P1 3.0KW", "Select the pump model"),
+        ("Configuration", ttk.Combobox, options.get("configuration", []), "Standard", "Select the pump configuration"),
+        ("Customer", ttk.Entry, None, "Guth Test", "Enter the customer name"),
+        ("Branch", ttk.Combobox, options.get("branch", []), "Main", "Select the branch"),
+        ("Assembly Part Number", ttk.Combobox, assembly_part_numbers, assembly_part_numbers[0] if assembly_part_numbers else "N/A", "Select the assembly part number"),
+        ("Pressure Required (bar)", ttk.Entry, None, "", "Enter required pressure in bar"),
+        ("Flow Rate Required (L/h)", ttk.Entry, None, "", "Enter required flow rate in L/h"),
+        ("Impeller Size", ttk.Combobox, options.get("impeller_size", {}).get("P1 3.0KW", []), "Medium", "Select impeller size"),
+        ("Connection Type", ttk.Combobox, options.get("connection_type", []), "Flange", "Select connection type"),
+        ("Custom Motor", ttk.Entry, None, "", "Enter custom motor details (optional)"),
+        ("Flush Seal Housing", ttk.Checkbutton, ["Yes", "No"], "No", "Check if flush seal housing is required")
     ]
     entries = {}
-    for i, (label, widget_type, opts, default) in enumerate(fields):
+    for i, (label, widget_type, opts, default, tooltip) in enumerate(fields):
         ttk.Label(create_frame, text=f"{label}:").pack()
         if widget_type == ttk.Entry:
             entry = widget_type(create_frame)
@@ -91,9 +106,11 @@ def show_pump_originator_gui(root, username, logout_callback):
             entry = widget_type(create_frame, text="", variable=var, bootstyle="success-round-toggle")
             entries[label.lower().replace(" ", "_")] = var
             entry.pack(pady=5)
+            ToolTip(entry, text=tooltip, bootstyle="info")
             continue
         entry.pack(pady=5)
         entries[label.lower().replace(" ", "_")] = entry
+        ToolTip(entry, text=tooltip, bootstyle="info")
 
     status_label = ttk.Label(create_frame, text="", bootstyle=SUCCESS)
     status_label.pack(pady=10)
@@ -103,7 +120,7 @@ def show_pump_originator_gui(root, username, logout_callback):
         data = {key: entry.get() if not isinstance(entry, ttk.BooleanVar) else "Yes" if entry.get() else "No" for key, entry in entries.items()}
         
         required_fields = ["pump_model", "configuration", "customer", "branch", "assembly_part_number", "pressure_required", "flow_rate_required", "impeller_size", "connection_type"]
-        missing = [field.replace("_", " ").title() for field in required_fields if not data[field]]
+        missing = [field.replace("_", " ").title() for field in required_fields if not data[field].strip()]
         if missing:
             Messagebox.show_error(f"Missing required fields: {', '.join(missing)}", "Validation Error")
             return
@@ -147,6 +164,7 @@ def show_pump_originator_gui(root, username, logout_callback):
             Messagebox.show_error("Error", f"Failed to create pump: {str(e)}")
 
     ttk.Button(create_frame, text="Create Pump", command=create, bootstyle=SUCCESS).pack(pady=20)
+    ToolTip(ttk.Button(create_frame, text="Create Pump", command=create, bootstyle=SUCCESS), text="Submit to create a new pump", bootstyle="success")
 
     notebook = ttk.Notebook(main_frame)
     notebook.pack(fill=BOTH, expand=True, pady=10)
@@ -177,7 +195,6 @@ def show_pump_originator_gui(root, username, logout_callback):
                     FROM pumps
                 """)
                 for pump in cursor.fetchall():
-                    # pump is a tuple: (serial_number, assembly_part_number, customer, branch, pump_model, configuration, created_at, status, pressure_required, flow_rate_required)
                     all_pumps_tree.insert("", END, values=(pump[0], pump[1] or "N/A", pump[2], pump[3], pump[4], pump[5], pump[6], pump[7], pump[8], pump[9]))
             logger.info("Refreshed All Pumps table")
         except Exception as e:
@@ -186,6 +203,7 @@ def show_pump_originator_gui(root, username, logout_callback):
 
     refresh_all_pumps()
     ttk.Button(all_pumps_frame, text="Refresh", command=refresh_all_pumps, bootstyle="info", style="large.TButton").pack(pady=5)
+    ToolTip(ttk.Button(all_pumps_frame, text="Refresh", command=refresh_all_pumps, bootstyle="info", style="large.TButton"), text="Refresh the All Pumps table", bootstyle="info")
 
     stores_tab = ttk.Frame(notebook)
     notebook.add(stores_tab, text="Pumps in Stores")
@@ -212,7 +230,6 @@ def show_pump_originator_gui(root, username, logout_callback):
                     FROM pumps WHERE status = 'Stores'
                 """)
                 for pump in cursor.fetchall():
-                    # pump is a tuple: (serial_number, assembly_part_number, customer, branch, pump_model, configuration, created_at, status, pressure_required, flow_rate_required)
                     stores_tree.insert("", END, values=(pump[0], pump[1] or "N/A", pump[2], pump[3], pump[4], pump[5], pump[6], pump[7], pump[8], pump[9]))
             logger.info("Refreshed Pumps in Stores table")
         except Exception as e:
@@ -221,8 +238,10 @@ def show_pump_originator_gui(root, username, logout_callback):
 
     refresh_stores_pumps()
     ttk.Button(stores_frame, text="Refresh", command=refresh_stores_pumps, bootstyle="info", style="large.TButton").pack(pady=5)
+    ToolTip(ttk.Button(stores_frame, text="Refresh", command=refresh_stores_pumps, bootstyle="info", style="large.TButton"), text="Refresh the Pumps in Stores table", bootstyle="info")
 
     ttk.Button(main_frame, text="Logoff", command=logout_callback, bootstyle="warning", style="large.TButton").pack(pady=10)
+    ToolTip(ttk.Button(main_frame, text="Logoff", command=logout_callback, bootstyle="warning", style="large.TButton"), text="Log out of the application", bootstyle="warning")
     ttk.Label(main_frame, text="\u00A9 Guth South Africa", font=("Roboto", 10)).pack(pady=(5, 0))
     ttk.Label(main_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack()
 

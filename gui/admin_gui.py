@@ -4,6 +4,7 @@ from ttkbootstrap.dialogs import Messagebox
 from PIL import Image, ImageTk
 import pyodbc
 import os
+import sys
 from datetime import datetime, timedelta
 import shutil
 import bcrypt
@@ -18,12 +19,28 @@ from email.mime.text import MIMEText
 from database import get_db_connection
 
 logger = get_logger("admin_gui")
-BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+
+# Determine the base directory for bundled resources
+if getattr(sys, 'frozen', False):
+    BASE_DIR = sys._MEIPASS
+else:
+    BASE_DIR = r"C:\Users\travism\source\repos\GuthPumpRegistry"
+
+# Define config paths
+if getattr(sys, 'frozen', False):
+    # Use AppData for persistent config in installed app
+    CONFIG_DIR = os.path.join(os.getenv('APPDATA'), "GuthPumpRegistry")
+    os.makedirs(CONFIG_DIR, exist_ok=True)
+    CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
+    DEFAULT_CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+else:
+    CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+    DEFAULT_CONFIG_PATH = CONFIG_PATH
+
 LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo.png")
-CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 BUILD_NUMBER = "1.0.0"
 
-# Default directories
+# Default directories (relative to BASE_DIR for default, but will be overridden by config)
 DEFAULT_DIRS = {
     "certificate": os.path.join(BASE_DIR, "certificates"),
     "bom": os.path.join(BASE_DIR, "boms"),
@@ -44,27 +61,53 @@ DEFAULT_EMAIL_SETTINGS = {
 
 def load_config():
     """Load configuration from config.json, creating it with defaults if missing."""
-    if not os.path.exists(CONFIG_PATH):
-        config = {"document_dirs": DEFAULT_DIRS, "email_settings": DEFAULT_EMAIL_SETTINGS}
-        with open(CONFIG_PATH, "w") as f:
-            json.dump(config, f, indent=4)
-        logger.info(f"Created default config file at {CONFIG_PATH}")
-        return config
-    with open(CONFIG_PATH, "r") as f:
-        config = json.load(f)
-    config.setdefault("document_dirs", DEFAULT_DIRS)
-    config.setdefault("email_settings", DEFAULT_EMAIL_SETTINGS)
+    # Check user-specific config first (writable location)
+    if os.path.exists(CONFIG_PATH):
+        try:
+            with open(CONFIG_PATH, "r") as f:
+                config = json.load(f)
+            logger.info(f"Loaded user config from {CONFIG_PATH}")
+        except Exception as e:
+            logger.error(f"Failed to load user config from {CONFIG_PATH}: {str(e)}")
+            config = {}
+    else:
+        # Fall back to bundled default config
+        if os.path.exists(DEFAULT_CONFIG_PATH):
+            try:
+                with open(DEFAULT_CONFIG_PATH, "r") as f:
+                    config = json.load(f)
+                logger.info(f"Loaded default config from {DEFAULT_CONFIG_PATH}")
+            except Exception as e:
+                logger.error(f"Failed to load default config from {DEFAULT_CONFIG_PATH}: {str(e)}")
+                config = {}
+        else:
+            config = {}
+            logger.warning(f"No config found at {CONFIG_PATH} or {DEFAULT_CONFIG_PATH}")
+
+    # Ensure defaults are applied
+    config.setdefault("document_dirs", DEFAULT_DIRS.copy())
+    config.setdefault("email_settings", DEFAULT_EMAIL_SETTINGS.copy())
     for key, default in DEFAULT_DIRS.items():
         config["document_dirs"].setdefault(key, default)
     for key, default in DEFAULT_EMAIL_SETTINGS.items():
         config["email_settings"].setdefault(key, default)
+
+    # If user config didn’t exist, create it with defaults
+    if not os.path.exists(CONFIG_PATH):
+        save_config(config)
+        logger.info(f"Created default config file at {CONFIG_PATH}")
+
     return config
 
 def save_config(config):
-    """Save configuration to config.json."""
-    with open(CONFIG_PATH, "w") as f:
-        json.dump(config, f, indent=4)
-    logger.info(f"Saved config to {CONFIG_PATH}")
+    """Save configuration to config.json in a writable location."""
+    try:
+        with open(CONFIG_PATH, "w") as f:
+            json.dump(config, f, indent=4)
+        logger.info(f"Saved config to {CONFIG_PATH}")
+    except Exception as e:
+        logger.error(f"Failed to save config to {CONFIG_PATH}: {str(e)}")
+        raise
 
 def show_admin_gui(root, username, logout_callback):
     """Display the admin GUI with tabbed interface."""
@@ -153,7 +196,6 @@ def show_pumps_tab(frame):
         cursor = conn.cursor()
         cursor.execute("SELECT serial_number, pump_model, configuration, status, customer, created_at FROM pumps")
         for pump in cursor.fetchall():
-            # pump is a tuple: (serial_number, pump_model, configuration, status, customer, created_at)
             frame.tree.insert("", END, values=(pump[0], pump[1], pump[2], pump[3], pump[4], pump[5]))
 
 def edit_pump_window(parent_frame, tree):
@@ -167,7 +209,6 @@ def edit_pump_window(parent_frame, tree):
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM pumps WHERE serial_number = ?", (serial_number,))
-        # Convert tuple to dict using column names
         columns = [desc[0] for desc in cursor.description]
         pump = dict(zip(columns, cursor.fetchone() or tuple([serial_number] + [None] * (len(columns) - 1))))
 
@@ -257,7 +298,6 @@ def show_user_tab(frame):
         input_frame.pack(fill=X, padx=10, pady=10)
         frame.input_frame = input_frame
 
-        # Updated roles to include "Assembler_Tester"
         roles = ["Admin", "Stores", "Assembler_Tester", "Pump Originator", "Approval"]
 
         fields = ["Username", "Password", "Role", "Name", "Surname", "Email"]
@@ -294,7 +334,6 @@ def show_user_tab(frame):
                 return
             with get_db_connection() as conn:
                 cursor = conn.cursor()
-                # Check existing users for debugging
                 cursor.execute("SELECT username FROM users WHERE username = ?", (username,))
                 existing_user = cursor.fetchone()
                 if existing_user:
@@ -309,18 +348,17 @@ def show_user_tab(frame):
                     """, (username, password_hash, role, name, surname, email))
                     conn.commit()
                     logger.info(f"Successfully added user {username} with role {role}")
-                    # Clear all fields after successful add
                     for field, entry in frame.entries.items():
                         entry.delete(0, END)
-                    frame.entries["role"].set("Pump Originator")  # Reset role to default
+                    frame.entries["role"].set("Pump Originator")
                     frame.error_label.config(text="User added successfully!", bootstyle="success")
                     refresh_user_list()
                 except pyodbc.IntegrityError as ie:
                     frame.error_label.config(text=f"User {username} already exists (IntegrityError)", bootstyle="danger")
-                    logger.error(f"IntegrityError adding user {username} with role {role}: {str(ie)}")
+                    logger.error(f"IntegrityError adding user {username}: {str(ie)}")
                 except Exception as e:
                     frame.error_label.config(text=f"Failed to add user: {str(e)}", bootstyle="danger")
-                    logger.error(f"Unexpected error adding user {username} with role {role}: {str(e)}")
+                    logger.error(f"Unexpected error adding user {username}: {str(e)}")
 
         def edit_user():
             selected = frame.user_tree.selection()
@@ -377,7 +415,6 @@ def show_user_tab(frame):
                 cursor = conn.cursor()
                 cursor.execute("SELECT username, role FROM users")
                 for user in cursor.fetchall():
-                    # user is a tuple: (username, role)
                     frame.user_tree.insert("", END, values=(user[0], user[1]))
 
         def on_right_click(event):
@@ -597,7 +634,6 @@ def show_activity_log_tab(frame):
                 cursor = conn.cursor()
                 cursor.execute("SELECT timestamp, username, action FROM audit_log ORDER BY timestamp DESC")
                 for log in cursor.fetchall():
-                    # log is a tuple: (timestamp, username, action)
                     frame.log_tree.insert("", END, values=(log[0], log[1], log[2]))
 
         def export_to_excel():
@@ -763,10 +799,8 @@ def edit_user_window(parent_frame, username):
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
-        # Convert tuple to dict using column names
         columns = [desc[0] for desc in cursor.description]
         user = dict(zip(columns, cursor.fetchone()))
-        # Updated roles to include "Assembler_Tester"
         roles = ["Admin", "Stores", "Assembler_Tester", "Pump Originator", "Approval"]
 
     edit_window = ttk.Toplevel(parent_frame)

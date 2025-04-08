@@ -1,5 +1,8 @@
-ttkbootstrap==1.10.1
-bcrypt==4.1.2
-fpdf==1.7.2
-python-dotenv==1.0.1
-openpyxl==3.1.2
+# Guth Pump Registry Requirements
+# Install with: pip install -r requirements.txt
+
+ttkbootstrap==1.10.1      # GUI framework with bootstrap styling
+pyodbc==5.1.0            # SQL Server ODBC driver for database connectivity
+bcrypt==4.1.2            # Password hashing for user authentication
+reportlab==4.2.0         # PDF generation for notifications
+pillow==10.3.0           # Image processing for logos in GUI
