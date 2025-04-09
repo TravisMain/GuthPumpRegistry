@@ -1,44 +1,56 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-from PyInstaller.utils.hooks import collect_submodules
+from PyInstaller.utils.hooks import collect_submodules, collect_data_files
 
 block_cipher = None
 
 a = Analysis(
     ['gui\\base_gui.py'],
     pathex=['C:\\Users\\travism\\source\\repos\\GuthPumpRegistry'],
-    binaries=[('C:\\Program Files\\Python311\\python311.dll', '.')],
+    binaries=[
+        ('C:\\Program Files\\Python311\\python311.dll', '.'),
+        # Adjust this path based on your system
+        ('C:\\Program Files\\Microsoft SQL Server\\Client SDK\\ODBC\\170\\Tools\\Binn\\msodbcsql17.dll', '.')
+    ],
     datas=[
         ('assets\\bom.json', 'assets'),
         ('assets\\pump_options.json', 'assets'),
         ('assets\\assembly_part_numbers.json', 'assets'),
         ('assets\\logo.png', 'assets'),
+        ('assets\\guth_logo.png', 'assets'),
+        ('assets\\Roboto-Regular.ttf', 'assets'),
+        ('assets\\Roboto-Black.ttf', 'assets'),
         ('gui', 'gui'),
         ('utils', 'utils'),
         ('database.py', '.'),
-        ('export_utils.py', '.'),  # Main PDF/email utility
-        ('doc_utils.py', '.'),     # Added if distinct from export_utils.py
+        ('export_utils.py', '.'),
         ('config.json', '.'),
         ('README.md', '.'),
-        ('USER_GUIDE.md', '.')
+        ('USER_GUIDE.md', '.'),
+        ('app_icon.ico', '.'),
+        *collect_data_files('ttkbootstrap')  # ttkbootstrap themes
     ],
     hiddenimports=[
-        'ttkbootstrap',                  # GUI framework
-        'pyodbc',                        # Database connectivity
-        'bcrypt',                        # Password hashing
-        'reportlab',                     # PDF generation
+        'ttkbootstrap',
+        'ttkbootstrap.style',
+        'ttkbootstrap.themes',
+        'ttkbootstrap.window',
+        'pyodbc',
+        'pyodbc.drivers',
+        'bcrypt',
+        'reportlab',
         'reportlab.lib.pagesizes',
         'reportlab.lib.units',
         'reportlab.lib.styles',
         'reportlab.lib.colors',
         'reportlab.platypus',
         'reportlab.graphics',
-        'PIL',                           # Image processing
-        'threading',                     # Thread safety
-        'matplotlib',                    # Graphing in approval_gui.py
-        'matplotlib.backends.backend_tkagg',  # Tkinter canvas for graphs
-        'pandas',                        # Added back if used elsewhere
-        'tkinter.filedialog'             # Added back if used elsewhere
+        'PIL',
+        'threading',
+        'matplotlib',
+        'matplotlib.backends.backend_tkagg',
+        'pandas',
+        'tkinter.filedialog'
     ],
     hookspath=[],
     hooksconfig={},
@@ -52,6 +64,8 @@ a = Analysis(
 )
 
 a.hiddenimports.extend(collect_submodules('reportlab'))
+a.hiddenimports.extend(collect_submodules('ttkbootstrap'))
+a.hiddenimports.extend(collect_submodules('pyodbc'))
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
@@ -61,16 +75,18 @@ exe = EXE(
     a.binaries,
     a.zipfiles,
     a.datas,
-    name='GuthPumpRegistry',
-    debug=False,
+    [],
+    name='GuthPumpWorks',
+    debug=True,
+    console=False,  # Keep True for now to debug
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
-    console=False,  # No console for GUI app
+    upx=False,
+    onefile=True,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='app_icon.ico'  # Verify this exists at project root
+    icon='app_icon.ico'
 )

@@ -1,0 +1,6 @@
+2025-04-08 11:59:29,361 - base_gui - ERROR - BaseGUI: Import error: No module named 'utils'
+Traceback (most recent call last):
+  File "C:\Users\travism\source\repos\GuthPumpRegistry\gui\base_gui.py", line 35, in <module>
+    from utils.config import get_logger
+ModuleNotFoundError: No module named 'utils'
+

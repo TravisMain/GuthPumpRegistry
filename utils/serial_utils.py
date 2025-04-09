@@ -1,4 +1,5 @@
 import os
+import pyodbc
 import sys
 import threading
 from datetime import datetime
@@ -14,7 +15,6 @@ else:
 
 SERIAL_LOCK = threading.Lock()
 
-# Updated serial number mappings per your request
 PUMP_MODEL_CODES = {
     "PT 0.55KW": "0",
     "PS 0.75KW": "1",
@@ -49,31 +49,28 @@ def generate_serial_number(pump_model, configuration, cursor):
 
     with SERIAL_LOCK:
         try:
-            # Use a single transaction to ensure consistency
+            # Step 1: Check if entry exists and insert if not
             cursor.execute("""
-                BEGIN TRANSACTION;
                 IF NOT EXISTS (
                     SELECT 1 FROM serial_counter 
                     WHERE model_code = ? AND config_code = ? AND year = ?
                 )
-                BEGIN
-                    INSERT INTO serial_counter (model_code, config_code, sequence, year)
-                    VALUES (?, ?, 0, ?)
-                END
-                
+                INSERT INTO serial_counter (model_code, config_code, sequence, year)
+                VALUES (?, ?, 0, ?)
+            """, (model_code, config_code, year, model_code, config_code, year))
+
+            # Step 2: Increment sequence
+            cursor.execute("""
                 UPDATE serial_counter 
                 SET sequence = sequence + 1
-                WHERE model_code = ? AND config_code = ? AND year = ?;
-                
-                SELECT sequence FROM serial_counter 
-                WHERE model_code = ? AND config_code = ? AND year = ?;
-                COMMIT TRANSACTION;
-            """, (model_code, config_code, year, 
-                  model_code, config_code, year, 
-                  model_code, config_code, year, 
-                  model_code, config_code, year))
+                WHERE model_code = ? AND config_code = ? AND year = ?
+            """, (model_code, config_code, year))
 
-            # Fetch the sequence (last query in the batch)
+            # Step 3: Fetch the updated sequence
+            cursor.execute("""
+                SELECT sequence FROM serial_counter 
+                WHERE model_code = ? AND config_code = ? AND year = ?
+            """, (model_code, config_code, year))
             row = cursor.fetchone()
             if row is None:
                 raise ValueError(f"No sequence found for {model_code}{config_code} in {year}")
@@ -87,11 +84,9 @@ def generate_serial_number(pump_model, configuration, cursor):
             return serial
         except pyodbc.Error as e:
             logger.error(f"Database error generating serial number: {str(e)}")
-            cursor.execute("ROLLBACK TRANSACTION")  # Rollback on error
             raise
         except Exception as e:
             logger.error(f"Failed to generate serial number: {str(e)}")
-            cursor.execute("ROLLBACK TRANSACTION")  # Rollback on error
             raise
 
 if __name__ == "__main__":

@@ -1,8 +1,6 @@
-{
-  "assembly_part_numbers": ["APN-001", "APN-002", "APN-003", "APN-004", "APN-005"]
-}# Guth Pump Registry User Guide
+# Guth Pump Registry User Guide
 
-Welcome to the Guth Pump Registry, a desktop application designed to streamline the management of pump assemblies at Guth South Africa. This guide provides step-by-step instructions for using the application, tailored to your role within the workflow. Whether you’re creating pumps, pulling parts, testing assemblies, approving results, or managing the system, this document will help you get started and make the most of the tool.
+Welcome to the Guth Pump Registry, a desktop application designed to streamline the management of pump assemblies at Guth South Africa. This guide provides step-by-step instructions for using the application, tailored to your role within the workflow. Whether you're creating pumps, pulling parts, testing assemblies, approving results, or managing the system, this document will help you get started and make the most of the tool.
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -65,7 +63,7 @@ The Guth Pump Registry is a role-based application that tracks pump assemblies f
    - **Surname**: Last name (e.g., `Doe`).
    - **Email**: Valid email address (e.g., `john.doe@guth.co.za`).
    - **Password**: Secure password.
-3. Click **Submit**. On success, you’ll see "Registration successful! You can now login." Default role is **Pump Originator**.
+3. Click **Submit**. On success, you'll see "Registration successful! You can now login." Default role is **Pump Originator**.
 
 ## User Roles and Dashboards
 
@@ -139,7 +137,7 @@ The Guth Pump Registry is a role-based application that tracks pump assemblies f
 ### Notifications
 - **PDFs**: Saved to paths set in `config.json` (e.g., `C:\Custom\Path\Notifications`).
 - **Emails**: Sent to role-specific recipients (e.g., `stores@guth.co.za`) with attachments.
-- Configure SMTP in Admin → Email tab for email functionality.
+- Configure SMTP in Admin -> Email tab for email functionality.
 
 ### Configuration (Admin)
 1. Log in as Admin.
@@ -157,11 +155,11 @@ The Guth Pump Registry is a role-based application that tracks pump assemblies f
   - Verify database connection in `config.json`.
 
 - **PDFs Not Generating**:
-  - Ensure `logo.png` exists in `assets/` and output paths are writable.
+  - Ensure `logo.png` exists in `assets\` and output paths are writable.
   - Check `app.log` for errors.
 
 - **Emails Not Sending**:
-  - Confirm SMTP settings in Admin → Email.
+  - Confirm SMTP settings in Admin -> Email.
   - Check network and `app.log` for SMTP errors.
 
 - **Database Errors**:

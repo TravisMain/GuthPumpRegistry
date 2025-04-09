@@ -68,7 +68,7 @@ def load_config():
         "excel_exports": os.path.join(BASE_DIR, "exports")
     })
 
-    # If user config didn’t exist, create it with defaults
+    # If user config didnâ€™t exist, create it with defaults
     if not os.path.exists(CONFIG_PATH):
         try:
             with open(CONFIG_PATH, "w") as f:

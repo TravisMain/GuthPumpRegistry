@@ -1,19 +1,26 @@
 import sys
 import os
+
+# Ensure the project root is correctly set and added to sys.path before imports
+script_dir = os.path.dirname(os.path.abspath(__file__))  # Directory of base_gui.py (gui\)
+project_root = os.path.abspath(os.path.join(script_dir, '..'))  # Parent directory (root)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+# Now safe to import modules
 import traceback
 import logging
 
-# Print immediately to confirm execution starts
-print("BaseGUI: Execution started")
+print("BaseGUI: Execution started")  # Keep for debugging visibility
 
-# Path handling for PyInstaller
+BASE_DIR = project_root
+print(f"BaseGUI: BASE_DIR set to {BASE_DIR}")
+
+# Path handling for PyInstaller resources
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and PyInstaller."""
-    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    base_path = getattr(sys, '_MEIPASS', BASE_DIR)
     return os.path.join(base_path, relative_path)
-
-BASE_DIR = resource_path("")
-print(f"BaseGUI: BASE_DIR set to {BASE_DIR}")
 
 # Define config paths
 if getattr(sys, 'frozen', False):
@@ -43,7 +50,7 @@ try:
     import ttkbootstrap as ttk
     import pyodbc
     from gui.styles import configure_styles
-    from gui.login_gui import show_login_screen, save_login_details  # Added save_login_details import
+    from gui.login_gui import show_login_screen
     from gui.register_gui import show_register_window
     from gui.dashboard_gui import show_dashboard
     from gui.admin_gui import show_admin_gui
@@ -53,14 +60,18 @@ try:
     from database import get_db_connection, check_user, insert_user
 except Exception as e:
     error_msg = f"BaseGUI: Import error: {str(e)}\n{traceback.format_exc()}"
-    print(error_msg)  # Print to console for .exe
+    print(error_msg)
     try:
-        logging.basicConfig(filename="app.log", level=logging.DEBUG)  # Fallback logging
+        with open(os.path.join(BASE_DIR, "import_error.log"), "w", encoding='utf-8') as f:
+            f.write(error_msg)
+        logging.basicConfig(filename="app.log", level=logging.DEBUG)
         logger = logging.getLogger("base_gui")
         logger.error(error_msg)
     except:
-        print("BaseGUI: Failed to initialize logging")
-    if not getattr(sys, 'frozen', False):  # Only pause in development mode
+        print("BaseGUI: Failed to initialize logging or write import_error.log")
+    if getattr(sys, 'frozen', False):
+        input("Press Enter to exit . . .")
+    else:
         input("Press Enter to continue . . .")
     sys.exit(1)
 
@@ -90,7 +101,7 @@ class BaseGUI:
         self.login_frame, self.error_label = show_login_screen(self.root, self.login, self.show_register)
 
     def login(self, username, password):
-        """Handle login attempt, save login details if Remember Me is checked, and route to appropriate dashboard."""
+        """Handle login attempt and route to appropriate dashboard."""
         logger.info(f"Login attempt for {username}")
         print(f"BaseGUI: Login attempt for {username}")
         if not self.error_label:
@@ -103,15 +114,16 @@ class BaseGUI:
                 cursor = conn.cursor()
                 role = check_user(cursor, username, password)
             if role:
-                # Save login details if Remember Me is checked
-                if hasattr(self.login_frame, 'remember_me'):  # Check if login_frame has remember_me attribute
+                if hasattr(self.login_frame, 'remember_me'):
                     remember_me = self.login_frame.remember_me.get()
                     if remember_me:
+                        from gui.login_gui import save_login_details
                         save_login_details(username, password, True)
                         logger.info(f"Saved login details for {username} due to Remember Me")
                         print(f"BaseGUI: Saved login details for {username} due to Remember Me")
                     else:
-                        save_login_details("", "", False)  # Clear saved details if unchecked
+                        from gui.login_gui import save_login_details
+                        save_login_details("", "", False)
                         logger.info("Cleared saved login details as Remember Me was unchecked")
                         print("BaseGUI: Cleared saved login details as Remember Me was unchecked")
 
@@ -200,6 +212,7 @@ if __name__ == "__main__":
         logger.info("Application starting")
         print("BaseGUI: Application starting")
         root = ttk.Window(themename="flatly")
+        root.iconbitmap(resource_path("app_icon.ico"))
         configure_styles()
         app = BaseGUI(root)
         logger.info("Main loop starting")
@@ -209,6 +222,7 @@ if __name__ == "__main__":
         error_msg = f"BaseGUI: Main error: {str(e)}\n{traceback.format_exc()}"
         logger.error(error_msg)
         print(error_msg)
-        if not getattr(sys, 'frozen', False):  # Only pause in development mode
-            input("Press Enter to continue . . .")
+        with open(os.path.join(BASE_DIR, "error.log"), "w", encoding='utf-8') as f:
+            f.write(error_msg)
+        input("Press Enter to exit . . .")
         sys.exit(1)

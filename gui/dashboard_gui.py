@@ -1,4 +1,4 @@
-﻿import ttkbootstrap as ttk
+import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs import Messagebox
 from ttkbootstrap import Style
@@ -40,7 +40,6 @@ STORES_EMAIL = "stores@guth.co.za"
 
 def load_config():
     """Load configuration from config.json, creating it with defaults if missing."""
-    # Check user-specific config first (writable location)
     if os.path.exists(CONFIG_PATH):
         try:
             with open(CONFIG_PATH, "r") as f:
@@ -50,7 +49,6 @@ def load_config():
             logger.error(f"Failed to load user config from {CONFIG_PATH}: {str(e)}")
             config = {}
     else:
-        # Fall back to bundled default config
         if os.path.exists(DEFAULT_CONFIG_PATH):
             try:
                 with open(DEFAULT_CONFIG_PATH, "r") as f:
@@ -63,7 +61,6 @@ def load_config():
             config = {}
             logger.warning(f"No config found at {CONFIG_PATH} or {DEFAULT_CONFIG_PATH}")
 
-    # Ensure defaults are applied for required keys
     config.setdefault("document_dirs", {
         "certificate": os.path.join(BASE_DIR, "certificates"),
         "bom": os.path.join(BASE_DIR, "boms"),
@@ -72,7 +69,6 @@ def load_config():
         "excel_exports": os.path.join(BASE_DIR, "exports")
     })
 
-    # If user config didn’t exist, create it with defaults
     if not os.path.exists(CONFIG_PATH):
         try:
             with open(CONFIG_PATH, "w") as f:
@@ -306,6 +302,17 @@ def show_dashboard(root, username, role, logout_callback):
 
     def submit_pump():
         """Create a new pump assembly and notify Stores if applicable."""
+        global pyodbc
+        try:
+            import pyodbc  # Force re-import to ensure it’s available
+            logger.debug("pyodbc re-imported in submit_pump successfully")
+        except ImportError as e:
+            logger.error(f"Failed to re-import pyodbc in submit_pump: {str(e)}")
+            raise
+        except NameError as e:
+            logger.error(f"pyodbc NameError in submit_pump before use: {str(e)}")
+            raise
+
         data = {key: entry.get().strip() if isinstance(entry, (ttk.Entry, ttk.Combobox)) else "Yes" if entry.instate(['selected']) else "No" for key, entry in entries.items()}
         if data["connection_type"] == "Other":
             data["connection_type"] = other_entry.get().strip() or (error_label.config(text="Please enter a custom connection type.") and None) or None
@@ -319,7 +326,7 @@ def show_dashboard(root, username, role, logout_callback):
         if data["send_to_stores"] == "Yes":
             data["customer"] = "Stores"
 
-        required_fields = [f[0].lower().replace(" ", "_") for f in fields if f[3]]
+        required_fields = ["pump_model", "configuration", "customer", "branch", "assembly_part_number", "pressure_required", "flow_rate_required", "impeller_size", "connection_type"]
         missing = [field.replace("_", " ").title() for field in required_fields if not data[field]]
         if missing:
             error_label.config(text=f"Missing required fields: {', '.join(missing)}")
@@ -335,7 +342,9 @@ def show_dashboard(root, username, role, logout_callback):
             return
 
         try:
+            logger.debug("Attempting to get database connection in submit_pump")
             with get_db_connection() as conn:
+                logger.debug("Database connection obtained in submit_pump")
                 cursor = conn.cursor()
                 serial = create_pump(
                     cursor,
@@ -354,12 +363,10 @@ def show_dashboard(root, username, role, logout_callback):
                     insert_bom=True
                 )
                 cursor.execute("SELECT part_code, part_name, quantity FROM bom_items WHERE serial_number = ?", (serial,))
-                # bom_items uses tuple indices: (part_code, part_name, quantity)
                 bom_items = [{"part_code": row[0], "part_name": row[1], "quantity": row[2]} for row in cursor.fetchall()]
                 conn.commit()
                 logger.info(f"New pump created by {username}: {serial} with BOM")
 
-            # Build pump_data after serial is assigned
             pump_data = {
                 "serial_number": serial,
                 "assembly_part_number": data["assembly_part_number"],
@@ -378,7 +385,7 @@ def show_dashboard(root, username, role, logout_callback):
             logger.debug(f"pump_data: {pump_data}")
 
             config = load_config()
-            notifications_dir = os.path.join(BASE_DIR, "docs", "Notifications")  # Keep as legacy dir for compatibility
+            notifications_dir = os.path.join(BASE_DIR, "docs", "Notifications")
             os.makedirs(notifications_dir, exist_ok=True)
             for dir_key in ["confirmation", "bom"]:
                 dir_path = config["document_dirs"][dir_key]
@@ -415,7 +422,7 @@ def show_dashboard(root, username, role, logout_callback):
             refresh_all_pumps()
             refresh_stores_pumps()
         except Exception as e:
-            logger.error(f"Failed to create pump: {str(e)}")
+            logger.error(f"Failed to create pump: {str(e)}", exc_info=True)
             Messagebox.show_error("Error", f"Failed to create pump: {str(e)}")
 
     ttk.Button(form_frame, text="Submit", command=submit_pump, bootstyle="success", style="large.TButton").grid(row=len(fields) + 1, column=0, pady=5, padx=5, sticky=W)

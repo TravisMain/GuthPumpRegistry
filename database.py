@@ -39,7 +39,7 @@ def load_config():
             return config
         except Exception as e:
             logger.error(f"Failed to load config from {CONFIG_PATH}: {str(e)}")
-    # Fall back to default config path if user config isn’t found
+    # Fall back to default config path if user config isnâ€™t found
     if os.path.exists(DEFAULT_CONFIG_PATH):
         try:
             with open(DEFAULT_CONFIG_PATH, "r") as f:
@@ -84,7 +84,7 @@ def initialize_database():
             cursor = conn.cursor()
             cursor.execute("USE GuthPumpRegistry")
 
-            # Create tables if they don’t exist (non-destructive)
+            # Create tables if they donâ€™t exist (non-destructive)
             cursor.execute("""
                 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'pumps')
                 CREATE TABLE pumps (
@@ -160,7 +160,7 @@ def initialize_database():
                     year NVARCHAR(4) NOT NULL
                 )
             """)
-            # Create indexes if they don’t exist
+            # Create indexes if they donâ€™t exist
             cursor.execute("IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'idx_pumps_status') CREATE INDEX idx_pumps_status ON pumps(status)")
             cursor.execute("IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'idx_bom_items_serial') CREATE INDEX idx_bom_items_serial ON bom_items(serial_number)")
             conn.commit()

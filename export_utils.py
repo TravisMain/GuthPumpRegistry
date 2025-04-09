@@ -1,4 +1,4 @@
-﻿import os
+import os
 import sys
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
