@@ -4,38 +4,38 @@
         "impellers": [
             {
                 "diameter_mm": 110,
-                "capacity_range_Lhr": [ 0, 16000 ],
-                "pressure_range_bar": [ 0.10, 0.52 ]
+                "capacity_range_Lhr": [ 0, 18000 ],
+                "pressure_range_bar": [ 0.15, 0.41 ]
             },
             {
                 "diameter_mm": 120,
-                "capacity_range_Lhr": [ 0, 19000 ],
-                "pressure_range_bar": [ 0.15, 0.62 ]
+                "capacity_range_Lhr": [ 0, 20000 ],
+                "pressure_range_bar": [ 0.20, 0.50 ]
             },
             {
                 "diameter_mm": 130,
-                "capacity_range_Lhr": [ 0, 22000 ],
-                "pressure_range_bar": [ 0.20, 0.71 ]
+                "capacity_range_Lhr": [ 0, 24000 ],
+                "pressure_range_bar": [ 0.31, 0.59 ]
             },
             {
                 "diameter_mm": 140,
-                "capacity_range_Lhr": [ 0, 24500 ],
-                "pressure_range_bar": [ 0.25, 0.80 ]
+                "capacity_range_Lhr": [ 0, 30000 ],
+                "pressure_range_bar": [ 0.34, 0.68 ]
             },
             {
                 "diameter_mm": 150,
-                "capacity_range_Lhr": [ 0, 26500 ],
-                "pressure_range_bar": [ 0.30, 0.88 ]
+                "capacity_range_Lhr": [ 0, 30000 ],
+                "pressure_range_bar": [ 0.49, 0.78 ]
             },
             {
                 "diameter_mm": 160,
-                "capacity_range_Lhr": [ 0, 28000 ],
-                "pressure_range_bar": [ 0.35, 0.93 ]
+                "capacity_range_Lhr": [ 0, 30000 ],
+                "pressure_range_bar": [ 0.57, 0.92 ]
             },
             {
                 "diameter_mm": 171,
-                "capacity_range_Lhr": [ 0, 29000 ],
-                "pressure_range_bar": [ 0.40, 0.98 ]
+                "capacity_range_Lhr": [ 0, 30000 ],
+                "pressure_range_bar": [ 0.57, 1.03 ]
             }
         ]
     },
@@ -44,38 +44,38 @@
         "impellers": [
             {
                 "diameter_mm": 110,
-                "capacity_range_Lhr": [ 0, 38000 ],
-                "pressure_range_bar": [ 0.40, 1.30 ]
+                "capacity_range_Lhr": [ 0, 36000 ],
+                "pressure_range_bar": [ 0.53, 1.67 ]
             },
             {
                 "diameter_mm": 120,
-                "capacity_range_Lhr": [ 0, 37000 ],
-                "pressure_range_bar": [ 0.80, 1.70 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 0.60, 2.01 ]
             },
             {
                 "diameter_mm": 130,
-                "capacity_range_Lhr": [ 0, 35000 ],
-                "pressure_range_bar": [ 1.30, 2.25 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 1.07, 2.28 ]
             },
             {
                 "diameter_mm": 140,
-                "capacity_range_Lhr": [ 0, 33000 ],
-                "pressure_range_bar": [ 1.80, 2.80 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 1.96, 2.84 ]
             },
             {
                 "diameter_mm": 150,
-                "capacity_range_Lhr": [ 0, 30000 ],
-                "pressure_range_bar": [ 2.40, 3.30 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 2.99, 3.26 ]
             },
             {
                 "diameter_mm": 160,
-                "capacity_range_Lhr": [ 0, 28000 ],
-                "pressure_range_bar": [ 3.00, 3.80 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 3.51, 3.73 ]
             },
             {
                 "diameter_mm": 171,
-                "capacity_range_Lhr": [ 0, 25000 ],
-                "pressure_range_bar": [ 3.40, 4.20 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 3.92, 4.12 ]
             }
         ]
     },
@@ -84,23 +84,23 @@
         "impellers": [
             {
                 "diameter_mm": 140,
-                "capacity_range_Lhr": [ 0, 42000 ],
-                "pressure_range_bar": [ 1.70, 2.90 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 1.84, 2.89 ]
             },
             {
                 "diameter_mm": 150,
-                "capacity_range_Lhr": [ 0, 38000 ],
-                "pressure_range_bar": [ 2.30, 3.40 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 2.75, 3.34 ]
             },
             {
                 "diameter_mm": 160,
-                "capacity_range_Lhr": [ 0, 34000 ],
-                "pressure_range_bar": [ 2.80, 4.00 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 3.51, 3.75 ]
             },
             {
                 "diameter_mm": 171,
-                "capacity_range_Lhr": [ 0, 30000 ],
-                "pressure_range_bar": [ 3.20, 4.60 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 4.17, 4.22 ]
             }
         ]
     },
@@ -109,43 +109,43 @@
         "impellers": [
             {
                 "diameter_mm": 170,
-                "capacity_range_Lhr": [ 0, 38000 ],
-                "pressure_range_bar": [ 0.40, 1.10 ]
+                "capacity_range_Lhr": [ 0, 52000 ],
+                "pressure_range_bar": [ 0.74, 1.03 ]
             },
             {
                 "diameter_mm": 190,
-                "capacity_range_Lhr": [ 0, 44000 ],
-                "pressure_range_bar": [ 0.55, 1.35 ]
+                "capacity_range_Lhr": [ 0, 58000 ],
+                "pressure_range_bar": [ 0.98, 1.31 ]
             },
             {
                 "diameter_mm": 200,
-                "capacity_range_Lhr": [ 0, 47000 ],
-                "pressure_range_bar": [ 0.60, 1.50 ]
+                "capacity_range_Lhr": [ 0, 58000 ],
+                "pressure_range_bar": [ 1.31, 1.50 ]
             },
             {
                 "diameter_mm": 210,
-                "capacity_range_Lhr": [ 0, 50000 ],
-                "pressure_range_bar": [ 0.70, 1.65 ]
+                "capacity_range_Lhr": [ 0, 66000 ],
+                "pressure_range_bar": [ 1.47, 1.62 ]
             },
             {
                 "diameter_mm": 220,
-                "capacity_range_Lhr": [ 0, 52500 ],
-                "pressure_range_bar": [ 0.80, 1.80 ]
+                "capacity_range_Lhr": [ 0, 66000 ],
+                "pressure_range_bar": [ 1.55, 1.77 ]
             },
             {
                 "diameter_mm": 230,
-                "capacity_range_Lhr": [ 0, 55000 ],
-                "pressure_range_bar": [ 0.90, 1.95 ]
+                "capacity_range_Lhr": [ 0, 66000 ],
+                "pressure_range_bar": [ 1.67, 1.91 ]
             },
             {
                 "diameter_mm": 240,
-                "capacity_range_Lhr": [ 0, 57000 ],
-                "pressure_range_bar": [ 1.05, 2.10 ]
+                "capacity_range_Lhr": [ 0, 66000 ],
+                "pressure_range_bar": [ 1.81, 2.02 ]
             },
             {
                 "diameter_mm": 250,
-                "capacity_range_Lhr": [ 0, 58000 ],
-                "pressure_range_bar": [ 1.20, 2.20 ]
+                "capacity_range_Lhr": [ 0, 66000 ],
+                "pressure_range_bar": [ 1.81, 2.02 ]
             }
         ]
     },
@@ -154,43 +154,43 @@
         "impellers": [
             {
                 "diameter_mm": 120,
-                "capacity_range_Lhr": [ 0, 52000 ],
-                "pressure_range_bar": [ 0.50, 2.00 ]
+                "capacity_range_Lhr": [ 0, 58000 ],
+                "pressure_range_bar": [ 0.78, 2.06 ]
             },
             {
                 "diameter_mm": 130,
-                "capacity_range_Lhr": [ 0, 50000 ],
-                "pressure_range_bar": [ 0.90, 2.40 ]
+                "capacity_range_Lhr": [ 0, 58000 ],
+                "pressure_range_bar": [ 1.27, 2.40 ]
             },
             {
                 "diameter_mm": 140,
-                "capacity_range_Lhr": [ 0, 48000 ],
-                "pressure_range_bar": [ 1.30, 2.90 ]
+                "capacity_range_Lhr": [ 0, 58000 ],
+                "pressure_range_bar": [ 1.67, 2.82 ]
             },
             {
                 "diameter_mm": 150,
-                "capacity_range_Lhr": [ 0, 45000 ],
-                "pressure_range_bar": [ 1.80, 3.45 ]
+                "capacity_range_Lhr": [ 0, 58000 ],
+                "pressure_range_bar": [ 2.16, 3.22 ]
             },
             {
                 "diameter_mm": 160,
-                "capacity_range_Lhr": [ 0, 41000 ],
-                "pressure_range_bar": [ 2.40, 4.00 ]
+                "capacity_range_Lhr": [ 0, 58000 ],
+                "pressure_range_bar": [ 2.65, 3.80 ]
             },
             {
                 "diameter_mm": 170,
-                "capacity_range_Lhr": [ 0, 36000 ],
-                "pressure_range_bar": [ 3.00, 4.50 ]
+                "capacity_range_Lhr": [ 0, 58000 ],
+                "pressure_range_bar": [ 3.14, 4.22 ]
             },
             {
                 "diameter_mm": 180,
-                "capacity_range_Lhr": [ 0, 31000 ],
-                "pressure_range_bar": [ 3.80, 5.00 ]
+                "capacity_range_Lhr": [ 0, 58000 ],
+                "pressure_range_bar": [ 2.84, 4.90 ]
             },
             {
                 "diameter_mm": 190,
-                "capacity_range_Lhr": [ 0, 25000 ],
-                "pressure_range_bar": [ 4.80, 5.40 ]
+                "capacity_range_Lhr": [ 0, 58000 ],
+                "pressure_range_bar": [ 2.84, 4.90 ]
             }
         ]
     },
@@ -199,13 +199,13 @@
         "impellers": [
             {
                 "diameter_mm": 110,
-                "capacity_range_Lhr": [ 0, 12500 ],
-                "pressure_range_bar": [ 0.10, 0.42 ]
+                "capacity_range_Lhr": [ 0, 13000 ],
+                "pressure_range_bar": [ 0.10, 0.44 ]
             },
             {
                 "diameter_mm": 115,
-                "capacity_range_Lhr": [ 0, 13500 ],
-                "pressure_range_bar": [ 0.15, 0.46 ]
+                "capacity_range_Lhr": [ 0, 14000 ],
+                "pressure_range_bar": [ 0.12, 0.48 ]
             }
         ]
     },
@@ -214,13 +214,13 @@
         "impellers": [
             {
                 "diameter_mm": 110,
-                "capacity_range_Lhr": [ 0, 16500 ],
-                "pressure_range_bar": [ 1.00, 1.60 ]
+                "capacity_range_Lhr": [ 0, 16000 ],
+                "pressure_range_bar": [ 1.12, 1.67 ]
             },
             {
                 "diameter_mm": 115,
-                "capacity_range_Lhr": [ 0, 14500 ],
-                "pressure_range_bar": [ 1.25, 1.80 ]
+                "capacity_range_Lhr": [ 0, 16000 ],
+                "pressure_range_bar": [ 1.41, 1.90 ]
             }
         ]
     },
@@ -228,9 +228,9 @@
         "id": "PT 0.55KW",
         "impellers": [
             {
-                "diameter_mm": "92",
+                "diameter_mm": 92,
                 "capacity_range_Lhr": [ 0, 12000 ],
-                "pressure_range_bar": [ 0.70, 1.15 ]
+                "pressure_range_bar": [ 0.69, 1.12 ]
             }
         ]
     },
@@ -239,38 +239,38 @@
         "impellers": [
             {
                 "diameter_mm": 110,
-                "capacity_range_Lhr": [ 0, 38000 ],
-                "pressure_range_bar": [ 0.40, 1.30 ]
+                "capacity_range_Lhr": [ 0, 36000 ],
+                "pressure_range_bar": [ 0.53, 1.67 ]
             },
             {
                 "diameter_mm": 120,
-                "capacity_range_Lhr": [ 0, 37000 ],
-                "pressure_range_bar": [ 0.80, 1.70 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 0.60, 2.01 ]
             },
             {
                 "diameter_mm": 130,
-                "capacity_range_Lhr": [ 0, 35000 ],
-                "pressure_range_bar": [ 1.30, 2.25 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 1.07, 2.28 ]
             },
             {
                 "diameter_mm": 140,
-                "capacity_range_Lhr": [ 0, 33000 ],
-                "pressure_range_bar": [ 1.80, 2.80 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 1.96, 2.84 ]
             },
             {
                 "diameter_mm": 150,
-                "capacity_range_Lhr": [ 0, 30000 ],
-                "pressure_range_bar": [ 2.40, 3.30 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 2.99, 3.26 ]
             },
             {
                 "diameter_mm": 160,
-                "capacity_range_Lhr": [ 0, 28000 ],
-                "pressure_range_bar": [ 3.00, 3.80 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 3.51, 3.73 ]
             },
             {
                 "diameter_mm": 171,
-                "capacity_range_Lhr": [ 0, 25000 ],
-                "pressure_range_bar": [ 3.40, 4.20 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 3.92, 4.12 ]
             }
         ]
     },
@@ -279,38 +279,38 @@
         "impellers": [
             {
                 "diameter_mm": 110,
-                "capacity_range_Lhr": [ 0, 38000 ],
-                "pressure_range_bar": [ 0.40, 1.30 ]
+                "capacity_range_Lhr": [ 0, 36000 ],
+                "pressure_range_bar": [ 0.53, 1.67 ]
             },
             {
                 "diameter_mm": 120,
-                "capacity_range_Lhr": [ 0, 37000 ],
-                "pressure_range_bar": [ 0.80, 1.70 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 0.60, 2.01 ]
             },
             {
                 "diameter_mm": 130,
-                "capacity_range_Lhr": [ 0, 35000 ],
-                "pressure_range_bar": [ 1.30, 2.25 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 1.07, 2.28 ]
             },
             {
                 "diameter_mm": 140,
-                "capacity_range_Lhr": [ 0, 33000 ],
-                "pressure_range_bar": [ 1.80, 2.80 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 1.96, 2.84 ]
             },
             {
                 "diameter_mm": 150,
-                "capacity_range_Lhr": [ 0, 30000 ],
-                "pressure_range_bar": [ 2.40, 3.30 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 2.99, 3.26 ]
             },
             {
                 "diameter_mm": 160,
-                "capacity_range_Lhr": [ 0, 28000 ],
-                "pressure_range_bar": [ 3.00, 3.80 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 3.51, 3.73 ]
             },
             {
                 "diameter_mm": 171,
-                "capacity_range_Lhr": [ 0, 25000 ],
-                "pressure_range_bar": [ 3.40, 4.20 ]
+                "capacity_range_Lhr": [ 0, 44000 ],
+                "pressure_range_bar": [ 3.92, 4.12 ]
             }
         ]
     }

@@ -435,7 +435,9 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
             header_frame.image = logo
         except Exception as e:
             logger.error(f"Details window logo load failed: {str(e)}\n{traceback.format_exc()}")
-    ttk.Label(header_frame, text="Pump Approval Details", font=("Roboto", 14, "bold")).pack(anchor=W, padx=10)
+    ttk.Label(header_frame, text=f"Welcome, {username}", font=("Roboto", 18, "bold")).pack(anchor=W, padx=10)
+    ttk.Label(header_frame, text="Pump Approval Details", font=("Roboto", 12)).pack(anchor=W, padx=10)
+    ttk.Label(header_frame, text="Review and approve pump test results. Edit details as needed before final approval.", font=("Roboto", 10), wraplength=600).pack(anchor=W, padx=10)
 
     content_frame = ttk.Frame(container_frame)
     content_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
@@ -472,7 +474,9 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
     invoice_entry.grid(row=0, column=1, padx=10, pady=2, sticky=W)
 
     ttk.Label(top_frame, text="Customer:", font=("Roboto", 10)).grid(row=1, column=0, padx=10, pady=2, sticky=W)
-    ttk.Label(top_frame, text=pump["customer"], font=("Roboto", 10)).grid(row=1, column=1, padx=10, pady=2, sticky=W)
+    customer_entry = ttk.Entry(top_frame, width=30)
+    customer_entry.insert(0, pump["customer"])
+    customer_entry.grid(row=1, column=1, padx=10, pady=2, sticky=W)
 
     ttk.Label(top_frame, text="Job Number:", font=("Roboto", 10)).grid(row=2, column=0, padx=10, pady=2, sticky=W)
     job_entry = ttk.Entry(top_frame, width=30)
@@ -498,12 +502,12 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
     ttk.Label(fab_frame, text=serial_number, font=("Roboto", 10)).grid(row=2, column=1, padx=5, pady=5, sticky=W)
 
     ttk.Label(fab_frame, text="Impeller Diameter:", font=("Roboto", 10)).grid(row=3, column=0, padx=5, pady=5, sticky=W)
-    impeller_entry = ttk.Entry(fab_frame, width=20)
-    impeller_entry.insert(0, test_data.get("impeller_diameter", pump.get("impeller_size", "")))
-    impeller_entry.grid(row=3, column=1, padx=5, pady=5, sticky=W)
+    ttk.Label(fab_frame, text=test_data.get("impeller_diameter", pump.get("impeller_size", "")), font=("Roboto", 10)).grid(row=3, column=1, padx=5, pady=5, sticky=W)
 
     ttk.Label(fab_frame, text="Assembled By:", font=("Roboto", 10)).grid(row=4, column=0, padx=5, pady=5, sticky=W)
-    ttk.Label(fab_frame, text=test_data.get("assembled_by", username), font=("Roboto", 10)).grid(row=4, column=1, padx=5, pady=5, sticky=W)
+    assembled_by_entry = ttk.Entry(fab_frame, width=20)
+    assembled_by_entry.insert(0, test_data.get("assembled_by", username))
+    assembled_by_entry.grid(row=4, column=1, padx=5, pady=5, sticky=W)
 
     details_frame = ttk.LabelFrame(left_frame, text="Details", padding=10)
     details_frame.pack(fill=X)
@@ -606,7 +610,9 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
     medium_entry.grid(row=2, column=1, padx=5, pady=5, sticky=W)
 
     ttk.Label(hydro_frame, text="Tested By:", font=("Roboto", 10)).grid(row=3, column=0, padx=5, pady=5, sticky=W)
-    ttk.Label(hydro_frame, text=test_data.get("tested_by", username), font=("Roboto", 10)).grid(row=3, column=1, padx=5, pady=5, sticky=W)
+    tested_by_entry = ttk.Entry(hydro_frame, width=20)
+    tested_by_entry.insert(0, test_data.get("tested_by", username))
+    tested_by_entry.grid(row=3, column=1, padx=5, pady=5, sticky=W)
 
     approval_frame = ttk.Frame(main_frame)
     approval_frame.grid(row=2, column=0, pady=15, sticky=W+E)
@@ -619,13 +625,13 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
     def retest_pump():
         updated_test_data = {
             "invoice_number": invoice_entry.get() or "",
-            "customer": pump["customer"] or "N/A",
+            "customer": customer_entry.get() or "",
             "job_number": job_entry.get() or "",
             "assembly_part_number": pump.get("assembly_part_number", "N/A"),
             "pump_model": pump["pump_model"] or "N/A",
             "serial_number": serial_number,
-            "impeller_diameter": impeller_entry.get() or "",
-            "assembled_by": test_data.get("assembled_by", username) or "",
+            "impeller_diameter": test_data.get("impeller_diameter", pump.get("impeller_size", "")),
+            "assembled_by": assembled_by_entry.get() or "",
             "motor_size": fields_left[0][1].get() or "",
             "motor_speed": fields_left[1][1].get() or "",
             "motor_volts": fields_left[2][1].get() or "",
@@ -640,7 +646,7 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
             "date_of_test": date_entry.get() or "",
             "duration_of_test": duration_entry.get() or "",
             "test_medium": medium_entry.get() or "",
-            "tested_by": test_data.get("tested_by", username) or "",
+            "tested_by": tested_by_entry.get() or "",
             "flowrate": [entry.get() or "" for entry in flow_entries],
             "pressure": [entry.get() or "" for entry in pressure_entries],
             "amperage": [entry.get() or "" for entry in amp_entries],
@@ -662,13 +668,13 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
     def approve_pump():
         updated_test_data = {
             "invoice_number": invoice_entry.get() or "",
-            "customer": pump["customer"] or "N/A",
+            "customer": customer_entry.get() or "",
             "job_number": job_entry.get() or "",
             "assembly_part_number": pump.get("assembly_part_number", "N/A"),
             "pump_model": pump["pump_model"] or "N/A",
             "serial_number": serial_number,
-            "impeller_diameter": impeller_entry.get() or "",
-            "assembled_by": test_data.get("assembled_by", username) or "",
+            "impeller_diameter": test_data.get("impeller_diameter", pump.get("impeller_size", "")),
+            "assembled_by": assembled_by_entry.get() or "",
             "motor_size": fields_left[0][1].get() or "",
             "motor_speed": fields_left[1][1].get() or "",
             "motor_volts": fields_left[2][1].get() or "",
@@ -683,7 +689,7 @@ def show_pump_details_window(parent, serial_number, username, refresh_callback):
             "date_of_test": date_entry.get() or "",
             "duration_of_test": duration_entry.get() or "",
             "test_medium": medium_entry.get() or "",
-            "tested_by": test_data.get("tested_by", username) or "",
+            "tested_by": tested_by_entry.get() or "",
             "flowrate": [entry.get() or "" for entry in flow_entries],
             "pressure": [entry.get() or "" for entry in pressure_entries],
             "amperage": [entry.get() or "" for entry in amp_entries],
@@ -782,6 +788,7 @@ def show_approval_dashboard(root, username, role, logout_callback):
             logger.error(f"Logo load failed: {str(e)}\n{traceback.format_exc()}")
     ttk.Label(header_frame, text=f"Welcome, {username}", font=("Roboto", 18, "bold")).pack(anchor=W, padx=10)
     ttk.Label(header_frame, text="Approval Dashboard", font=("Roboto", 12)).pack(anchor=W, padx=10)
+    ttk.Label(header_frame, text="Review and approve pump test results submitted for final approval. Ensure all details are correct before proceeding.", font=("Roboto", 10), wraplength=600).pack(anchor=W, padx=10)
 
     approval_list_frame = ttk.LabelFrame(main_frame, text="Pumps for Approval", padding=10)
     approval_list_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)

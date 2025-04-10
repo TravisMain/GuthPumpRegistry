@@ -9,6 +9,7 @@ import sys
 from datetime import datetime
 import json
 import threading
+import time
 from utils.config import get_logger
 from export_utils import send_email, generate_pdf_notification, generate_pump_details_table
 from database import get_db_connection, create_pump
@@ -31,6 +32,7 @@ LOGO_PATH = os.path.join(BASE_DIR, "assets", "logo.png")
 OPTIONS_PATH = os.path.join(BASE_DIR, "assets", "pump_options.json")
 PUMP_CURVES_DIR = os.path.join(BASE_DIR, "assets", "pump_curves")
 PUMP_SIZING_PATH = os.path.join(BASE_DIR, "assets", "pump_sizing.json")
+BOM_PATH = os.path.join(BASE_DIR, "assets", "bom.json")
 BUILD_NUMBER = "1.0.0"
 STORES_EMAIL = "stores@guth.co.za"
 
@@ -93,6 +95,17 @@ def load_pump_sizing(file_path=PUMP_SIZING_PATH):
         logger.error(f"Failed to load pump sizing data from {file_path}: {e}")
         return []
 
+def load_bom(file_path=BOM_PATH):
+    """Load BOM data from JSON file."""
+    try:
+        with open(file_path, "r") as f:
+            bom_data = json.load(f)
+            logger.debug(f"Loaded BOM from JSON: {bom_data}")
+            return bom_data
+    except Exception as e:
+        logger.error(f"Failed to load BOM: {str(e)}")
+        return {}
+
 class CustomTooltip:
     """Custom tooltip class for widgets."""
     def __init__(self, widget, text):
@@ -130,6 +143,19 @@ def generate_bom_checklist(serial_number, bom_items, output_path):
         logger.error(f"Failed to generate BOM checklist PDF: {e}")
         raise
 
+def execute_with_retry(cursor, query, params, max_retries=3, delay=1):
+    """Execute a database query with retry logic for transient errors."""
+    for attempt in range(max_retries):
+        try:
+            cursor.execute(query, params)
+            return
+        except pyodbc.Error as e:
+            if attempt == max_retries - 1:
+                logger.error(f"Failed to execute query after {max_retries} attempts: {query}, params: {params}, error: {e}")
+                raise
+            logger.warning(f"Database operation failed, retrying ({attempt+1}/{max_retries}): {e}")
+            time.sleep(delay)
+
 class PumpOriginatorDashboard:
     """Class to manage the Pump Originator dashboard."""
     def __init__(self, root, username, role, logout_callback):
@@ -144,13 +170,16 @@ class PumpOriginatorDashboard:
 
     def refresh_all_pumps(self):
         """Refresh the All Pumps table with search and filter."""
+        logger.debug("Entering refresh_all_pumps")
         self.all_pumps_tree.delete(*self.all_pumps_tree.get_children())
+        logger.debug("Cleared existing items in All Pumps Treeview")
         search_type = self.search_type_all.get()
         search_term = self.search_entry_all.get().lower()
         filter_status = self.filter_combobox_all.get()
 
         try:
             with get_db_connection() as conn:
+                logger.debug("Database connection established for All Pumps")
                 cursor = conn.cursor()
                 query = """
                     SELECT serial_number, customer, branch, pump_model, configuration, impeller_size, connection_type,
@@ -177,22 +206,32 @@ class PumpOriginatorDashboard:
                     query += " WHERE " + " AND ".join(conditions)
 
                 cursor.execute(query, params)
-                for pump in cursor.fetchall():
+                pumps = cursor.fetchall()
+                logger.debug(f"Retrieved {len(pumps)} pumps for All Pumps table")
+                for i, pump in enumerate(pumps):
                     self.all_pumps_tree.insert("", END, values=(pump[0], pump[1], pump[2], pump[3], pump[4], pump[5], pump[6], pump[7], pump[8], pump[9], pump[10], pump[11]))
+                    logger.debug(f"Inserted pump {i+1} into All Pumps Treeview: {pump}")
             logger.info("Refreshed All Pumps table")
+            # Force the Treeview to update
+            self.all_pumps_tree.update()
+            self.all_pumps_tree.update_idletasks()
+            logger.debug("Forced All Pumps Treeview update")
         except Exception as e:
             logger.error(f"Failed to refresh all pumps: {e}")
             Messagebox.show_error("Error", f"Failed to load pumps: {e}")
 
     def refresh_stock_pumps(self):
         """Refresh the Pumps in Stock table with search and filter."""
+        logger.debug("Entering refresh_stock_pumps")
         self.stock_tree.delete(*self.stock_tree.get_children())
+        logger.debug("Cleared existing items in Stock Pumps Treeview")
         search_type = self.search_type_stock.get()
         search_term = self.search_entry_stock.get().lower()
         filter_branch = self.filter_combobox_stock.get()
 
         try:
             with get_db_connection() as conn:
+                logger.debug("Database connection established for Stock Pumps")
                 cursor = conn.cursor()
                 query = """
                     SELECT serial_number, customer, branch, pump_model, configuration, impeller_size, connection_type,
@@ -219,9 +258,16 @@ class PumpOriginatorDashboard:
                     query += " AND " + " AND ".join(conditions)
 
                 cursor.execute(query, params)
-                for pump in cursor.fetchall():
+                pumps = cursor.fetchall()
+                logger.debug(f"Retrieved {len(pumps)} pumps for Stock Pumps table")
+                for i, pump in enumerate(pumps):
                     self.stock_tree.insert("", END, values=(pump[0], pump[1], pump[2], pump[3], pump[4], pump[5], pump[6], pump[7], pump[8], pump[9], pump[10], pump[11]))
+                    logger.debug(f"Inserted pump {i+1} into Stock Pumps Treeview: {pump}")
             logger.info("Refreshed Pumps in Stock table")
+            # Force the Treeview to update
+            self.stock_tree.update()
+            self.stock_tree.update_idletasks()
+            logger.debug("Forced Stock Pumps Treeview update")
         except Exception as e:
             logger.error(f"Failed to refresh stock pumps: {e}")
             Messagebox.show_error("Error", f"Failed to load pumps: {e}")
@@ -284,6 +330,35 @@ class PumpOriginatorDashboard:
                 self.fab_entries["impeller_size"]["values"] = []
                 self.fab_entries["impeller_size"].set("")
                 logger.warning(f"No impeller sizes found for {model}")
+        # Update O-ring material and mechanical seal options
+        self.update_material_seal_options()
+
+    def update_material_seal_options(self, event=None):
+        """Update O-ring material and mechanical seal options based on pump model."""
+        pump_model = self.fab_entries["pump_model"].get()
+        o_ring_combobox = self.fab_entries["o_ring_material"]
+        mech_seal_combobox = self.fab_entries["mechanical_seals"]
+
+        # Reset dropdowns
+        o_ring_combobox["values"] = []
+        mech_seal_combobox["values"] = []
+
+        if pump_model.startswith("P1"):
+            o_ring_combobox["values"] = ["Nitrile", "Viton"]
+            mech_seal_combobox["values"] = ["SC/SC", "TC/TC", "C/SS"]
+        elif pump_model.startswith("PS"):
+            o_ring_combobox["values"] = ["Nitrile"]
+            mech_seal_combobox["values"] = ["Standard"]
+        elif pump_model.startswith("P2"):
+            o_ring_combobox["values"] = ["Nitrile"]
+            mech_seal_combobox["values"] = ["Viton"]
+
+        # Set default values
+        if o_ring_combobox["values"]:
+            o_ring_combobox.set(o_ring_combobox["values"][0])
+        if mech_seal_combobox["values"]:
+            mech_seal_combobox.set(mech_seal_combobox["values"][0])
+        logger.debug(f"Updated O-ring material options to {o_ring_combobox['values']} and mechanical seal options to {mech_seal_combobox['values']} for {pump_model}")
 
     def update_recommended_pumps(self, event=None):
         """Update the recommended pumps panel based on flow rate and pressure, showing only the top 3 best matches."""
@@ -381,22 +456,26 @@ class PumpOriginatorDashboard:
 
     def show_dashboard(self):
         """Display the Pump Originator dashboard."""
+        logger.debug("Entering show_dashboard")
         self.root.state('zoomed')
         for widget in self.root.winfo_children():
             widget.destroy()
 
         self.main_frame = ttk.Frame(self.root)
         self.main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
+        logger.debug("Main frame created and packed")
 
         # Header (shrunk)
         header_frame = ttk.Frame(self.main_frame)
         header_frame.pack(fill=X, pady=(0, 10), ipady=10)
+        logger.debug("Header frame created and packed")
         if os.path.exists(LOGO_PATH):
             try:
                 img = Image.open(LOGO_PATH).resize((int(Image.open(LOGO_PATH).width * 1.0), int(Image.open(LOGO_PATH).height * 1.0)), Image.Resampling.LANCZOS)
                 logo = ImageTk.PhotoImage(img)
                 ttk.Label(header_frame, image=logo).pack(side=RIGHT, padx=10)
                 header_frame.image = logo  # Keep reference
+                logger.debug("Logo loaded and added to header frame")
             except Exception as e:
                 logger.error(f"Dashboard logo load failed: {e}")
         ttk.Label(header_frame, text=f"Welcome, {self.username}", font=("Roboto", 18, "bold")).pack(anchor=W, padx=10)
@@ -404,14 +483,17 @@ class PumpOriginatorDashboard:
         # Add instruction under the heading
         ttk.Label(header_frame, text="This dashboard helps you create and manage pump assemblies. Enter details to view recommended pumps and submit new assemblies.",
                   font=("Roboto", 10), wraplength=600).pack(anchor=W, padx=10)
+        logger.debug("Header labels added")
 
         # Notebook (Tabs)
         notebook = ttk.Notebook(self.main_frame)
         notebook.pack(fill=BOTH, expand=True, pady=5)
+        logger.debug("Notebook created and packed")
 
         # Tab 1: Create New Pump Assembly
         create_tab = ttk.Frame(notebook)
         notebook.add(create_tab, text="Create New Pump Assembly")
+        logger.debug("Create New Pump Assembly tab added")
 
         # Use a Frame with grid to control panel widths
         create_frame = ttk.Frame(create_tab)
@@ -419,6 +501,7 @@ class PumpOriginatorDashboard:
         create_frame.grid_rowconfigure(0, weight=1)
         create_frame.grid_columnconfigure(0, weight=1)  # Left panel
         create_frame.grid_columnconfigure(1, weight=1)  # Right panel
+        logger.debug("Create frame created with grid layout")
 
         # Left frame with scrollbar for fields (shrunk to ~50%)
         left_container = ttk.Frame(create_frame)
@@ -431,6 +514,7 @@ class PumpOriginatorDashboard:
         canvas_left.configure(yscrollcommand=scrollbar_left.set)
         canvas_left.create_window((0, 0), window=self.fields_frame, anchor="nw")
         self.fields_frame.bind("<Configure>", lambda e: canvas_left.configure(scrollregion=canvas_left.bbox("all")))
+        logger.debug("Left frame with scrollbar created")
 
         # Mouse wheel binding for left frame (fields)
         def _on_mousewheel_left(event):
@@ -443,6 +527,7 @@ class PumpOriginatorDashboard:
         right_container.grid(row=0, column=1, sticky="nsew", padx=(5, 0))
         self.right_frame = ttk.Frame(right_container)
         self.right_frame.pack(fill=BOTH, expand=True)
+        logger.debug("Right frame for recommended pumps created")
 
         # Top frame for Customer Details and Product Details (side by side)
         top_frame = ttk.Frame(self.fields_frame)
@@ -450,6 +535,7 @@ class PumpOriginatorDashboard:
         top_frame.grid_rowconfigure(0, weight=1)
         top_frame.grid_columnconfigure(0, weight=1)
         top_frame.grid_columnconfigure(1, weight=1)
+        logger.debug("Top frame for Customer and Product Details created")
 
         # Customer Details (left)
         customer_frame = ttk.LabelFrame(top_frame, text="Customer Details", padding=10)
@@ -475,6 +561,7 @@ class PumpOriginatorDashboard:
             entry.grid(row=i, column=1, pady=3, sticky=EW)
             self.customer_entries[label.lower().replace(" ", "_")] = entry
             CustomTooltip(entry, tooltip)
+        logger.debug("Customer Details frame populated")
 
         # Product Details (right)
         details_frame = ttk.LabelFrame(top_frame, text="Product Details", padding=10)
@@ -496,6 +583,7 @@ class PumpOriginatorDashboard:
             entry.grid(row=i, column=1, pady=3, sticky=EW)
             self.details_entries[label.lower().replace(" ", "_")] = entry
             CustomTooltip(entry, tooltip)
+        logger.debug("Product Details frame populated")
 
         # Fabrication (below, two columns)
         fab_frame = ttk.LabelFrame(self.fields_frame, text="Fabrication", padding=10)
@@ -506,17 +594,12 @@ class PumpOriginatorDashboard:
             ("Impeller Size", "combobox", [], True, "Select impeller size (populated after selection)"),
         ]
         fab_fields_right = [
-            ("O ring Material", "combobox", ["EPDM", "Viton", "Nitril"], True, "Select O-ring material"),
-            ("Mechanical Seals", "combobox", self.options.get("mechanical_seals", ["C/SS", "TC/TC", "SC/SC", "Ceramic", "Other"]), True, "Select mechanical seal type or 'Other'"),
+            ("O ring Material", "combobox", [], True, "Select O-ring material"),
+            ("Mechanical Seals", "combobox", [], True, "Select mechanical seal type"),
             ("Flush Seal Housing", "checkbutton", None, False, "Check if flush seal housing is required"),
             ("Custom Motor", "entry", None, False, "Enter custom motor details (optional)"),
         ]
         self.fab_entries = {}
-        self.custom_seal_entry = ttk.Entry(fab_frame, font=("Roboto", 10), width=20)
-        self.custom_seal_entry.grid(row=1, column=3, pady=3, padx=5, sticky=EW)
-        self.custom_seal_entry.grid_remove()
-
-        # Left column
         for i, (label, wtype, opts, req, tooltip) in enumerate(fab_fields_left):
             ttk.Label(fab_frame, text=f"{label}{' *' if req else ''}:", font=("Roboto", 10)).grid(row=i, column=0, pady=3, sticky=W)
             if wtype == "entry":
@@ -546,12 +629,13 @@ class PumpOriginatorDashboard:
                 entry = ttk.Entry(fab_frame, font=("Roboto", 10), width=20)
             elif wtype == "combobox":
                 entry = ttk.Combobox(fab_frame, values=opts, font=("Roboto", 10), state="readonly", width=20)
-                entry.set(opts[0] if opts else "")
+                entry.set("")
             elif wtype == "checkbutton":
                 entry = ttk.Checkbutton(fab_frame, text="", bootstyle="success-round-toggle")
             entry.grid(row=i, column=3, pady=3, sticky=EW)
             self.fab_entries[label.lower().replace(" ", "_")] = entry
             CustomTooltip(entry, tooltip)
+        logger.debug("Fabrication frame populated")
 
         # Error Label
         self.error_label = ttk.Label(self.fields_frame, text="", font=("Roboto", 10), bootstyle="danger")
@@ -559,11 +643,10 @@ class PumpOriginatorDashboard:
 
         # Submit Button
         ttk.Button(self.fields_frame, text="Submit", command=self.submit_pump, bootstyle="success", style="large.TButton").pack(pady=10)
+        logger.debug("Submit button added")
 
         # Bind events
         self.fab_entries["pump_model"].bind("<<ComboboxSelected>>", self.update_impeller)
-        self.fab_entries["mechanical_seals"].bind("<<ComboboxSelected>>", self.update_seal)
-
         # Bind pressure and flow rate entries to update recommended pumps
         self.details_entries["pressure_required"].bind("<KeyRelease>", self.update_recommended_pumps)
         self.details_entries["flow_rate_required"].bind("<KeyRelease>", self.update_recommended_pumps)
@@ -577,12 +660,14 @@ class PumpOriginatorDashboard:
         notebook.add(pumps_tab, text="All Pumps")
         sub_notebook = ttk.Notebook(pumps_tab)
         sub_notebook.pack(fill=BOTH, expand=True, pady=10)
+        logger.debug("All Pumps tab and sub-notebook added")
 
         # Sub-Tab 1: All Pumps
         all_pumps_tab = ttk.Frame(sub_notebook)
         sub_notebook.add(all_pumps_tab, text="All Pumps")
         all_pumps_frame = ttk.LabelFrame(all_pumps_tab, text="All Pumps", padding=10)
         all_pumps_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
+        logger.debug("All Pumps sub-tab created")
 
         # Search and filter frame for All Pumps
         search_filter_frame_all = ttk.Frame(all_pumps_frame)
@@ -602,6 +687,7 @@ class PumpOriginatorDashboard:
         self.filter_combobox_all.set("All")
         self.filter_combobox_all.pack(side=LEFT, padx=5)
         CustomTooltip(self.filter_combobox_all, "Filter pumps by their current status")
+        logger.debug("Search and filter frame for All Pumps created")
 
         columns = ("Serial Number", "Customer", "Branch", "Pump Model", "Configuration", "Impeller Size", "Connection Type",
                    "Pressure Required", "Flow Rate Required", "Custom Motor", "Flush Seal Housing", "Status")
@@ -613,18 +699,21 @@ class PumpOriginatorDashboard:
         scrollbar_all = ttk.Scrollbar(all_pumps_frame, orient=VERTICAL, command=self.all_pumps_tree.yview)
         scrollbar_all.pack(side=RIGHT, fill=Y)
         self.all_pumps_tree.configure(yscrollcommand=scrollbar_all.set)
+        logger.debug("All Pumps Treeview created and packed")
 
         self.search_type_all.bind("<<ComboboxSelected>>", lambda event: self.refresh_all_pumps())
         self.search_entry_all.bind("<KeyRelease>", lambda event: self.refresh_all_pumps())
         self.filter_combobox_all.bind("<<ComboboxSelected>>", lambda event: self.refresh_all_pumps())
         self.all_pumps_tree.bind("<Double-1>", lambda event: self.edit_pump_window(self.all_pumps_tree))
         self.refresh_all_pumps()
+        logger.debug("All Pumps bindings set and table refreshed")
 
         # Sub-Tab 2: Pumps in Stock
         stock_tab = ttk.Frame(sub_notebook)
         sub_notebook.add(stock_tab, text="Pumps in Stock")
         stock_frame = ttk.LabelFrame(stock_tab, text="Pumps in Stock", padding=10)
         stock_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
+        logger.debug("Pumps in Stock sub-tab created")
 
         # Search and filter frame for Pumps in Stock
         search_filter_frame_stock = ttk.Frame(stock_frame)
@@ -644,6 +733,7 @@ class PumpOriginatorDashboard:
         self.filter_combobox_stock.set("All")
         self.filter_combobox_stock.pack(side=LEFT, padx=5)
         CustomTooltip(self.filter_combobox_stock, "Filter pumps by branch")
+        logger.debug("Search and filter frame for Pumps in Stock created")
 
         self.stock_tree = ttk.Treeview(stock_frame, columns=columns, show="headings", height=12)
         for col in columns:
@@ -653,12 +743,14 @@ class PumpOriginatorDashboard:
         scrollbar_stock = ttk.Scrollbar(stock_frame, orient=VERTICAL, command=self.stock_tree.yview)
         scrollbar_stock.pack(side=RIGHT, fill=Y)
         self.stock_tree.configure(yscrollcommand=scrollbar_stock.set)
+        logger.debug("Pumps in Stock Treeview created and packed")
 
         self.search_type_stock.bind("<<ComboboxSelected>>", lambda event: self.refresh_stock_pumps())
         self.search_entry_stock.bind("<KeyRelease>", lambda event: self.refresh_stock_pumps())
         self.filter_combobox_stock.bind("<<ComboboxSelected>>", lambda event: self.refresh_stock_pumps())
         self.stock_tree.bind("<Double-1>", lambda event: self.edit_pump_window(self.stock_tree))
         self.refresh_stock_pumps()
+        logger.debug("Pumps in Stock bindings set and table refreshed")
 
         # Footer Frame (below notebook, always visible)
         footer_frame = ttk.Frame(self.main_frame)
@@ -666,6 +758,7 @@ class PumpOriginatorDashboard:
         ttk.Button(footer_frame, text="Logoff", command=lambda: self.logout_callback(), bootstyle="warning", style="large.TButton").pack(pady=5)
         ttk.Label(footer_frame, text="\u00A9 Guth South Africa", font=("Roboto", 10)).pack()
         ttk.Label(footer_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack()
+        logger.debug("Footer frame created and packed")
 
         style = Style()
         style.configure("Custom.TNotebook", tabposition="n", background="#f0f0f0")
@@ -684,11 +777,95 @@ class PumpOriginatorDashboard:
 
     def submit_pump(self):
         """Submit a new pump assembly."""
+        logger.debug("Entering submit_pump")
         data = {**{k: e.get() if isinstance(e, (ttk.Entry, ttk.Combobox)) else "Yes" if e.instate(['selected']) else "No" for k, e in self.customer_entries.items()},
                 **{k: e.get() if isinstance(e, (ttk.Entry, ttk.Combobox)) else "Yes" if e.instate(['selected']) else "No" for k, e in self.fab_entries.items()},
                 **{k: e.get() for k, e in self.details_entries.items()}}
-        data["mechanical_seals"] = self.custom_seal_entry.get() if data["mechanical_seals"] == "Other" else data["mechanical_seals"]
+        # Remove spaces from field names in data
+        data = {k.replace(" ", "_"): v for k, v in data.items()}
 
+        # Load BOM data
+        bom_data = load_bom()
+        pump_model = data["pump_model"]
+        configuration = data["configuration"] or "Standard"
+        bom_items = bom_data.get(pump_model, {}).get(configuration, [])
+        logger.debug(f"Loaded BOM for {pump_model} with configuration {configuration}: {bom_items}")
+
+        if not bom_items:
+            self.error_label.config(text=f"No BOM found for {pump_model} with configuration {configuration}", bootstyle="danger")
+            logger.error(f"No BOM found for {pump_model} with configuration {configuration}")
+            return
+
+        # Dynamically update BOM based on selected options
+        updated_bom_items = bom_items.copy()
+        logger.debug(f"Initial BOM items: {updated_bom_items}")
+
+        # Flush Seal Housing
+        if data["flush_seal_housing"] == "Yes":
+            flush_seal_part = None
+            if pump_model.startswith("P1"):
+                flush_seal_part = {"part_code": "10.55.10009", "part_name": "P1 - 2 FLUSH ARRANGEMENT SEAL", "quantity": 1}
+            elif pump_model.startswith("PS"):
+                flush_seal_part = {"part_code": "10.55.10010", "part_name": "PS FLUSH ARRANGEMENT SEAL", "quantity": 1}
+            elif pump_model.startswith("P2"):
+                flush_seal_part = {"part_code": "10.55.10009", "part_name": "P1 - 2 FLUSH ARRANGEMENT SEAL", "quantity": 1}
+            if flush_seal_part:
+                # Update quantity if the part exists in the BOM, otherwise append it
+                found = False
+                for item in updated_bom_items:
+                    if item["part_code"] == flush_seal_part["part_code"]:
+                        item["quantity"] = 1
+                        found = True
+                        break
+                if not found:
+                    updated_bom_items.append(flush_seal_part)
+                logger.debug(f"Added flush seal part: {flush_seal_part}")
+
+        # O-ring Material
+        o_ring_part = None
+        if pump_model.startswith("P1"):
+            if data["o_ring_material"] == "Nitrile":
+                o_ring_part = {"part_code": "10.55.09005", "part_name": "P1 FRONT COVER 'O' RING NITRILE", "quantity": 1}
+            elif data["o_ring_material"] == "Viton":
+                o_ring_part = {"part_code": "10.55.09013", "part_name": "P1 FRONT COVER 'O' RING VITON", "quantity": 1}
+        elif pump_model.startswith("PS"):
+            if data["o_ring_material"] == "Nitrile":
+                o_ring_part = {"part_code": "10.55.09000", "part_name": "PS FRONT COVER 'O' RING NITRILE", "quantity": 1}
+        elif pump_model.startswith("P2"):
+            if data["o_ring_material"] == "Nitrile":
+                o_ring_part = {"part_code": "10.55.09010", "part_name": "P2 FRONT COVER 'O' RING NITRILE", "quantity": 1}
+
+        if o_ring_part:
+            # Remove the default O-ring part
+            updated_bom_items = [item for item in updated_bom_items if "Front cover 'O' ring" not in item["part_name"]]
+            updated_bom_items.append(o_ring_part)
+            logger.debug(f"Updated O-ring part: {o_ring_part}")
+
+        # Mechanical Seal
+        mech_seal_part = None
+        if pump_model.startswith("P1"):
+            if data["mechanical_seals"] == "SC/SC":
+                mech_seal_part = {"part_code": "10.55.10000", "part_name": "P1 MECH SEAL S/C VS S/C - EPDM ELASTOMER", "quantity": 1}
+            elif data["mechanical_seals"] == "TC/TC":
+                mech_seal_part = {"part_code": "10.55.10001", "part_name": "P1 MECH SEAL T/C VS T/C - EPDM ELASTOMER", "quantity": 1}
+            elif data["mechanical_seals"] == "C/SS":
+                mech_seal_part = {"part_code": "10.55.10002", "part_name": "P1 - 2 MECH SEAL S/ST - CARBON EPDM ELASTOMER", "quantity": 1}
+        elif pump_model.startswith("PS"):
+            if data["mechanical_seals"] == "Standard":
+                mech_seal_part = {"part_code": "10.55.100047", "part_name": "Mechanical shaft seal", "quantity": 1}
+        elif pump_model.startswith("P2"):
+            if data["mechanical_seals"] == "Viton":
+                mech_seal_part = {"part_code": "10.55.10004", "part_name": "Mechanical shaft seal VITON", "quantity": 1}
+
+        if mech_seal_part:
+            # Remove the default mechanical seal part
+            updated_bom_items = [item for item in updated_bom_items if "Mechanical shaft seal" not in item["part_name"]]
+            updated_bom_items.append(mech_seal_part)
+            logger.debug(f"Updated mechanical seal part: {mech_seal_part}")
+
+        logger.debug(f"Final updated BOM items: {updated_bom_items}")
+
+        # Validate required fields
         assembly_key = f"{data['pump_model']}_{data['configuration']}"
         data["assembly_part_number"] = self.options.get("assembly_part_mapping", {}).get(assembly_key, f"APN-{data['pump_model'].replace(' ', '')}")
 
@@ -701,30 +878,68 @@ class PumpOriginatorDashboard:
         required = ["customer", "job_number", "sage_reference_number", "branch", "pump_model", "configuration", "impeller_size", "o_ring_material", "mechanical_seals", "temperature", "product", "pressure_required", "flow_rate_required"]
         missing = [f.replace("_", " ").title() for f in required if not data[f].strip()]
         if missing:
-            self.error_label.config(text=f"Missing: {', '.join(missing)}")
+            self.error_label.config(text=f"Missing: {', '.join(missing)}", bootstyle="danger")
+            logger.warning(f"Missing required fields: {missing}")
             return
 
+        # Save to database and prepare notifications
+        conn = None
+        cursor = None
+        error_occurred = False
         try:
-            with get_db_connection() as conn:
-                cursor = conn.cursor()
-                serial = create_pump(cursor, data["pump_model"], data["configuration"], data["customer"], self.username, data["branch"],
-                                     data["impeller_size"], "", 0.0, 0.0, data["custom_motor"], data["flush_seal_housing"],
-                                     data["assembly_part_number"], insert_bom=True)
-                cursor.execute("""
-                    UPDATE pumps 
-                    SET invoice_number=?, job_number_1=?, sage_reference_number=?, o_ring_material=?, 
-                        mechanical_seals=?, temperature=?, medium=?, pressure_required=?, flow_rate_required=?, status=?
-                    WHERE serial_number=?
-                """, (data["invoice_number"], data["job_number"], data["sage_reference_number"], data["o_ring_material"],
-                      data["mechanical_seals"], data["temperature"], data["product"], data["pressure_required"], data["flow_rate_required"], data["status"], serial))
-                conn.commit()
+            conn = get_db_connection()
+            conn.autocommit = False  # Explicitly disable autocommit
+            cursor = conn.cursor()
 
+            # Step 1: Create the pump
+            serial = create_pump(cursor, data["pump_model"], data["configuration"], data["customer"], self.username, data["branch"],
+                                 data["impeller_size"], "", 0.0, 0.0, data["custom_motor"], data["flush_seal_housing"],
+                                 data["assembly_part_number"], insert_bom=False)
+            logger.debug(f"Created pump with serial number: {serial}")
+
+            # Step 2: Update pump details
+            update_query = """
+                UPDATE pumps 
+                SET invoice_number=?, job_number_1=?, sage_reference_number=?, o_ring_material=?, 
+                    mechanical_seals=?, temperature=?, medium=?, pressure_required=?, flow_rate_required=?, status=?
+                WHERE serial_number=?
+            """
+            update_params = (data["invoice_number"], data["job_number"], data["sage_reference_number"], data["o_ring_material"],
+                             data["mechanical_seals"], data["temperature"], data["product"], data["pressure_required"],
+                             data["flow_rate_required"], data["status"], serial)
+            logger.debug(f"Executing UPDATE query: {update_query} with params: {update_params}")
+            execute_with_retry(cursor, update_query, update_params)
+            logger.debug(f"Updated pump details for serial number: {serial}")
+
+            # Step 3: Insert BOM items
+            for item in updated_bom_items:
+                if item["quantity"] > 0:
+                    insert_query = """
+                        INSERT INTO bom_items (serial_number, part_code, part_name, quantity)
+                        VALUES (?, ?, ?, ?)
+                    """
+                    insert_params = (serial, item["part_code"], item["part_name"], item["quantity"])
+                    logger.debug(f"Executing INSERT query: {insert_query} with params: {insert_params}")
+                    execute_with_retry(cursor, insert_query, insert_params)
+                    logger.debug(f"Inserted BOM item for {serial}: {item}")
+
+            # Step 4: Retrieve BOM items for the checklist
+            cursor.execute("SELECT part_code, part_name, quantity FROM bom_items WHERE serial_number = ?", (serial,))
+            bom_items = [{"part_code": row[0], "part_name": row[1], "quantity": row[2]} for row in cursor.fetchall()]
+            logger.debug(f"Retrieved BOM items for {serial}: {bom_items}")
+
+            # Step 5: Commit the transaction
+            conn.commit()
+            logger.info(f"Pump assembly {serial} created by {self.username}")
+
+            # Prepare pump data for notifications
             pump_data = {k: data[k] for k in ["serial_number", "assembly_part_number", "customer", "branch", "pump_model", "configuration",
                                               "impeller_size", "custom_motor", "flush_seal_housing", "o_ring_material",
                                               "mechanical_seals", "temperature", "product", "pressure_required", "flow_rate_required"] if k in data}
             pump_data["serial_number"] = serial
             pump_data["requested_by"] = self.username
 
+            # Generate PDFs
             config = load_config()
             notifications_dir = os.path.join(BASE_DIR, "docs", "Notifications")
             os.makedirs(notifications_dir, exist_ok=True)
@@ -736,11 +951,7 @@ class PumpOriginatorDashboard:
             bom_pdf_path = os.path.join(config["document_dirs"]["bom"], f"bom_checklist_{serial}.pdf")
             confirmation_path = os.path.join(config["document_dirs"]["confirmation"], f"confirmation_pump_created_{serial}.pdf")
 
-            with get_db_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("SELECT part_code, part_name, quantity FROM bom_items WHERE serial_number = ?", (serial,))
-                bom_items = [{"part_code": row[0], "part_name": row[1], "quantity": row[2]} for row in cursor.fetchall()]
-
+            # Generate PDFs
             generate_pdf_notification(serial, pump_data, title="New Pump Assembly Notification", output_path=pdf_path)
             os.startfile(pdf_path, "print")
             generate_bom_checklist(serial, bom_items, output_path=bom_pdf_path)
@@ -748,6 +959,7 @@ class PumpOriginatorDashboard:
             confirmation_data = {"serial_number": serial, "assembly_part_number": data["assembly_part_number"], "status": data["status"], "created_by": self.username, "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
             generate_pdf_notification(serial, confirmation_data, title=f"Confirmation - Pump Created {serial}", output_path=confirmation_path)
 
+            # Send email notification
             subject = f"New Pump Assembly Created: {serial}"
             body_content = f"""
                 <p>A new pump assembly has been created and requires stock to be booked out of Sage and pulled.</p>
@@ -760,12 +972,33 @@ class PumpOriginatorDashboard:
             self.error_label.config(text=f"Pump created: {serial}", bootstyle="success")
             self.refresh_all_pumps()
             self.refresh_stock_pumps()
+            logger.debug("Called refresh_all_pumps and refresh_stock_pumps after pump creation")
+
+        except pyodbc.Error as e:
+            logger.error(f"Database error during pump creation: {e}", exc_info=True)
+            error_occurred = True
+            self.error_label.config(text=f"Database Error: {e}", bootstyle="danger")
         except Exception as e:
-            logger.error(f"Failed to create pump: {e}", exc_info=True)
+            logger.error(f"Unexpected error during pump creation: {e}", exc_info=True)
+            error_occurred = True
             self.error_label.config(text=f"Error: {e}", bootstyle="danger")
+        finally:
+            if conn:
+                if error_occurred:
+                    try:
+                        conn.rollback()  # Roll back the transaction if an error occurred
+                        logger.debug("Transaction rolled back due to error")
+                    except pyodbc.Error as rollback_error:
+                        logger.error(f"Failed to rollback transaction: {rollback_error}")
+                try:
+                    conn.close()
+                    logger.debug("Database connection closed")
+                except pyodbc.Error as close_error:
+                    logger.error(f"Failed to close database connection: {close_error}")
 
     def edit_pump_window(self, tree):
         """Edit or retest a pump record."""
+        logger.debug("Entering edit_pump_window")
         selected = tree.selection()
         if not selected:
             logger.debug("No pump selected in Treeview")
@@ -815,8 +1048,8 @@ class PumpOriginatorDashboard:
             ("configuration", "combobox", self.options.get("configuration", [])),
             ("impeller_size", "entry", None),
             ("connection_type", "combobox", self.options.get("connection_type", []) + ["SMS", "DR", "BSP"]),
-            ("o_ring_material", "combobox", ["EPDM", "Viton", "Nitril"]),
-            ("mechanical_seals", "combobox", self.options.get("mechanical_seals", ["C/SS", "TC/TC", "SC/SC", "Ceramic", "Other"])),
+            ("o_ring_material", "combobox", ["Nitrile", "Viton"] if pump.get("pump_model", "").startswith("P1") else ["Nitrile"]),
+            ("mechanical_seals", "combobox", ["SC/SC", "TC/TC", "C/SS"] if pump.get("pump_model", "").startswith("P1") else ["Standard"] if pump.get("pump_model", "").startswith("PS") else ["Viton"] if pump.get("pump_model", "").startswith("P2") else []),
             ("temperature", "entry", None),
             ("medium", "entry", None),
             ("custom_motor", "entry", None),
@@ -830,7 +1063,7 @@ class PumpOriginatorDashboard:
         custom_connection_entry.grid_remove()
         custom_seal_entry = ttk.Entry(frame, font=("Roboto", 12))
         custom_seal_entry.grid(row=9, column=2, pady=5, padx=5, sticky=EW)
-        if pump.get("mechanical_seals") and pump["mechanical_seals"] not in self.options.get("mechanical_seals", ["C/SS", "TC/TC", "SC/SC", "Ceramic", "Other"]):
+        if pump.get("mechanical_seals") and pump["mechanical_seals"] not in (["SC/SC", "TC/TC", "C/SS"] if pump.get("pump_model", "").startswith("P1") else ["Standard"] if pump.get("pump_model", "").startswith("PS") else ["Viton"] if pump.get("pump_model", "").startswith("P2") else []):
             custom_seal_entry.insert(0, pump["mechanical_seals"])
         custom_seal_entry.grid_remove()
 
@@ -951,6 +1184,7 @@ class PumpOriginatorDashboard:
 
 def show_dashboard(root, username, role, logout_callback):
     """Wrapper function to instantiate the dashboard class."""
+    logger.debug(f"Calling show_dashboard with username: {username}, role: {role}")
     dashboard = PumpOriginatorDashboard(root, username, role, logout_callback)
     return dashboard.main_frame
 
