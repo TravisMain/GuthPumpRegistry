@@ -5,7 +5,7 @@ from PIL import Image, ImageTk
 from database import get_db_connection
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import threading
 from utils.config import get_logger
@@ -140,13 +140,16 @@ def show_combined_assembler_tester_dashboard(root, username, role, logout_callba
             logger.error(f"Logo load failed: {str(e)}")
     ttk.Label(header_frame, text=f"Welcome, {username}", font=("Roboto", 18, "bold")).pack(anchor=W, padx=10)
     ttk.Label(header_frame, text="Assembler/Tester Dashboard", font=("Roboto", 12)).pack(anchor=W, padx=10)
+    # Add instruction under the heading
+    ttk.Label(header_frame, text="This dashboard lets you assemble and test pump assemblies. Manage tasks and submit test reports for approval.",
+              font=("Roboto", 10), wraplength=600).pack(anchor=W, padx=10)
 
     assembler_frame = ttk.LabelFrame(main_frame, text="Assembly Tasks", padding=20, bootstyle="default")
     assembler_frame.pack(fill=X, padx=10, pady=10)
 
     assembler_list_frame = ttk.LabelFrame(assembler_frame, text="Pumps in Assembly", padding=10)
     assembler_list_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
-    assembler_columns = ("Serial Number", "Assembly Part Number", "Customer", "Branch", "Pump Model", "Configuration")
+    assembler_columns = ("Serial Number", "Assembly Part Number", "Customer", "Branch", "Pump Model", "Configuration", "Mechanical Seal", "O ring Material", "Impeller Size", "Flush Seal Housing")
     assembler_tree = ttk.Treeview(assembler_list_frame, columns=assembler_columns, show="headings", height=10)
     for col in assembler_columns:
         assembler_tree.heading(col, text=col, anchor=W)
@@ -174,14 +177,16 @@ def show_combined_assembler_tester_dashboard(root, username, role, logout_callba
             with get_db_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute("""
-                    SELECT p.serial_number, p.assembly_part_number, p.customer, p.branch, p.pump_model, p.configuration
+                    SELECT p.serial_number, p.assembly_part_number, p.customer, p.branch, p.pump_model, p.configuration,
+                           p.mechanical_seals, p.o_ring_material, p.impeller_size, p.flush_seal_housing
                     FROM pumps p
                     LEFT JOIN bom_items b ON p.serial_number = b.serial_number
                     WHERE p.status = 'Assembler'
-                    GROUP BY p.serial_number, p.assembly_part_number, p.customer, p.branch, p.pump_model, p.configuration
+                    GROUP BY p.serial_number, p.assembly_part_number, p.customer, p.branch, p.pump_model, p.configuration,
+                             p.mechanical_seals, p.o_ring_material, p.impeller_size, p.flush_seal_housing
                 """)
                 for pump in cursor.fetchall():
-                    assembler_tree.insert("", END, values=(pump[0], pump[1] or "N/A", pump[2], pump[3], pump[4], pump[5]))
+                    assembler_tree.insert("", END, values=(pump[0], pump[1] or "N/A", pump[2], pump[3], pump[4], pump[5], pump[6] or "N/A", pump[7] or "N/A", pump[8] or "N/A", pump[9] or "N/A"))
             logger.info("Refreshed assembler pump list")
         except Exception as e:
             logger.error(f"Failed to refresh assembler pump list: {str(e)}")
@@ -278,10 +283,37 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
             header_frame.image = logo
         except Exception as e:
             logger.error(f"BOM window logo load failed: {str(e)}")
-    ttk.Label(header_frame, text=f"Pump {serial_number}", font=("Roboto", 14, "bold")).pack(anchor=W, padx=10)
 
-    bom_frame = ttk.LabelFrame(bom_window, text="Bill of Materials (Received Items)", padding=10)
-    bom_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
+    # Header with Serial Number, Assembly Part Number, Pump Model (matching Stores dashboard style)
+    header_info_frame = ttk.Frame(header_frame)
+    header_info_frame.pack(anchor=W, padx=10)
+
+    # Serial Number
+    serial_frame = ttk.Frame(header_info_frame)
+    serial_frame.pack(anchor=W, pady=5)
+    ttk.Label(serial_frame, text="Serial Number: ", font=("Roboto", 14)).pack(side=LEFT)  # Not bold
+    ttk.Label(serial_frame, text=serial_number, font=("Roboto", 14, "bold")).pack(side=LEFT)  # Bold
+
+    # Assembly Part Number
+    assembly_part_number = pump.get("assembly_part_number", "N/A")
+    assembly_frame = ttk.Frame(header_info_frame)
+    assembly_frame.pack(anchor=W, pady=5)
+    ttk.Label(assembly_frame, text="Assembly Part Number: ", font=("Roboto", 14)).pack(side=LEFT)  # Not bold
+    ttk.Label(assembly_frame, text=assembly_part_number, font=("Roboto", 14, "bold")).pack(side=LEFT)  # Bold
+
+    # Pump Model
+    pump_model_frame = ttk.Frame(header_info_frame)
+    pump_model_frame.pack(anchor=W, pady=5)
+    ttk.Label(pump_model_frame, text="Pump Model: ", font=("Roboto", 14)).pack(side=LEFT)  # Not bold
+    ttk.Label(pump_model_frame, text=pump['pump_model'], font=("Roboto", 14, "bold")).pack(side=LEFT)  # Bold
+
+    # Main content frame to manage layout
+    content_frame = ttk.Frame(bom_window)
+    content_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
+
+    # Bill of Materials (Received Items)
+    bom_frame = ttk.LabelFrame(content_frame, text="Bill of Materials (Received Items)", padding=10)
+    bom_frame.pack(fill=BOTH, expand=True, pady=(0, 10))
 
     canvas = ttk.Canvas(bom_frame)
     scrollbar = ttk.Scrollbar(bom_frame, orient=VERTICAL, command=canvas.yview)
@@ -291,6 +323,31 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
     canvas.configure(yscrollcommand=scrollbar.set)
     canvas.pack(side=LEFT, fill=BOTH, expand=True)
     scrollbar.pack(side=RIGHT, fill=Y)
+
+    # Enable mouse wheel scrolling for the BOM table
+    def on_mouse_wheel(event):
+        if canvas.winfo_exists():
+            if event.delta > 0 or event.num == 4:  # Scroll up
+                canvas.yview_scroll(-1, "units")
+            elif event.delta < 0 or event.num == 5:  # Scroll down
+                canvas.yview_scroll(1, "units")
+
+    canvas.bind("<MouseWheel>", on_mouse_wheel)  # Windows
+    canvas.bind("<Button-4>", on_mouse_wheel)    # Linux/macOS scroll up
+    canvas.bind("<Button-5>", on_mouse_wheel)    # Linux/macOS scroll down
+
+    # Clean up bindings on window close
+    def on_close():
+        try:
+            if canvas.winfo_exists():
+                canvas.unbind("<MouseWheel>")
+                canvas.unbind("<Button-4>")
+                canvas.unbind("<Button-5>")
+            bom_window.destroy()
+        except Exception as e:
+            logger.debug(f"Minor error during BOM window close: {str(e)}")
+
+    bom_window.protocol("WM_DELETE_WINDOW", on_close)
 
     ttk.Label(scrollable_frame, text="Part Number", font=("Roboto", 10, "bold")).grid(row=0, column=0, padx=5, pady=5, sticky=W)
     ttk.Label(scrollable_frame, text="Part Name", font=("Roboto", 10, "bold")).grid(row=0, column=1, padx=5, pady=5, sticky=W)
@@ -307,8 +364,9 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
         confirm_check.grid(row=i, column=3, padx=5, pady=5)
         confirm_vars.append(confirm_var)
 
-    unpulled_frame = ttk.LabelFrame(bom_window, text="Items Not Pulled", padding=10)
-    unpulled_frame.pack(fill=X, padx=10, pady=10)
+    # Items Not Pulled
+    unpulled_frame = ttk.LabelFrame(content_frame, text="Items Not Pulled", padding=10)
+    unpulled_frame.pack(fill=X, pady=(0, 10))
     unpulled_columns = ("Part Code", "Part Name", "Reason")
     unpulled_tree = ttk.Treeview(unpulled_frame, columns=unpulled_columns, show="headings", height=5)
     for col in unpulled_columns:
@@ -342,6 +400,28 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
             Messagebox.show_error("Error", f"Failed to load unpulled items: {str(e)}")
 
     refresh_unpulled_list()
+
+    # Notes Section (Read-Only)
+    notes_frame = ttk.LabelFrame(content_frame, text="Notes from Stores", padding=10)
+    notes_frame.pack(fill=X, pady=(0, 10))
+    notes_text = ttk.Text(notes_frame, height=5, width=80, font=("Roboto", 10), state="disabled")
+    notes_text.pack(fill=X, expand=True, padx=5, pady=5)
+
+    # Retrieve and display notes from the pumps table
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT notes FROM pumps WHERE serial_number = ?", (serial_number,))
+            result = cursor.fetchone()
+            notes = result[0] if result and result[0] else "No notes provided."
+            notes_text.configure(state="normal")
+            notes_text.insert("1.0", notes)
+            notes_text.configure(state="disabled")
+    except Exception as e:
+        logger.error(f"Failed to load notes for pump {serial_number}: {str(e)}")
+        notes_text.configure(state="normal")
+        notes_text.insert("1.0", "Error loading notes.")
+        notes_text.configure(state="disabled")
 
     footer_frame = ttk.Frame(bom_window)
     footer_frame.pack(side=BOTTOM, pady=10)
@@ -430,7 +510,7 @@ def show_bom_window(parent_frame, tree, username, refresh_callback):
     check_submit_state()
 
 def show_test_report(parent_frame, tree, username, refresh_callback):
-    """Display test report for Assembler_Tester role with all fields optional."""
+    """Display simplified test report for Assembler_Tester role with a tablet-friendly interface."""
     selected = tree.selection()
     if not selected:
         logger.debug("No pump selected in Treeview")
@@ -463,6 +543,10 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
     test_window.title(f"Test Report for Pump {serial_number}")
     test_window.state("zoomed")
 
+    # Start timer for Duration of Test
+    start_time = datetime.now()
+    duration_submitted = False
+
     header_frame = ttk.Frame(test_window, style="white.TFrame")
     header_frame.pack(fill=X, pady=(0, 10), ipady=10)
     if os.path.exists(LOGO_PATH):
@@ -473,184 +557,106 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
             header_frame.image = logo
         except Exception as e:
             logger.error(f"Test report logo load failed: {str(e)}")
-    ttk.Label(header_frame, text="Pump Test Report", font=("Roboto", 14, "bold")).pack(anchor=W, padx=10)
+    ttk.Label(header_frame, text="Pump Test Report", font=("Roboto", 16, "bold")).pack(anchor=W, padx=10)
 
-    canvas = ttk.Canvas(test_window)
-    scrollbar = ttk.Scrollbar(test_window, orient=VERTICAL, command=canvas.yview)
-    main_frame = ttk.Frame(canvas)
-    main_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-    canvas.create_window((0, 0), window=main_frame, anchor="nw")
-    canvas.configure(yscrollcommand=scrollbar.set)
-    canvas.pack(side=LEFT, fill=BOTH, expand=True, padx=10, pady=10)
-    scrollbar.pack(side=RIGHT, fill=Y)
+    main_frame = ttk.Frame(test_window)
+    main_frame.pack(fill=BOTH, expand=True, padx=20, pady=20)
 
-    def on_mouse_wheel(event):
-        if canvas.winfo_exists():
-            canvas.yview_scroll(-1 * (event.delta // 120), "units")
+    # Pump Details Section (Non-editable)
+    details_frame = ttk.LabelFrame(main_frame, text="Pump Details", padding=15)
+    details_frame.pack(fill=X, pady=(0, 20))
 
-    canvas.bind("<MouseWheel>", on_mouse_wheel)
-    def on_close():
-        try:
-            if canvas.winfo_exists():
-                canvas.unbind("<MouseWheel>")
-            test_window.destroy()
-        except Exception as e:
-            logger.debug(f"Minor error during window close: {str(e)}")
+    ttk.Label(details_frame, text="Pump Model:", font=("Roboto", 14, "bold")).grid(row=0, column=0, padx=10, pady=10, sticky=W)
+    ttk.Label(details_frame, text=pump["pump_model"], font=("Roboto", 14)).grid(row=0, column=1, padx=10, pady=10, sticky=W)
 
-    test_window.protocol("WM_DELETE_WINDOW", on_close)
+    ttk.Label(details_frame, text="Serial Number:", font=("Roboto", 14, "bold")).grid(row=1, column=0, padx=10, pady=10, sticky=W)
+    ttk.Label(details_frame, text=serial_number, font=("Roboto", 14)).grid(row=1, column=1, padx=10, pady=10, sticky=W)
 
-    top_frame = ttk.Frame(main_frame)
-    top_frame.grid(row=0, column=0, pady=(0, 15), sticky=W)
+    ttk.Label(details_frame, text="Impeller Diameter:", font=("Roboto", 14, "bold")).grid(row=2, column=0, padx=10, pady=10, sticky=W)
+    ttk.Label(details_frame, text=pump.get("impeller_size", ""), font=("Roboto", 14)).grid(row=2, column=1, padx=10, pady=10, sticky=W)
 
-    ttk.Label(top_frame, text="Invoice Number:", font=("Roboto", 10)).grid(row=0, column=0, padx=10, pady=2, sticky=W)
-    invoice_entry = ttk.Entry(top_frame, width=30)
-    invoice_entry.grid(row=0, column=1, padx=10, pady=2, sticky=W)
+    # Test Data Section (Editable)
+    table_frame = ttk.LabelFrame(main_frame, text="Test Data", padding=15)
+    table_frame.pack(fill=BOTH, expand=True, pady=(0, 20))
 
-    ttk.Label(top_frame, text="Customer:", font=("Roboto", 10)).grid(row=1, column=0, padx=10, pady=2, sticky=W)
-    ttk.Label(top_frame, text=pump["customer"], font=("Roboto", 10)).grid(row=1, column=1, padx=10, pady=2, sticky=W)
-
-    ttk.Label(top_frame, text="Job Number:", font=("Roboto", 10)).grid(row=2, column=0, padx=10, pady=2, sticky=W)
-    job_entry = ttk.Entry(top_frame, width=30)
-    job_entry.grid(row=2, column=1, padx=10, pady=2, sticky=W)
-
-    main_layout = ttk.Frame(main_frame)
-    main_layout.grid(row=1, column=0, pady=15, sticky=W+E)
-
-    left_frame = ttk.Frame(main_layout)
-    left_frame.pack(side=LEFT, padx=15, fill=Y)
-
-    fab_frame = ttk.LabelFrame(left_frame, text="Fabrication", padding=10)
-    fab_frame.pack(pady=(0, 10), fill=X)
-
-    ttk.Label(fab_frame, text="Assembly Part Number:", font=("Roboto", 10)).grid(row=0, column=0, padx=5, pady=5, sticky=W)
-    ttk.Label(fab_frame, text=pump.get("assembly_part_number", "N/A"), font=("Roboto", 10)).grid(row=0, column=1, padx=5, pady=5, sticky=W)
-
-    ttk.Label(fab_frame, text="Pump Model:", font=("Roboto", 10)).grid(row=1, column=0, padx=5, pady=5, sticky=W)
-    ttk.Label(fab_frame, text=pump["pump_model"], font=("Roboto", 10)).grid(row=1, column=1, padx=5, pady=5, sticky=W)
-
-    ttk.Label(fab_frame, text="Serial Number:", font=("Roboto", 10)).grid(row=2, column=0, padx=5, pady=5, sticky=W)
-    ttk.Label(fab_frame, text=serial_number, font=("Roboto", 10)).grid(row=2, column=1, padx=5, pady=5, sticky=W)
-
-    ttk.Label(fab_frame, text="Impeller Diameter:", font=("Roboto", 10)).grid(row=3, column=0, padx=5, pady=5, sticky=W)
-    impeller_entry = ttk.Entry(fab_frame, width=20)
-    impeller_entry.insert(0, pump.get("impeller_size", ""))
-    impeller_entry.grid(row=3, column=1, padx=5, pady=5, sticky=W)
-
-    ttk.Label(fab_frame, text="Assembled By:", font=("Roboto", 10)).grid(row=4, column=0, padx=5, pady=5, sticky=W)
-    ttk.Label(fab_frame, text=username, font=("Roboto", 10)).grid(row=4, column=1, padx=5, pady=5, sticky=W)
-
-    details_frame = ttk.LabelFrame(left_frame, text="Details", padding=10)
-    details_frame.pack(fill=X)
-
-    fields_left = [
-        ("Motor Size:", ttk.Entry(details_frame, width=20)),
-        ("Motor Speed:", ttk.Entry(details_frame, width=20)),
-        ("Motor Volts:", ttk.Entry(details_frame, width=20)),
-        ("Motor Enclosure:", ttk.Entry(details_frame, width=20)),
-        ("Mechanical Seal:", ttk.Entry(details_frame, width=20)),
-    ]
-    fields_right = [
-        ("Frequency:", ttk.Entry(details_frame, width=20)),
-        ("Pump Housing:", ttk.Entry(details_frame, width=20)),
-        ("Pump Connection:", ttk.Entry(details_frame, width=20)),
-        ("Suction:", ttk.Entry(details_frame, width=20)),
-        ("Discharge:", ttk.Entry(details_frame, width=20)),
-        ("Flush Arrangement:", ttk.Label(details_frame, text="Yes" if "flush" in pump["configuration"].lower() else "No", font=("Roboto", 10))),
-    ]
-    for i, (label, widget) in enumerate(fields_left):
-        ttk.Label(details_frame, text=label, font=("Roboto", 10)).grid(row=i, column=0, padx=5, pady=5, sticky=W)
-        widget.grid(row=i, column=1, padx=5, pady=5, sticky=W)
-    for i, (label, widget) in enumerate(fields_right):
-        ttk.Label(details_frame, text=label, font=("Roboto", 10)).grid(row=i, column=2, padx=5, pady=5, sticky=W)
-        widget.grid(row=i, column=3, padx=5, pady=5, sticky=W)
-
-    right_frame = ttk.Frame(main_layout)
-    right_frame.pack(side=LEFT, padx=15, fill=BOTH, expand=True)
-
-    table_frame = ttk.LabelFrame(right_frame, text="Test Data", padding=10)
-    table_frame.pack(pady=(0, 10), fill=BOTH, expand=True)
-
-    ttk.Label(table_frame, text="Flowrate (l/h)", font=("Roboto", 10)).grid(row=0, column=1, padx=5, pady=5)
-    ttk.Label(table_frame, text="Pressure (bar)", font=("Roboto", 10)).grid(row=0, column=2, padx=5, pady=5)
-    ttk.Label(table_frame, text="Amperage", font=("Roboto", 10)).grid(row=0, column=3, padx=5, pady=5)
+    ttk.Label(table_frame, text="Flowrate (L/h)", font=("Roboto", 14, "bold")).grid(row=0, column=1, padx=15, pady=10)
+    ttk.Label(table_frame, text="Suction Pressure (bar)", font=("Roboto", 14, "bold")).grid(row=0, column=2, padx=15, pady=10)
+    ttk.Label(table_frame, text="Discharge Pressure (bar)", font=("Roboto", 14, "bold")).grid(row=0, column=3, padx=15, pady=10)
+    ttk.Label(table_frame, text="Amperage", font=("Roboto", 14, "bold")).grid(row=0, column=4, padx=15, pady=10)
 
     flow_entries = []
-    pressure_entries = []
+    suction_pressure_entries = []
+    discharge_pressure_entries = []
     amp_entries = []
     for i in range(1, 6):
-        ttk.Label(table_frame, text=f"Test {i}", font=("Roboto", 10)).grid(row=i, column=0, padx=5, pady=5, sticky=W)
-        flow_entry = ttk.Entry(table_frame, width=15)
-        flow_entry.grid(row=i, column=1, padx=5, pady=5)
-        pressure_entry = ttk.Entry(table_frame, width=15)
-        pressure_entry.grid(row=i, column=2, padx=5, pady=5)
-        amp_entry = ttk.Entry(table_frame, width=15)
-        amp_entry.grid(row=i, column=3, padx=5, pady=5)
+        ttk.Label(table_frame, text=f"Test {i}", font=("Roboto", 14, "bold")).grid(row=i, column=0, padx=15, pady=10, sticky=W)
+        flow_entry = ttk.Entry(table_frame, width=20, font=("Roboto", 14))
+        flow_entry.grid(row=i, column=1, padx=15, pady=10)
+        suction_pressure_entry = ttk.Entry(table_frame, width=20, font=("Roboto", 14))
+        suction_pressure_entry.grid(row=i, column=2, padx=15, pady=10)
+        discharge_pressure_entry = ttk.Entry(table_frame, width=20, font=("Roboto", 14))
+        discharge_pressure_entry.grid(row=i, column=3, padx=15, pady=10)
+        amp_entry = ttk.Entry(table_frame, width=20, font=("Roboto", 14))
+        amp_entry.grid(row=i, column=4, padx=15, pady=10)
         flow_entries.append(flow_entry)
-        pressure_entries.append(pressure_entry)
+        suction_pressure_entries.append(suction_pressure_entry)
+        discharge_pressure_entries.append(discharge_pressure_entry)
         amp_entries.append(amp_entry)
 
-    hydro_frame = ttk.LabelFrame(right_frame, text="Hydraulic Test", padding=10)
-    hydro_frame.pack(fill=X)
+    # Hydraulic Test Section
+    hydro_frame = ttk.LabelFrame(main_frame, text="Hydraulic Test", padding=15)
+    hydro_frame.pack(fill=X, pady=(0, 20))
 
-    ttk.Label(hydro_frame, text="Date of Test:", font=("Roboto", 10)).grid(row=0, column=0, padx=5, pady=5, sticky=W)
-    ttk.Label(hydro_frame, text=datetime.now().strftime("%Y-%m-%d"), font=("Roboto", 10)).grid(row=0, column=1, padx=5, pady=5, sticky=W)
+    ttk.Label(hydro_frame, text="Date of Test:", font=("Roboto", 14, "bold")).grid(row=0, column=0, padx=10, pady=10, sticky=W)
+    ttk.Label(hydro_frame, text=datetime.now().strftime("%Y-%m-%d"), font=("Roboto", 14)).grid(row=0, column=1, padx=10, pady=10, sticky=W)
 
-    ttk.Label(hydro_frame, text="Duration of Test:", font=("Roboto", 10)).grid(row=1, column=0, padx=5, pady=5, sticky=W)
-    duration_entry = ttk.Entry(hydro_frame, width=20)
-    duration_entry.grid(row=1, column=1, padx=5, pady=5, sticky=W)
-
-    ttk.Label(hydro_frame, text="Test Medium:", font=("Roboto", 10)).grid(row=2, column=0, padx=5, pady=5, sticky=W)
-    medium_entry = ttk.Entry(hydro_frame, width=20)
-    medium_entry.grid(row=2, column=1, padx=5, pady=5, sticky=W)
-
-    ttk.Label(hydro_frame, text="Tested By:", font=("Roboto", 10)).grid(row=3, column=0, padx=5, pady=5, sticky=W)
-    ttk.Label(hydro_frame, text=username, font=("Roboto", 10)).grid(row=3, column=1, padx=5, pady=5, sticky=W)
-
-    approval_frame = ttk.Frame(main_frame)
-    approval_frame.grid(row=2, column=0, pady=15, sticky=W+E)
-    ttk.Label(approval_frame, text="Date:", font=("Roboto", 10)).pack(side=LEFT, padx=10)
-    ttk.Label(approval_frame, text=datetime.now().strftime("%Y-%m-%d"), font=("Roboto", 10)).pack(side=LEFT, padx=10)
-
+    # Footer with Submit Button
     footer_frame = ttk.Frame(main_frame)
-    footer_frame.grid(row=3, column=0, pady=15, sticky=W+E)
+    footer_frame.pack(fill=X, pady=10)
     complete_btn = ttk.Button(footer_frame, text="Submit for Approval", bootstyle="success", style="large.TButton")
-    complete_btn.pack(pady=(0, 5))
+    complete_btn.pack(pady=(0, 10))
     ttk.Label(footer_frame, text="\u00A9 Guth South Africa", font=("Roboto", 10)).pack()
     ttk.Label(footer_frame, text=f"Build {BUILD_NUMBER}", font=("Roboto", 10)).pack()
 
     def complete_test():
-        """Submit test report for approval with all fields optional, preparing data for graph."""
+        """Submit test report for approval with simplified fields."""
+        nonlocal duration_submitted
+        end_time = datetime.now()
+        duration = end_time - start_time
+        duration_str = str(duration).split('.')[0]  # Format as HH:MM:SS
+
+        # Calculate pressure as Discharge Pressure - Suction Pressure for each test
+        pressure_values = []
+        for suction, discharge in zip(suction_pressure_entries, discharge_pressure_entries):
+            suction_val = suction.get().strip()
+            discharge_val = discharge.get().strip()
+            if suction_val and discharge_val:
+                try:
+                    pressure = float(discharge_val) - float(suction_val)
+                    pressure_values.append(str(pressure))
+                except ValueError:
+                    Messagebox.show_error("Error", "Suction Pressure and Discharge Pressure must be numeric if provided.")
+                    return
+            else:
+                pressure_values.append("")
+
         test_data = {
-            "invoice_number": invoice_entry.get(),
-            "customer": pump["customer"],
-            "job_number": job_entry.get(),
-            "assembly_part_number": pump.get("assembly_part_number", "N/A"),
             "pump_model": pump["pump_model"],
             "serial_number": serial_number,
-            "impeller_diameter": impeller_entry.get(),
-            "assembled_by": username,
-            "motor_size": fields_left[0][1].get(),
-            "motor_speed": fields_left[1][1].get(),
-            "motor_volts": fields_left[2][1].get(),
-            "motor_enclosure": fields_left[3][1].get(),
-            "mechanical_seal": fields_left[4][1].get(),
-            "frequency": fields_right[0][1].get(),
-            "pump_housing": fields_right[1][1].get(),
-            "pump_connection": fields_right[2][1].get(),
-            "suction": fields_right[3][1].get(),
-            "discharge": fields_right[4][1].get(),
-            "flush_arrangement": fields_right[5][1].cget("text"),
+            "impeller_diameter": pump.get("impeller_size", ""),
             "date_of_test": datetime.now().strftime("%Y-%m-%d"),
-            "duration_of_test": duration_entry.get(),
-            "test_medium": medium_entry.get(),
+            "duration_of_test": duration_str,
+            "test_medium": "Water",  # Default to Water
             "tested_by": username,
             "flowrate": [entry.get() for entry in flow_entries],
-            "pressure": [entry.get() for entry in pressure_entries],
+            "suction_pressure": [entry.get() for entry in suction_pressure_entries],
+            "discharge_pressure": [entry.get() for entry in discharge_pressure_entries],
+            "pressure": pressure_values,  # Calculated as Discharge - Suction
             "amperage": [entry.get() for entry in amp_entries],
             "approval_date": datetime.now().strftime("%Y-%m-%d"),
         }
 
-        for field in ["flowrate", "pressure", "amperage"]:
+        for field in ["flowrate", "suction_pressure", "discharge_pressure", "amperage"]:
             for i, value in enumerate(test_data[field]):
                 if value.strip():
                     try:
@@ -678,26 +684,28 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
                 pdf_path = os.path.join(certificate_dir, f"test_certificate_{serial_number}.pdf")
                 pump_data = {
                     "serial_number": test_data["serial_number"],
-                    "assembly_part_number": test_data["assembly_part_number"],
-                    "customer": test_data["customer"],
+                    "assembly_part_number": pump.get("assembly_part_number", "N/A"),
+                    "customer": pump["customer"],
                     "branch": pump.get("branch", ""),
                     "pump_model": test_data["pump_model"],
                     "configuration": pump["configuration"],
                     "impeller_size": test_data["impeller_diameter"],
-                    "connection_type": test_data["pump_connection"],
+                    "connection_type": pump.get("connection_type", ""),
                     "pressure_required": pump.get("pressure_required", ""),
                     "flow_rate_required": pump.get("flow_rate_required", ""),
-                    "custom_motor": test_data["motor_size"],
-                    "flush_seal_housing": test_data["flush_arrangement"],
+                    "custom_motor": pump.get("custom_motor", ""),
+                    "flush_seal_housing": pump.get("flush_seal_housing", ""),
                     "date_of_test": test_data["date_of_test"],
                     "duration_of_test": test_data["duration_of_test"],
                     "test_medium": test_data["test_medium"],
                     "tested_by": test_data["tested_by"],
                     "flowrate": test_data["flowrate"],  # Pass raw list for graph
-                    "pressure": test_data["pressure"],   # Pass raw list for graph
+                    "pressure": test_data["pressure"],   # Pass calculated pressure for graph
                     "amperage": test_data["amperage"],   # Pass raw list for graph
                     # For table display in PDF/email
                     "flowrate_display": ", ".join([v for v in test_data["flowrate"] if v.strip()]) or "Not provided",
+                    "suction_pressure_display": ", ".join([v for v in test_data["suction_pressure"] if v.strip()]) or "Not provided",
+                    "discharge_pressure_display": ", ".join([v for v in test_data["discharge_pressure"] if v.strip()]) or "Not provided",
                     "pressure_display": ", ".join([v for v in test_data["pressure"] if v.strip()]) or "Not provided",
                     "amperage_display": ", ".join([v for v in test_data["amperage"] if v.strip()]) or "Not provided",
                 }
@@ -713,6 +721,8 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
                         <h3 style="color: #34495e;">Test Data</h3>
                         {generate_test_data_table({
                             "flowrate": [v for v in test_data["flowrate"] if v.strip()] or ["Not provided"],
+                            "suction_pressure": [v for v in test_data["suction_pressure"] if v.strip()] or ["Not provided"],
+                            "discharge_pressure": [v for v in test_data["discharge_pressure"] if v.strip()] or ["Not provided"],
                             "pressure": [v for v in test_data["pressure"] if v.strip()] or ["Not provided"],
                             "amperage": [v for v in test_data["amperage"] if v.strip()] or ["Not provided"]
                         })}
@@ -722,6 +732,7 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
                 else:
                     logger.warning(f"No originator found for pump {serial_number}")
 
+            duration_submitted = True
             refresh_callback()
             test_window.destroy()
         except Exception as e:
@@ -729,6 +740,15 @@ def show_test_report(parent_frame, tree, username, refresh_callback):
             Messagebox.show_error("Error", f"Failed to submit test report: {str(e)}")
 
     complete_btn.configure(command=complete_test)
+
+    # Reset timer if window is closed without submitting
+    def on_close():
+        nonlocal duration_submitted
+        if not duration_submitted:
+            logger.debug(f"Test report window for {serial_number} closed without submitting; timer reset")
+        test_window.destroy()
+
+    test_window.protocol("WM_DELETE_WINDOW", on_close)
 
 if __name__ == "__main__":
     root = ttk.Window(themename="flatly")

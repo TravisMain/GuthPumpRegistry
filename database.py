@@ -39,7 +39,6 @@ def load_config():
             return config
         except Exception as e:
             logger.error(f"Failed to load config from {CONFIG_PATH}: {str(e)}")
-    # Fall back to default config path if user config isn’t found
     if os.path.exists(DEFAULT_CONFIG_PATH):
         try:
             with open(DEFAULT_CONFIG_PATH, "r") as f:
@@ -49,21 +48,22 @@ def load_config():
         except Exception as e:
             logger.error(f"Failed to load default config from {DEFAULT_CONFIG_PATH}: {str(e)}")
     logger.warning(f"No config found at {CONFIG_PATH} or {DEFAULT_CONFIG_PATH}, using minimal defaults")
-    return {"connection_string": None}  # Minimal default, will raise an error if not set
+    return {"connection_string": None}
 
 def get_db_connection():
-    """Get a singleton database connection."""
+    """Get a singleton database connection, forcing a new connection to ensure schema updates are recognized."""
     global _conn_pool
     try:
         config = load_config()
         conn_str = config.get("connection_string")
         if not conn_str:
             raise ValueError("No connection string found in config.json. Please configure via the application.")
-        if _conn_pool is None or _conn_pool.closed:
-            with DB_LOCK:
-                if _conn_pool is None or _conn_pool.closed:
-                    _conn_pool = pyodbc.connect(conn_str)
-                    logger.info("Database connection established successfully")
+        # Force a new connection each time for testing to avoid schema caching issues
+        with DB_LOCK:
+            if _conn_pool is not None:
+                _conn_pool.close()  # Close existing connection
+            _conn_pool = pyodbc.connect(conn_str)
+            logger.info("Database connection established successfully")
         return _conn_pool
     except pyodbc.Error as e:
         error_msg = f"Failed to connect to the database: {str(e)}"
@@ -84,7 +84,7 @@ def initialize_database():
             cursor = conn.cursor()
             cursor.execute("USE GuthPumpRegistry")
 
-            # Create tables if they don’t exist (non-destructive)
+            # Create pumps table with all fields, including new ones
             cursor.execute("""
                 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'pumps')
                 CREATE TABLE pumps (
@@ -100,6 +100,7 @@ def initialize_database():
                     invoice_number NVARCHAR(50),
                     job_number_1 NVARCHAR(50),
                     job_number_2 NVARCHAR(50),
+                    sage_reference_number NVARCHAR(50),
                     test_result NVARCHAR(10) CHECK(test_result IN ('Pass', 'Fail')),
                     test_comments NVARCHAR(MAX),
                     motor_voltage NVARCHAR(20),
@@ -113,7 +114,12 @@ def initialize_database():
                     flow_rate_required FLOAT NOT NULL,
                     custom_motor NVARCHAR(50),
                     flush_seal_housing NVARCHAR(10),
-                    assembly_part_number NVARCHAR(50)
+                    assembly_part_number NVARCHAR(50),
+                    rpm NVARCHAR(10),
+                    o_ring_material NVARCHAR(20),
+                    mechanical_seals NVARCHAR(50),
+                    temperature NVARCHAR(50),
+                    medium NVARCHAR(50)
                 )
             """)
             cursor.execute("""
@@ -190,7 +196,6 @@ def check_user(cursor, username, password):
         cursor.execute("SELECT password_hash, role FROM users WHERE username = ?", (username,))
         user = cursor.fetchone()
         if user:
-            # password_hash (index 0) is bytes from VARBINARY, no encoding needed
             if bcrypt.checkpw(password.encode('utf-8'), user[0]):
                 return user[1]  # Index 1 = role
         return None
@@ -209,11 +214,12 @@ def create_pump(cursor, pump_model, configuration, customer, requested_by, branc
         cursor.execute("""
             INSERT INTO pumps (serial_number, pump_model, configuration, customer, status, created_at, requested_by,
                               branch, impeller_size, connection_type, pressure_required, flow_rate_required,
-                              custom_motor, flush_seal_housing, assembly_part_number)
-            VALUES (?, ?, ?, ?, 'Stores', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                              custom_motor, flush_seal_housing, assembly_part_number, invoice_number, job_number_1,
+                              sage_reference_number, rpm, o_ring_material, mechanical_seals, temperature, medium)
+            VALUES (?, ?, ?, ?, 'Stores', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (serial, pump_model, configuration, customer, datetime.now(), requested_by, branch, impeller_size,
               connection_type, float(pressure_required), float(flow_rate_required), custom_motor, flush_seal_housing,
-              assembly_part_number))
+              assembly_part_number, None, None, None, None, None, None, None, None))
         
         if insert_bom:
             bom_items = load_bom_from_json(pump_model, configuration)
@@ -272,7 +278,6 @@ def insert_test_data():
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
-            # Check if tables are empty
             cursor.execute("SELECT COUNT(*) FROM users")
             if cursor.fetchone()[0] == 0:
                 test_users = [

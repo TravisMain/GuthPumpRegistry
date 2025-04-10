@@ -15,82 +15,26 @@
         "P2 7.5KW": [ "120mm", "130mm", "140mm", "150mm", "160mm", "170mm", "180mm", "190mm" ]
     },
     "connection_type": [ "DIN", "Tri-Clover", "Other" ],
+    "mechanical_seals": [ "C/SS", "TC/TC", "SC/SC", "Ceramic", "Other" ],
     "assembly_part_mapping": {
-        "10.55.03400": {
-            "pump_model": "PT 0.55KW",
-            "configuration": "Standard"
-        },
-        "10.55.03500": {
-            "pump_model": "PS 0.75KW",
-            "configuration": "Standard"
-        },
-        "10.55.03510": {
-            "pump_model": "PS 1.1KW",
-            "configuration": "Standard"
-        },
-        "10.55.04003": {
-            "pump_model": "P1 1.1KW",
-            "configuration": "Standard"
-        },
-        "10.55.04005": {
-            "pump_model": "P1 2.2KW",
-            "configuration": "Standard"
-        },
-        "10.55.04006": {
-            "pump_model": "P1 3.0KW",
-            "configuration": "Standard"
-        },
-        "10.55.04008": {
-            "pump_model": "P1 4.0KW",
-            "configuration": "Standard"
-        },
-        "10.55.04010": {
-            "pump_model": "P1 5.5KW",
-            "configuration": "Standard"
-        },
-        "10.55.05010": {
-            "pump_model": "P2 5.5KW",
-            "configuration": "Standard"
-        },
-        "10.55.05020": {
-            "pump_model": "P2 7.5KW",
-            "configuration": "Standard"
-        },
-        "10.55.03600": {
-            "pump_model": "PS 0.75KW",
-            "configuration": "Economical"
-        },
-        "10.55.03610": {
-            "pump_model": "PS 1.1KW",
-            "configuration": "Economical"
-        },
-        "10.55.04200": {
-            "pump_model": "P1 1.1KW",
-            "configuration": "Economical"
-        },
-        "10.55.04210": {
-            "pump_model": "P1 2.2KW",
-            "configuration": "Economical"
-        },
-        "10.55.04220": {
-            "pump_model": "P1 3.0KW",
-            "configuration": "Economical"
-        },
-        "10.55.04230": {
-            "pump_model": "P1 4.0KW",
-            "configuration": "Economical"
-        },
-        "10.55.04240": {
-            "pump_model": "P1 5.5KW",
-            "configuration": "Economical"
-        },
-        "10.55.04330": {
-            "pump_model": "P2 5.5KW",
-            "configuration": "Economical"
-        },
-        "10.55.04335": {
-            "pump_model": "P2 7.5KW",
-            "configuration": "Economical"
-        }
+        "PT 0.55KW_Standard": "10.55.03400",
+        "PS 0.75KW_Standard": "10.55.03500",
+        "PS 1.1KW_Standard": "10.55.03510",
+        "P1 1.1KW_Standard": "10.55.04003",
+        "P1 2.2KW_Standard": "10.55.04005",
+        "P1 3.0KW_Standard": "10.55.04006",
+        "P1 4.0KW_Standard": "10.55.04008",
+        "P1 5.5KW_Standard": "10.55.04010",
+        "P2 5.5KW_Standard": "10.55.05010",
+        "P2 7.5KW_Standard": "10.55.05020",
+        "PS 0.75KW_Economical": "10.55.03600",
+        "PS 1.1KW_Economical": "10.55.03610",
+        "P1 1.1KW_Economical": "10.55.04200",
+        "P1 2.2KW_Economical": "10.55.04210",
+        "P1 3.0KW_Economical": "10.55.04220",
+        "P1 4.0KW_Economical": "10.55.04230",
+        "P1 5.5KW_Economical": "10.55.04240",
+        "P2 5.5KW_Economical": "10.55.04330",
+        "P2 7.5KW_Economical": "10.55.04335"
     }
 }

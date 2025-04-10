@@ -1,0 +1,8 @@
+BaseGUI: Import error: no binding for nonlocal 'curve_frame' found (dashboard_gui.py, line 310)
+Traceback (most recent call last):
+  File "C:\Users\travism\source\repos\GuthPumpRegistry\gui\base_gui.py", line 55, in <module>
+    from gui.dashboard_gui import show_dashboard
+  File "C:\Users\travism\source\repos\GuthPumpRegistry\gui\dashboard_gui.py", line 310
+    nonlocal curve_frame, curve_image
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: no binding for nonlocal 'curve_frame' found
